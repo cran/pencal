@@ -1,0 +1,355 @@
+#' Predictive performance of the PRC-LMM model
+#'
+#' This function computes the naive and optimism-corrected
+#' measures of performance (C index and time-dependent AUC) 
+#' for the PRC-LMM model proposed 
+#' in Signorelli et al. (2020, in review). The optimism
+#' correction is computed based on a cluster bootstrap
+#' optimism correction procedure
+#' 
+#' @param step2 the output of \code{\link{summarize_lmms}} 
+#' (step 2 of the estimation of the PRC-LMM model)
+#' @param step3 the output of \code{\link{fit_prclmm}}
+#' (step 3 of the estimation of the PRC-LMM model)
+#' @param times numeric vector with the time points at which
+#' to estimate the time-dependent AUC
+#' @param n.cores number of cores to use to parallelize the computation
+#' of the cluster bootstrap procedure. If \code{n.cores = 1} (default), 
+#' no parallelization is done
+#' @param verbose if \code{TRUE} (default and recommended value), information
+#' on the ongoing computations is printed in the console
+#' 
+#' @return A list containing the following objects:
+#' \itemize{
+#' \item \code{call}: the function call;
+#' \item \code{concordance}: a data frame with the naive and
+#' optimism-corrected estimates of the concordance (C) index;
+#' \item \code{tdAUC}: a data frame with the naive and
+#' optimism-corrected estimates of the time-dependent AUC
+#' at the desired time points.
+#' }
+#' 
+#' @import foreach doParallel glmnet survival survivalROC survcomp
+#' @export
+#' 
+#' @author Mirko Signorelli
+#' @references 
+#' Signorelli, M., Spitali, P., Tsonaka, R. (in review). 
+#' On the prediction of survival outcomes using longitudinal 
+#' and high-dimensional (omic) data.
+#' @seealso \code{\link{fit_lmms}} (step 1),
+#' \code{\link{summarize_lmms}} (step 2),
+#' \code{\link{fit_prclmm}} (step 3)
+#' 
+#' @examples
+#' # generate example data
+#' set.seed(1234)
+#' p = 4 # number of longitudinal predictors
+#' simdata = simulate_prclmm_data(n = 100, p = p, p.relev = 2, 
+#'              seed = 123, t.values = c(0, 0.2, 0.5, 1, 1.5, 2))
+#'              
+#' # specify options for cluster bootstrap optimism correction
+#' # procedure and for parallel computing 
+#' # IMPORTANT: set do.bootstrap = TRUE to compute the optimism correction!
+#' do.bootstrap = FALSE
+#' n.boots = ifelse(do.bootstrap, 100, 0)
+#' parallelize = FALSE
+#' # IMPORTANT: set parallelize = TRUE to speed computations up!
+#' if (!parallelize) n.cores = 1
+#' if (parallelize) {
+#'    # identify number of available cores on your machine
+#'    n.cores = parallel::detectCores()
+#'    if (is.na(n.cores)) n.cores = 1
+#' }
+#' 
+#' # step 1 of PRC-LMM: estimate the LMMs
+#' y.names = paste('marker', 1:p, sep = '')
+#' step1 = fit_lmms(y.names = y.names, 
+#'                  fixefs = ~ age, ranefs = ~ age | id, 
+#'                  long.data = simdata$long.data, 
+#'                  surv.data = simdata$surv.data,
+#'                  t.from.base = t.from.base,
+#'                  n.boots = n.boots, n.cores = n.cores)
+#'                  
+#' # step 2 of PRC-LMM: compute the summaries 
+#' # of the longitudinal outcomes
+#' step2 = summarize_lmms(object = step1, n.cores = n.cores)
+#' 
+#' # step 3 of PRC-LMM: fit the penalized Cox models
+#' step3 = fit_prclmm(object = step2, surv.data = simdata$surv.data,
+#'                    baseline.covs = ~ baseline.age,
+#'                    penalty = 'ridge', n.cores = n.cores)
+#'                    
+#' # compute the performance measures
+#' perf = performance_prclmm(step2, step3, 
+#'               times = c(0.5, 1, 1.5, 2), 
+#'               n.cores = n.cores)
+#' # concordance index:
+#' perf$concordance
+#' # time-dependent AUC:
+#' perf$tdAUC
+
+performance_prclmm = function(step2, step3, times = 1,
+                              n.cores = 1, verbose = TRUE) {
+  call = match.call()
+  # load namespaces
+  requireNamespace('survival')
+  requireNamespace('survcomp')
+  requireNamespace('survivalROC')
+  requireNamespace('glmnet')
+  requireNamespace('foreach')
+  # fix for 'no visible binding for global variable...' note
+  i = b = NULL
+  
+  ############################
+  ##### CHECK THE INPUTS #####
+  ############################
+  if (!is.numeric(times)) stop('times should be numeric!')
+  n.times = length(times)
+  c.out = data.frame(n.boots = NA, naive = NA,
+                    cb.correction = NA, cb.performance = NA)
+  tdauc.out = data.frame(pred.time = times, naive = NA,
+                         cb.correction = NA, cb.performance = NA)
+  # checks on step 2 input
+  temp = c('call', 'ranef.orig', 'n.boots')
+  check1 = temp %in% ls(step2)
+  mess1 = paste('step2 input should cointain:', do.call(paste, as.list(temp)) )
+  if (sum(check1) != 3) stop(mess1)
+  n.boots = step2$n.boots
+  ranef.orig = step2$ranef.orig
+  # checks on step 3 input
+  temp = c('call', 'pcox.orig', 'surv.data', 'n.boots')
+  check2 = temp %in% ls(step3)
+  mess2 = paste('step2 input should cointain:', do.call(paste, as.list(temp)) )
+  if (sum(check2) != 4) stop(mess2)
+  baseline.covs = step3$call$baseline.covs
+  pcox.orig = step3$pcox.orig
+  surv.data = step3$surv.data
+  n = length(unique(surv.data$id))
+  # further checks
+  if (step2$n.boots != step3$n.boots) {
+    stop('step2$n.boots and step3$n.boots are different!')
+  }
+  if (n.boots == 0) {
+    mess = paste('The cluster bootstrap optimism correction has not',
+            'been performed (n.boots = 0). Therefore, only the apparent',
+            'values of the performance values will be returned.')
+    warning(mess, immediate. = TRUE)
+  }
+  if (n.boots > 0) {
+    temp = c('boot.ids', 'ranef.boot.train', 'ranef.boot.valid')
+    check3 = temp %in% ls(step2)
+    mess3 = paste('step2 should cointain:', do.call(paste, as.list(temp)) )
+    if (sum(check3) != 3) stop(mess3)
+    temp = c('boot.ids', 'pcox.boot')
+    check4 = temp %in% ls(step3)
+    mess4 = paste('step3 should cointain:', do.call(paste, as.list(temp)) )
+    if (sum(check4) != 2) stop(mess4)
+    boot.ids = step2$boot.ids
+    ranef.boot.train = step2$ranef.boot.train
+    ranef.boot.valid = step2$ranef.boot.valid
+    pcox.boot = step3$pcox.boot
+  }
+  if (n.cores < 1) {
+    warning('Input n.cores < 1, so we set n.cores = 1', immediate. = TRUE)
+    n.cores = 1
+  }
+  # check how many cores are actually available for this computation
+  if (n.boots > 0) {
+    max.cores = parallel::detectCores()
+    if (!is.na(max.cores)) {
+      diff = max.cores - n.cores
+      mess0 = paste('You requested', n.cores, 'cores for this computation.')
+      mess1 = paste(mess0, 'It seems that your computer actually has',
+                    max.cores, 'cores available.',
+                    'Consider increasing n.cores accordingly to speed computations up! =)')
+      if (diff > 0) warning(mess1, immediate. = TRUE)
+      mess2 = paste(mess0, 'However, seems that your computer only has',
+                    max.cores, 'cores available.',
+                    'Therefore, most likely computations will be performed using only', 
+                    max.cores, 'cores. =(')
+      if (diff < 0)  warning(mess2, immediate. = TRUE)
+    }
+  }
+  
+  #############################
+  ##### NAIVE PERFORMANCE #####
+  #############################
+  surv.orig = Surv(time = surv.data$time, event = surv.data$event)
+  if (is.null(baseline.covs)) {
+    X.orig = as.matrix(ranef.orig)
+  }
+  if (!is.null(baseline.covs)) {
+    X0 = model.matrix(as.formula(baseline.covs), data = surv.data)
+    X.orig = as.matrix(cbind(X0, ranef.orig))
+    contains.int = '(Intercept)' %in% colnames(X.orig)
+    if (contains.int) {
+      X.orig = X.orig[ , -1] 
+    }
+  }
+  
+  # C index on the original dataset
+  relrisk.orig = predict(pcox.orig, 
+                         newx = X.orig, 
+                         s = 'lambda.min',
+                         type = 'response')  
+  c.naive = concordance.index(x = relrisk.orig, 
+                    surv.time = surv.data$time,
+                    surv.event = surv.data$event, 
+                    method = "noether")
+  c.out$n.boots = n.boots
+  check = !inherits(c.naive, 'try-error')
+  c.out$naive = ifelse (check, round(c.naive$c.index, 4), NA)
+  
+  # time-dependent AUC
+  pmle.orig = as.numeric(coef(pcox.orig, s = 'lambda.min'))
+  linpred.orig = X.orig %*% pmle.orig
+  tdauc.naive = foreach(i = 1:n.times, .combine = 'c') %do% {
+    auc = try(survivalROC(Stime = surv.data$time, 
+                          status = surv.data$event, 
+                          marker = linpred.orig, 
+                          entry = rep(0, n), 
+                          predict.time = times[i], 
+                          cut.values = NULL,
+                          method = "NNE", 
+                          span = 0.25*n^(-0.20)))
+    check = !inherits(auc, 'try-error') & !is.nan(auc$AUC)
+    out = ifelse(check, round(auc$AUC, 4), NA)
+  }
+  tdauc.out$naive = tdauc.naive
+
+  ###############################
+  ##### OPTIMISM CORRECTION #####
+  ###############################
+  if (n.boots > 0) {
+    if (verbose) cat('Computation of optimism correction started\n')
+    mess = ifelse(n.cores >=2, paste('in parallel, using', n.cores, 'cores'),
+                  'using a single core')
+    if (verbose) cat(paste('This computation will be run', mess, '\n'))
+    # set up environment for parallel computing
+    cl = parallel::makeCluster(n.cores)
+    doParallel::registerDoParallel(cl)
+    
+    booty = foreach(b = 1:n.boots, .combine = 'rbind',
+       .packages = c('survival', 'survcomp', 'survivalROC',
+                     'glmnet', 'foreach')) %dopar% {
+      # prepare data for the training set
+      surv.data.train = surv.data[boot.ids[[b]], ]
+      if (is.null(baseline.covs)) {
+        X.train = as.matrix(ranef.boot.train[[b]])
+      }
+      if (!is.null(baseline.covs)) {
+        X0 = model.matrix(as.formula(baseline.covs), data = surv.data.train)
+        X.train = as.matrix(cbind(X0, ranef.boot.train[[b]]))
+        contains.int = '(Intercept)' %in% colnames(X.train)
+        if (contains.int) {
+          X.train = X.train[ , -1] 
+        }
+      }
+      # prepare X.valid for the validation set (surv.data already available)
+      if (is.null(baseline.covs)) {
+        X.valid = as.matrix(ranef.boot.valid[[b]])
+      }
+      if (!is.null(baseline.covs)) {
+        X0 = model.matrix(as.formula(baseline.covs), data = surv.data)
+        X.valid = as.matrix(cbind(X0, ranef.boot.valid[[b]]))
+        contains.int = '(Intercept)' %in% colnames(X.valid)
+        if (contains.int) {
+          X.valid = X.valid[ , -1] 
+        }
+      }
+      
+      # C index on boot.train
+      relrisk.train = predict(pcox.boot[[b]], 
+                              newx = X.train, 
+                              s = 'lambda.min',
+                              type = 'response')  
+      c.train = concordance.index(x = relrisk.train, 
+                                  surv.time = surv.data.train$time,
+                                  surv.event = surv.data.train$event, 
+                                  method = "noether")
+      
+      # C index on boot.valid
+      relrisk.valid = predict(pcox.boot[[b]], 
+                              newx = X.valid, 
+                              s = 'lambda.min',
+                              type = 'response')  
+      c.valid = concordance.index(x = relrisk.valid, 
+                                  surv.time = surv.data$time,
+                                  surv.event = surv.data$event, 
+                                  method = "noether")
+      
+      # tdAUC on boot.train
+      pmle.train = as.numeric(coef(pcox.boot[[b]], s = 'lambda.min'))
+      linpred.train = X.train %*% pmle.train
+      tdauc.train = foreach(i = 1:n.times, .combine = 'c') %do% {
+        auc = try(survivalROC(Stime = surv.data.train$time, 
+                              status = surv.data.train$event, 
+                              marker = linpred.train, 
+                              entry = rep(0, n), 
+                              predict.time = times[i], 
+                              cut.values = NULL,
+                              method = "NNE", 
+                              span = 0.25*n^(-0.20)))
+        check = !inherits(auc, 'try-error') & !is.nan(auc$AUC)
+        out = ifelse(check, round(auc$AUC, 4), NA)
+      }
+      
+      # tdAUC on boot.valid
+      pmle.train = as.numeric(coef(pcox.boot[[b]], s = 'lambda.min'))
+      # important: the pmle comes from the model fitted on the training set
+      linpred.valid = X.valid %*% pmle.train
+      tdauc.valid = foreach(i = 1:n.times, .combine = 'c') %do% {
+        auc = try(survivalROC(Stime = surv.data$time, 
+                              status = surv.data$event, 
+                              marker = linpred.valid, 
+                              entry = rep(0, n), 
+                              predict.time = times[i], 
+                              cut.values = NULL,
+                              method = "NNE", 
+                              span = 0.25*n^(-0.20)))
+        check = !inherits(auc, 'try-error') & !is.nan(auc$AUC)
+        out = ifelse(check, round(auc$AUC, 4), NA)
+      }
+      
+      # define outputs of parallel computing
+      check1 = !inherits(c.train, 'try-error')
+      ct = ifelse (check1, round(c.train$c.index, 4), NA)
+      check2 = !inherits(c.valid, 'try-error')
+      cv = ifelse (check2, round(c.valid$c.index, 4), NA)
+      out = data.frame(repl = NA, stat = NA, times = NA, train = NA, valid = NA)
+      out[1, ] = c(b, NA, NA, ct, cv)
+      out[2:(n.times + 1),] = cbind(b, NA, times, tdauc.train, tdauc.valid)
+      out$stat = c('C', rep('tdAUC', n.times))
+      out$optimism = out$valid - out$train
+      return(out)
+    }
+    
+    # close the cluster
+    parallel::stopCluster(cl)
+    
+    # compute the optimism correction for the C index
+    c.vals = booty[booty$stat == 'C', ]
+    c.opt = mean(c.vals$optimism, na.rm = TRUE)
+    c.out$cb.correction = round(c.opt, 4)
+    c.out$cb.performance = c.out$naive + c.out$cb.correction
+    
+    # compute the optimism correction for the tdAUC
+    tdauc.vals = booty[booty$stat == 'tdAUC', ]
+    tdauc.opt = foreach(i = 1:n.times, .combine = 'c') %do% {
+      temp = tdauc.vals[tdauc.vals$times == times[i], ]
+      out = mean(temp$optimism, na.rm = TRUE)
+      return(out)
+    }
+    tdauc.out$cb.correction = round(tdauc.opt, 4)
+    tdauc.out$cb.performance = tdauc.out$naive + tdauc.out$cb.correction
+    # closing message
+    if (verbose) {
+      cat('Computation of the optimism correction: finished :)\n')
+    }
+  }
+
+  out = list('call' = call, 'concordance' = c.out, 
+             'tdAUC' = tdauc.out)
+  return(out)
+}
