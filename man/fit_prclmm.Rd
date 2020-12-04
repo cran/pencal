@@ -2,37 +2,28 @@
 % Please edit documentation in R/fit_prclmm.R
 \name{fit_prclmm}
 \alias{fit_prclmm}
-\title{Step 1 of PRC-LMM: fits one linear mixed model for each response}
+\title{Step 3 of PRC-LMM (estimation of the penalized Cox model(s))}
 \usage{
-fit_prclmm(
-  object,
-  surv.data,
-  baseline.covs = NULL,
-  penalty = "ridge",
-  standardize = TRUE,
-  pfac.base.covs = 0,
-  n.alpha.elnet = 11,
-  n.folds.elnet = 5,
-  n.cores = 1,
-  verbose = TRUE
-)
+fit_prclmm(object, surv.data, baseline.covs = NULL, penalty = "ridge",
+  standardize = TRUE, pfac.base.covs = 0, n.alpha.elnet = 11,
+  n.folds.elnet = 5, n.cores = 1, verbose = TRUE)
 }
 \arguments{
-\item{object}{the output of step 2 of the PRC-LMM procedure,
+\item{object}{the output of step 2 of the PRC-LMM procedure, 
 as produced by the \code{\link{summarize_lmms}} function}
 
-\item{surv.data}{a data frame with the survival data and (if
+\item{surv.data}{a data frame with the survival data and (if 
 relevant) additional baseline covariates. \code{surv.data} should at least
-contain a subject id (called \code{id}), the time to event outcome
+contain a subject id (called \code{id}), the time to event outcome  
 (\code{time}), and binary event variable (\code{event})}
 
-\item{baseline.covs}{a formula specifying the variables
-(e.g., baseline age) in \code{surv.data} that should be included
+\item{baseline.covs}{a formula specifying the variables 
+(e.g., baseline age) in \code{surv.data} that should be included 
 as baseline covariates in the penalized Cox model. Example:
 \code{baseline.covs = '~ baseline.age'}. Default is \code{NULL}}
 
 \item{penalty}{the type of penalty function used for regularization.
-Default is \code{'ridge'}, other possible values are \code{'elasticnet'}
+Default is \code{'ridge'}, other possible values are \code{'elasticnet'} 
 and \code{'lasso'}}
 
 \item{standardize}{logical argument: should the predicted random effects
@@ -42,18 +33,20 @@ be standardized when included in the penalized Cox model? Default is \code{TRUE}
 whether the baseline covariates (if any) should be penalized (1) or not (0).
 Default is \code{pfac.base.covs = 0} (no penalization of all baseline covariates)}
 
-\item{n.alpha.elnet}{number of alpha values for the two-dimensional
+\item{n.alpha.elnet}{number of alpha values for the two-dimensional 
 grid of tuning parameteres in elasticnet.
 Only relevant if \code{penalty = 'elasticnet'}. Default is 11,
 so that the resulting alpha grid is c(1, 0.95, 0.90, ..., 0.05, 0)}
 
 \item{n.folds.elnet}{number of folds to be used for the selection
-of the tuning parameter in elasticnet. Only relevant if
+of the tuning parameter in elasticnet. Only relevant if 
 \code{penalty = 'elasticnet'}. Default is 5}
 
 \item{n.cores}{number of cores to use to parallelize the computation
-of the cluster bootstrap procedure. If \code{n.cores = 1} (default),
-no parallelization is done}
+of the cluster bootstrap optimism correction procedure. If 
+\code{ncores = 1} (default), no parallelization is done. 
+Pro tip: you can use \code{parallel::detectCores()} to check 
+how many cores are available on your computer}
 
 \item{verbose}{if \code{TRUE} (default and recommended value), information
 on the ongoing computations is printed in the console}
@@ -66,16 +59,16 @@ A list containing the following objects:
 original dataset;
 \item \code{surv.data}: the supplied survival data (ordered by
 subject id)
-\item \code{n.boots} number of bootstrap samples;
-\item \code{boot.ids}: a list with the subject ids for each bootstrap
-sample drawn (when \code{n.boots > 0});
+\item \code{n.boots}: number of bootstrap samples;
+\item \code{boot.ids}: a list with the ids of bootstrapped subjects 
+(when \code{n.boots > 0});
 \item \code{pcox.boot}: a list where each element is a fitted penalized
 Cox model for a given bootstrap sample (when \code{n.boots > 0}).
 }
 }
 \description{
 This function performs the third step for the estimation
-of the PRC-LMM model proposed in Signorelli et al. (2020,
+of the PRC-LMM model proposed in Signorelli et al. (2020, 
 in review)
 }
 \examples{
@@ -118,12 +111,12 @@ step3 = fit_prclmm(object = step2, surv.data = simdata$surv.data,
                    penalty = 'ridge', n.cores = n.cores)
 }
 \references{
-Signorelli, M., Spitali, P., Tsonaka, R. (in review).
-On the prediction of survival outcomes using longitudinal
+Signorelli, M., Spitali, P., Tsonaka, R. (in review). 
+On the prediction of survival outcomes using longitudinal 
 and high-dimensional (omic) data.
 }
 \seealso{
-\code{\link{fit_lmms}} (step 1),
+\code{\link{fit_lmms}} (step 1), 
 \code{\link{summarize_lmms}} (step 2),
 \code{\link{performance_prclmm}}
 }

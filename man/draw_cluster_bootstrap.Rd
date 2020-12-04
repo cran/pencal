@@ -19,16 +19,17 @@ A data frame containing the bootstrapped observations
 }
 \description{
 This function is part of the cluster bootstrap optimism correction
-procedure described in Signorelli et al. (2020, in review). Note
-that this function does not perform the random sampling, but it
+procedure described in Signorelli et al. (2020, in review). Note 
+that the function does not perform the random sampling, but it
 extracts the correct records from a dataframe, given the ids of
 the sampled clusters (subjects)
 }
 \references{
-Signorelli, M., Spitali, P., Tsonaka, R. (in review).
-On the prediction of survival outcomes using longitudinal
+Signorelli, M., Spitali, P., Tsonaka, R. (in review). 
+On the prediction of survival outcomes using longitudinal 
 and high-dimensional (omic) data.
 }
 \author{
 Mirko Signorelli
 }
+\keyword{internal}

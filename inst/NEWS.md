@@ -18,6 +18,17 @@ Each subsection corresponds to a specific package version.
 0.1.x
 =====
 
+pencal 0.1.2
+------------
+
+-   Released: December 2020
+-   Added the function `survpred_prclmm`, which computes predicted
+    survival probabilities from the fitted PRC-LMM model
+-   Added `fitted_prclmm` data object and related documentation (it is
+    used in the examples of `performance_prclmm`)
+-   Several corrections and clarifications added to the documentation
+-   Changed displaying style for function arguments in the documentation
+
 pencal 0.1.1
 ------------
 

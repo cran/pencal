@@ -4,17 +4,9 @@
 \alias{simulate_prclmm_data}
 \title{Simulate data that can be used to fit the PRC-LMM model}
 \usage{
-simulate_prclmm_data(
-  n = 100,
-  p = 10,
-  p.relev = 4,
-  lambda = 0.2,
-  nu = 2,
-  seed = 1,
-  base.age.range = c(3, 5),
-  cens.range = c(0.5, 10),
-  t.values = c(0, 0.5, 1, 2)
-)
+simulate_prclmm_data(n = 100, p = 10, p.relev = 4, lambda = 0.2,
+  nu = 2, seed = 1, base.age.range = c(3, 5), cens.range = c(0.5, 10),
+  t.values = c(0, 0.5, 1, 2))
 }
 \arguments{
 \item{n}{sample size}
@@ -36,32 +28,32 @@ the study at the same age)}
 
 \item{cens.range}{range for censoring times}
 
-\item{t.values}{vector specifying the time points
+\item{t.values}{vector specifying the time points 
 at which longitudinal measurements are collected
-(NB: for simplicity, this function assumes a balanced
-designed; however, PRC works both with balanced and
-unbalanced designs!)}
+(NB: for simplicity, this function assumes a balanced 
+designed; however, \code{pencal} is designed to work
+both with balanced and with unbalanced designs!)}
 }
 \value{
 A list containing the following elements:
 \itemize{
-\item a dataframe \code{long.data} with data on the longitudinal
+\item a dataframe \code{long.data} with data on the longitudinal 
 predictors, comprehensive of a subject id (\code{id}),
-baseline age (\code{base.age}) and time from baseline
-(\code{t.from.base});
-\item a dataframe \code{surv.data} with the survival data:
+baseline age (\code{base.age}),time from baseline
+(\code{t.from.base}) and the longitudinal biomarkers;
+\item a dataframe \code{surv.data} with the survival data: 
 a subject id (\code{id}), baseline age (\code{baseline.age}),
 the time to event outcome (\code{time}) and a binary vector
 (\code{event}) that is 1 if the event
 is observed, and 0 in case of right-censoring;
-\item \code{perc.cens} the proportion of censored individuals
+\item \code{perc.cens} the proportion of censored individuals 
 in the simulated dataset.
 }
 }
 \description{
 This function allows to simulate a survival outcome
 from longitudinal predictors. Specifically, the longitudinal
-predictors are simulated from linear mixed models, and
+predictors are simulated from linear mixed models (LMMs), and 
 the survival outcome from a Weibull model where the time
 to event depends on the random effects from the LMMs.
 It is an implementation of the simulation method used in
@@ -76,7 +68,7 @@ library(ptmixed)
 make.spaghetti(x = age, y = marker1, 
                id = id, group = id,
                data = simdata$long.data, 
-               legend.inset = - 0.2)
+               legend.inset = - 1)
 # proportion of censored subjects
 simdata$censoring.prop
 # visualize KM estimate of survival
@@ -88,8 +80,8 @@ kaplan <- survfit(surv.obj ~ 1,
 plot(kaplan)
 }
 \references{
-Signorelli, M., Spitali, P., Tsonaka, R. (in review).
-On the prediction of survival outcomes using longitudinal
+Signorelli, M., Spitali, P., Tsonaka, R. (in review). 
+On the prediction of survival outcomes using longitudinal 
 and high-dimensional (omic) data.
 }
 \author{

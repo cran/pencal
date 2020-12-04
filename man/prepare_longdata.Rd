@@ -9,7 +9,7 @@ prepare_longdata(df, t.from.base, subj.id, survtime, verbose = TRUE)
 \arguments{
 \item{df}{dataframe with the longitudinal measurements}
 
-\item{t.from.base}{name of the variable containing time from
+\item{t.from.base}{name of the variable containing time from 
 baseline in \code{df}}
 
 \item{subj.id}{name of the subject id variable in \code{df}}
@@ -20,14 +20,14 @@ baseline in \code{df}}
 is printed}
 }
 \value{
-A list containing: a reduced dataframe called \code{df.sanitized},
+A list containing: a reduced dataframe called \code{df.sanitized}, 
 where only measurements taken before \code{t} are retained; the number of
 measurements retained (\code{n.kept}) and removed (\code{n.removed})
 from the input data frame
 }
 \description{
 This function removes from a longitudinal dataframe
-all measurements taken after the occurence of the event
+all measurements taken after the occurence of the event 
 or after censoring. It is used internally by \code{\link{fit_lmms}}
 and it assumes that \code{df} is sorted by \code{subj.id},
 with survival times given in the same order by subject id
@@ -35,10 +35,11 @@ with survival times given in the same order by subject id
 needed)
 }
 \references{
-Signorelli, M., Spitali, P., Tsonaka, R. (in review).
-On the prediction of survival outcomes using longitudinal
+Signorelli, M., Spitali, P., Tsonaka, R. (in review). 
+On the prediction of survival outcomes using longitudinal 
 and high-dimensional (omic) data.
 }
 \author{
 Mirko Signorelli
 }
+\keyword{internal}

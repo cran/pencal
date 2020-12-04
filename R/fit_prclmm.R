@@ -1,4 +1,4 @@
-#' Step 1 of PRC-LMM: fits one linear mixed model for each response
+#' Step 3 of PRC-LMM (estimation of the penalized Cox model(s))
 #'
 #' This function performs the third step for the estimation
 #' of the PRC-LMM model proposed in Signorelli et al. (2020, 
@@ -30,8 +30,10 @@
 #' of the tuning parameter in elasticnet. Only relevant if 
 #' \code{penalty = 'elasticnet'}. Default is 5
 #' @param n.cores number of cores to use to parallelize the computation
-#' of the cluster bootstrap procedure. If \code{n.cores = 1} (default), 
-#' no parallelization is done
+#' of the cluster bootstrap optimism correction procedure. If 
+#' \code{ncores = 1} (default), no parallelization is done. 
+#' Pro tip: you can use \code{parallel::detectCores()} to check 
+#' how many cores are available on your computer
 #' @param verbose if \code{TRUE} (default and recommended value), information
 #' on the ongoing computations is printed in the console
 #' 
@@ -42,9 +44,9 @@
 #' original dataset;
 #' \item \code{surv.data}: the supplied survival data (ordered by
 #' subject id)
-#' \item \code{n.boots} number of bootstrap samples;
-#' \item \code{boot.ids}: a list with the subject ids for each bootstrap
-#' sample drawn (when \code{n.boots > 0});
+#' \item \code{n.boots}: number of bootstrap samples;
+#' \item \code{boot.ids}: a list with the ids of bootstrapped subjects 
+#' (when \code{n.boots > 0});
 #' \item \code{pcox.boot}: a list where each element is a fitted penalized
 #' Cox model for a given bootstrap sample (when \code{n.boots > 0}).
 #' }

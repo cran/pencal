@@ -25,7 +25,7 @@ A vector of survival times
 }
 \description{
 This function implements the algorithm proposed by
-Bender et al. (2005) to simulate survival times from
+Bender et al. (2005) to simulate survival times from 
 a Weibull model
 }
 \examples{
@@ -40,12 +40,12 @@ times = simulate_t_weibull(n = n, lambda = 1, nu = 2,
 hist(times, 20)
 }
 \references{
-Bender, R., Augustin, T., & Blettner, M. (2005).
-Generating survival times to simulate Cox proportional
+Bender, R., Augustin, T., & Blettner, M. (2005). 
+Generating survival times to simulate Cox proportional 
 hazards models. Statistics in medicine, 24(11), 1713-1723.
 
-Signorelli, M., Spitali, P., Tsonaka, R. (in review).
-On the prediction of survival outcomes using longitudinal
+Signorelli, M., Spitali, P., Tsonaka, R. (in review). 
+On the prediction of survival outcomes using longitudinal 
 and high-dimensional (omic) data.
 }
 \author{

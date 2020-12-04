@@ -2,51 +2,43 @@
 % Please edit documentation in R/fit_lmms.R
 \name{fit_lmms}
 \alias{fit_lmms}
-\title{Step 1 of PRC-LMM: fits one linear mixed model for each response}
+\title{Step 1 of PRC-LMM (estimation of the linear mixed models)}
 \usage{
-fit_lmms(
-  y.names,
-  fixefs,
-  ranefs,
-  long.data,
-  surv.data,
-  t.from.base,
-  n.boots = 0,
-  n.cores = 1,
-  verbose = TRUE
-)
+fit_lmms(y.names, fixefs, ranefs, long.data, surv.data, t.from.base,
+  n.boots = 0, n.cores = 1, verbose = TRUE)
 }
 \arguments{
 \item{y.names}{character vector with the names of the
 response variables which the LMMs have to be fitted to}
 
 \item{fixefs}{fixed effects formula for the model, example:
-\code{~ time} (NB: do not include left-hand side!)}
+\code{~ time}}
 
 \item{ranefs}{random effects formula for the model,
 specified using the representation of random effect
 structures of the \code{R} package \code{nlme}}
 
 \item{long.data}{a data frame with the longitudinal predictors,
-comprehensive of a variable called \code{id} with the subject
-ids, and of a variable measuring time from baseline}
+comprehensive of a variable called \code{id} with the subject 
+ids}
 
-\item{surv.data}{a data frame with the survival data and (if
-relevant) additional baseline, which should at least contain
-a subject id (called \code{id}), the time to event outcome
+\item{surv.data}{a data frame with the survival data and (if 
+relevant) additional baseline covariates. \code{surv.data} should at least
+contain a subject id (called \code{id}), the time to event outcome  
 (\code{time}), and binary event variable (\code{event})}
 
-\item{t.from.base}{name of the variable containing time from
+\item{t.from.base}{name of the variable containing time from 
 baseline in \code{long.data}}
 
-\item{n.boots}{number of bootstrap samples; if 0, the random
-effects are computed only for the original dataset and no
+\item{n.boots}{number of bootstrap samples to be used in the
+cluster bootstrap optimism correction procedure (CBOCP). If 0, no
 bootstrapping is performed}
 
 \item{n.cores}{number of cores to use to parallelize the computation
-of the cluster bootstrap procedure. If \code{ncores = 1} (default),
-no parallelization is done. Tip: you can use \code{parallel::detectCores()}
-to check how many cores are available on your computer}
+of the CBOCP procedure. If \code{ncores = 1} (default), 
+no parallelization is done. Pro tip: you can use 
+\code{parallel::detectCores()} to check how many 
+cores are available on your computer}
 
 \item{verbose}{if \code{TRUE} (default and recommended value), information
 on the ongoing computations is printed in the console}
@@ -60,19 +52,20 @@ call information: \code{call}, \code{y.names}, \code{fixefs},
 \item \code{lmm.fits.orig}: a list with the LMMs fitted on the
 original dataset (it should comprise as many LMMs as the elements
 of \code{y.names} are);
-\item \code{df.sanitized}: a sanitized version of the supplied
+\item \code{df.sanitized}: a sanitized version of the supplied 
 \code{long.data} dataframe, without the
 longitudinal measurements that are taken after the event
 or after censoring;
-\item \code{n.boots} number of bootstrap samples;
-\item \code{boot.ids} ids of bootstrapped subjects (when \code{n.boots > 0});
-\item \code{lmms.fits.boot}: a list of lists, with the LMMs fitted
-on eacj bootstrapped datasets (when \code{n.boots > 0}).
+\item \code{n.boots}: number of bootstrap samples;
+\item \code{boot.ids}: a list with the ids of bootstrapped subjects 
+(when \code{n.boots > 0});
+\item \code{lmms.fits.boot}: a list of lists, which contains the LMMs fitted 
+on each bootstrapped datasets (when \code{n.boots > 0}).
 }
 }
 \description{
 This function performs the first step for the estimation
-of the PRC-LMM model proposed in Signorelli et al. (2020,
+of the PRC-LMM model proposed in Signorelli et al. (2020, 
 in review)
 }
 \examples{
@@ -106,8 +99,8 @@ step1 = fit_lmms(y.names = y.names,
                  n.boots = n.boots, n.cores = n.cores)
 }
 \references{
-Signorelli, M., Spitali, P., Tsonaka, R. (in review).
-On the prediction of survival outcomes using longitudinal
+Signorelli, M., Spitali, P., Tsonaka, R. (in review). 
+On the prediction of survival outcomes using longitudinal 
 and high-dimensional (omic) data.
 }
 \seealso{

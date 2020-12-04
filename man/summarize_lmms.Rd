@@ -2,7 +2,7 @@
 % Please edit documentation in R/summarize_lmms.R
 \name{summarize_lmms}
 \alias{summarize_lmms}
-\title{Step 1 of PRC-LMM: fits one linear mixed model for each response}
+\title{Step 2 of PRC-LMM (computation of the predicted random effects)}
 \usage{
 summarize_lmms(object, n.cores = 1, verbose = TRUE)
 }
@@ -10,9 +10,10 @@ summarize_lmms(object, n.cores = 1, verbose = TRUE)
 \item{object}{a list of objects as produced by \code{\link{fit_lmms}}}
 
 \item{n.cores}{number of cores to use to parallelize the computation
-of the cluster bootstrap procedure. If \code{ncores = 1} (default),
-no parallelization is done. Tip: you can use \code{parallel::detectCores()}
-to check how many cores are available on your computer}
+of the cluster bootstrap optimism correction procedure. If 
+\code{ncores = 1} (default), no parallelization is done. 
+Pro tip: you can use \code{parallel::detectCores()} to check 
+how many cores are available on your computer}
 
 \item{verbose}{if \code{TRUE} (default and recommended value), information
 on the ongoing computations is printed in the console}
@@ -23,20 +24,20 @@ A list containing the following objects:
 \item \code{call}: the function call
 \item \code{ranef.orig}: a matrix with the predicted random effects
 computed for the original data;
-\item \code{n.boots} number of bootstrap samples;
-\item \code{boot.ids}: a list with the subject ids for each bootstrap
-sample drawn (when \code{n.boots > 0});
-\item \code{ranef.boot.train}: a list where each element is a matrix that
-contains the predicted random effects for each bootstrap sample
+\item \code{n.boots}: number of bootstrap samples;
+\item \code{boot.ids}: a list with the ids of bootstrapped subjects 
 (when \code{n.boots > 0});
-\item \code{ranef.boot.valid}: a list where each element is a matrix that
-contains the predicted random effects on the original data, based on the
+\item \code{ranef.boot.train}: a list where each element is a matrix that 
+contains the predicted random effects for each bootstrap sample 
+(when \code{n.boots > 0});
+\item \code{ranef.boot.valid}: a list where each element is a matrix that 
+contains the predicted random effects on the original data, based on the 
 lmm fitted on the cluster bootstrap samples (when \code{n.boots > 0});
 }
 }
 \description{
 This function performs the second step for the estimation
-of the PRC-LMM model proposed in Signorelli et al. (2020,
+of the PRC-LMM model proposed in Signorelli et al. (2020, 
 in review)
 }
 \examples{
@@ -74,12 +75,12 @@ step1 = fit_lmms(y.names = y.names,
 step2 = summarize_lmms(object = step1, n.cores = n.cores)
 }
 \references{
-Signorelli, M., Spitali, P., Tsonaka, R. (in review).
-On the prediction of survival outcomes using longitudinal
+Signorelli, M., Spitali, P., Tsonaka, R. (in review). 
+On the prediction of survival outcomes using longitudinal 
 and high-dimensional (omic) data.
 }
 \seealso{
-\code{\link{fit_lmms}} (step 1),
+\code{\link{fit_lmms}} (step 1), 
 \code{\link{fit_prclmm}} (step 3),
 \code{\link{performance_prclmm}}
 }

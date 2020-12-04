@@ -2,7 +2,7 @@
 #'
 #' This function is part of the cluster bootstrap optimism correction
 #' procedure described in Signorelli et al. (2020, in review). Note 
-#' that this function does not perform the random sampling, but it
+#' that the function does not perform the random sampling, but it
 #' extracts the correct records from a dataframe, given the ids of
 #' the sampled clusters (subjects)
 #' 
@@ -14,6 +14,7 @@
 #' @return A data frame containing the bootstrapped observations
 #' 
 #' @import foreach
+#' @keywords internal
 #' 
 #' @author Mirko Signorelli
 #' @references 

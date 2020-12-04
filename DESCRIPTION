@@ -1,6 +1,6 @@
 Package: pencal
 Title: Penalized Regression Calibration (PRC)
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: 
     c(person(given = "Mirko",
              family = "Signorelli",
@@ -25,14 +25,14 @@ Depends: R (>= 4.0.0)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
-Imports: foreach, doParallel, glmnet, nlme, survival, MASS, survcomp,
-        survivalROC, ptmixed, stats, dplyr
+Imports: foreach, doParallel, glmnet, nlme, survival, MASS, stats,
+        survcomp, survivalROC, dplyr, ptmixed
 NeedsCompilation: no
-Packaged: 2020-11-23 13:48:50 UTC; msignorelli
+Packaged: 2020-12-03 10:41:24 UTC; msignorelli
 Author: Mirko Signorelli [aut, cre, cph]
     (<https://orcid.org/0000-0002-8102-3356>),
   Pietro Spitali [ctb],
   Roula Tsonaka [ctb]
 Maintainer: Mirko Signorelli <msignorelli.rpackages@gmail.com>
 Repository: CRAN
-Date/Publication: 2020-11-25 10:00:02 UTC
+Date/Publication: 2020-12-04 12:30:02 UTC

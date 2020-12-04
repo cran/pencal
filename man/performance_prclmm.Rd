@@ -7,7 +7,7 @@
 performance_prclmm(step2, step3, times = 1, n.cores = 1, verbose = TRUE)
 }
 \arguments{
-\item{step2}{the output of \code{\link{summarize_lmms}}
+\item{step2}{the output of \code{\link{summarize_lmms}} 
 (step 2 of the estimation of the PRC-LMM model)}
 
 \item{step3}{the output of \code{\link{fit_prclmm}}
@@ -17,8 +17,10 @@ performance_prclmm(step2, step3, times = 1, n.cores = 1, verbose = TRUE)
 to estimate the time-dependent AUC}
 
 \item{n.cores}{number of cores to use to parallelize the computation
-of the cluster bootstrap procedure. If \code{n.cores = 1} (default),
-no parallelization is done}
+of the CBOCP procedure. If \code{ncores = 1} (default), 
+no parallelization is done. Pro tip: you can use 
+\code{parallel::detectCores()} to check how many 
+cores are available on your computer}
 
 \item{verbose}{if \code{TRUE} (default and recommended value), information
 on the ongoing computations is printed in the console}
@@ -36,63 +38,32 @@ at the desired time points.
 }
 \description{
 This function computes the naive and optimism-corrected
-measures of performance (C index and time-dependent AUC)
-for the PRC-LMM model proposed
+measures of performance (C index and time-dependent AUC) 
+for the PRC-LMM model proposed 
 in Signorelli et al. (2020, in review). The optimism
 correction is computed based on a cluster bootstrap
-optimism correction procedure
+optimism correction procedure (CBOCP)
 }
 \examples{
-# generate example data
-set.seed(1234)
-p = 4 # number of longitudinal predictors
-simdata = simulate_prclmm_data(n = 100, p = p, p.relev = 2, 
-             seed = 123, t.values = c(0, 0.2, 0.5, 1, 1.5, 2))
-             
-# specify options for cluster bootstrap optimism correction
-# procedure and for parallel computing 
-# IMPORTANT: set do.bootstrap = TRUE to compute the optimism correction!
-do.bootstrap = FALSE
-n.boots = ifelse(do.bootstrap, 100, 0)
-parallelize = FALSE
-# IMPORTANT: set parallelize = TRUE to speed computations up!
-if (!parallelize) n.cores = 1
-if (parallelize) {
-   # identify number of available cores on your machine
-   n.cores = parallel::detectCores()
-   if (is.na(n.cores)) n.cores = 1
-}
+\donttest{
+data(fitted_prclmm)
 
-# step 1 of PRC-LMM: estimate the LMMs
-y.names = paste('marker', 1:p, sep = '')
-step1 = fit_lmms(y.names = y.names, 
-                 fixefs = ~ age, ranefs = ~ age | id, 
-                 long.data = simdata$long.data, 
-                 surv.data = simdata$surv.data,
-                 t.from.base = t.from.base,
-                 n.boots = n.boots, n.cores = n.cores)
-                 
-# step 2 of PRC-LMM: compute the summaries 
-# of the longitudinal outcomes
-step2 = summarize_lmms(object = step1, n.cores = n.cores)
-
-# step 3 of PRC-LMM: fit the penalized Cox models
-step3 = fit_prclmm(object = step2, surv.data = simdata$surv.data,
-                   baseline.covs = ~ baseline.age,
-                   penalty = 'ridge', n.cores = n.cores)
+n.cores = parallel::detectCores()
+if (is.na(n.cores)) n.cores = 1
                    
 # compute the performance measures
-perf = performance_prclmm(step2, step3, 
-              times = c(0.5, 1, 1.5, 2), 
-              n.cores = n.cores)
+perf = performance_prclmm(fitted_prclmm$step2, fitted_prclmm$step3, 
+          times = c(0.5, 1, 1.5, 2), n.cores = n.cores)
+
 # concordance index:
 perf$concordance
 # time-dependent AUC:
 perf$tdAUC
 }
+}
 \references{
-Signorelli, M., Spitali, P., Tsonaka, R. (in review).
-On the prediction of survival outcomes using longitudinal
+Signorelli, M., Spitali, P., Tsonaka, R. (in review). 
+On the prediction of survival outcomes using longitudinal 
 and high-dimensional (omic) data.
 }
 \seealso{

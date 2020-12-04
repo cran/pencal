@@ -2,7 +2,7 @@
 #'
 #' This function allows to simulate a survival outcome
 #' from longitudinal predictors. Specifically, the longitudinal
-#' predictors are simulated from linear mixed models, and 
+#' predictors are simulated from linear mixed models (LMMs), and 
 #' the survival outcome from a Weibull model where the time
 #' to event depends on the random effects from the LMMs.
 #' It is an implementation of the simulation method used in
@@ -22,15 +22,15 @@
 #' @param t.values vector specifying the time points 
 #' at which longitudinal measurements are collected
 #' (NB: for simplicity, this function assumes a balanced 
-#' designed; however, PRC works both with balanced and
-#' unbalanced designs!)
+#' designed; however, \code{pencal} is designed to work
+#' both with balanced and with unbalanced designs!)
 #' 
 #' @return A list containing the following elements:
 #' \itemize{
 #' \item a dataframe \code{long.data} with data on the longitudinal 
 #' predictors, comprehensive of a subject id (\code{id}),
-#' baseline age (\code{base.age}) and time from baseline
-#' (\code{t.from.base});
+#' baseline age (\code{base.age}),time from baseline
+#' (\code{t.from.base}) and the longitudinal biomarkers;
 #' \item a dataframe \code{surv.data} with the survival data: 
 #' a subject id (\code{id}), baseline age (\code{baseline.age}),
 #' the time to event outcome (\code{time}) and a binary vector
@@ -58,7 +58,7 @@
 #' make.spaghetti(x = age, y = marker1, 
 #'                id = id, group = id,
 #'                data = simdata$long.data, 
-#'                legend.inset = - 0.2)
+#'                legend.inset = - 1)
 #' # proportion of censored subjects
 #' simdata$censoring.prop
 #' # visualize KM estimate of survival

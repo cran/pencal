@@ -1,4 +1,4 @@
-#' Step 1 of PRC-LMM: fits one linear mixed model for each response
+#' Step 2 of PRC-LMM (computation of the predicted random effects)
 #'
 #' This function performs the second step for the estimation
 #' of the PRC-LMM model proposed in Signorelli et al. (2020, 
@@ -6,9 +6,10 @@
 #' 
 #' @param object a list of objects as produced by \code{\link{fit_lmms}}
 #' @param n.cores number of cores to use to parallelize the computation
-#' of the cluster bootstrap procedure. If \code{ncores = 1} (default), 
-#' no parallelization is done. Tip: you can use \code{parallel::detectCores()}
-#' to check how many cores are available on your computer
+#' of the cluster bootstrap optimism correction procedure. If 
+#' \code{ncores = 1} (default), no parallelization is done. 
+#' Pro tip: you can use \code{parallel::detectCores()} to check 
+#' how many cores are available on your computer
 #' @param verbose if \code{TRUE} (default and recommended value), information
 #' on the ongoing computations is printed in the console
 #'  
@@ -17,9 +18,9 @@
 #' \item \code{call}: the function call
 #' \item \code{ranef.orig}: a matrix with the predicted random effects
 #' computed for the original data;
-#' \item \code{n.boots} number of bootstrap samples;
-#' \item \code{boot.ids}: a list with the subject ids for each bootstrap
-#' sample drawn (when \code{n.boots > 0});
+#' \item \code{n.boots}: number of bootstrap samples;
+#' \item \code{boot.ids}: a list with the ids of bootstrapped subjects 
+#' (when \code{n.boots > 0});
 #' \item \code{ranef.boot.train}: a list where each element is a matrix that 
 #' contains the predicted random effects for each bootstrap sample 
 #' (when \code{n.boots > 0});

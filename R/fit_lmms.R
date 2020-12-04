@@ -1,4 +1,4 @@
-#' Step 1 of PRC-LMM: fits one linear mixed model for each response
+#' Step 1 of PRC-LMM (estimation of the linear mixed models)
 #'
 #' This function performs the first step for the estimation
 #' of the PRC-LMM model proposed in Signorelli et al. (2020, 
@@ -7,26 +7,27 @@
 #' @param y.names character vector with the names of the
 #' response variables which the LMMs have to be fitted to
 #' @param fixefs fixed effects formula for the model, example:
-#' \code{~ time} (NB: do not include left-hand side!)
+#' \code{~ time}
 #' @param ranefs random effects formula for the model,
 #' specified using the representation of random effect
 #' structures of the \code{R} package \code{nlme}
 #' @param long.data a data frame with the longitudinal predictors,
 #' comprehensive of a variable called \code{id} with the subject 
-#' ids, and of a variable measuring time from baseline
+#' ids
 #' @param surv.data a data frame with the survival data and (if 
-#' relevant) additional baseline, which should at least contain
-#' a subject id (called \code{id}), the time to event outcome  
+#' relevant) additional baseline covariates. \code{surv.data} should at least
+#' contain a subject id (called \code{id}), the time to event outcome  
 #' (\code{time}), and binary event variable (\code{event})
 #' @param t.from.base name of the variable containing time from 
 #' baseline in \code{long.data}
-#' @param n.boots number of bootstrap samples; if 0, the random 
-#' effects are computed only for the original dataset and no
+#' @param n.boots number of bootstrap samples to be used in the
+#' cluster bootstrap optimism correction procedure (CBOCP). If 0, no
 #' bootstrapping is performed
 #' @param n.cores number of cores to use to parallelize the computation
-#' of the cluster bootstrap procedure. If \code{ncores = 1} (default), 
-#' no parallelization is done. Tip: you can use \code{parallel::detectCores()}
-#' to check how many cores are available on your computer
+#' of the CBOCP procedure. If \code{ncores = 1} (default), 
+#' no parallelization is done. Pro tip: you can use 
+#' \code{parallel::detectCores()} to check how many 
+#' cores are available on your computer
 #' @param verbose if \code{TRUE} (default and recommended value), information
 #' on the ongoing computations is printed in the console
 #' 
@@ -42,10 +43,11 @@
 #' \code{long.data} dataframe, without the
 #' longitudinal measurements that are taken after the event
 #' or after censoring;
-#' \item \code{n.boots} number of bootstrap samples;
-#' \item \code{boot.ids} ids of bootstrapped subjects (when \code{n.boots > 0});
-#' \item \code{lmms.fits.boot}: a list of lists, with the LMMs fitted 
-#' on eacj bootstrapped datasets (when \code{n.boots > 0}).
+#' \item \code{n.boots}: number of bootstrap samples;
+#' \item \code{boot.ids}: a list with the ids of bootstrapped subjects 
+#' (when \code{n.boots > 0});
+#' \item \code{lmms.fits.boot}: a list of lists, which contains the LMMs fitted 
+#' on each bootstrapped datasets (when \code{n.boots > 0}).
 #' }
 #' 
 #' @import nlme foreach doParallel stats

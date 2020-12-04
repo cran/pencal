@@ -21,6 +21,8 @@
 #' measurements retained (\code{n.kept}) and removed (\code{n.removed})
 #' from the input data frame
 #' 
+#' @keywords internal
+#' 
 #' @author Mirko Signorelli
 #' @references 
 #' Signorelli, M., Spitali, P., Tsonaka, R. (in review). 
