@@ -321,8 +321,8 @@ performance_prclmm = function(step2, step3, times = 1,
     }
   }
 
-  names(c.out) = c('n.boots', 'C.naive', 'optimism', 'C.adjusted')
-  names(tdauc.out) = c('pred.time', 'tdAUC.naive', 'optimism', 'tdAUC.adjusted')
+  names(c.out) = c('n.boots', 'C.naive', 'cb.opt.corr', 'C.adjusted')
+  names(tdauc.out) = c('pred.time', 'tdAUC.naive', 'cb.opt.corr', 'tdAUC.adjusted')
   
   out = list('call' = call, 'concordance' = c.out, 
              'tdAUC' = tdauc.out)

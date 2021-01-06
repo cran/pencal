@@ -15,6 +15,15 @@ package - in other words, within a section you will find all those
 package versions a.b.x where a and b are fixed whereas x = 1, 2, 3, …
 Each subsection corresponds to a specific package version.
 
+0.2.x
+=====
+
+pencal 0.2.1
+------------
+
+-   Released: January 2021
+-   Added the vignette “An introduction to the R package pencal”
+
 0.1.x
 =====
 
