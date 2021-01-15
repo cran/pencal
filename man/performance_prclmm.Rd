@@ -48,8 +48,14 @@ optimism correction procedure (CBOCP)
 \donttest{
 data(fitted_prclmm)
 
-n.cores = parallel::detectCores()
-if (is.na(n.cores)) n.cores = 1
+parallelize = FALSE
+# IMPORTANT: set parallelize = TRUE to speed computations up!
+if (!parallelize) n.cores = 1
+if (parallelize) {
+   # identify number of available cores on your machine
+   n.cores = parallel::detectCores()
+   if (is.na(n.cores)) n.cores = 1
+}
                    
 # compute the performance measures
 perf = performance_prclmm(fitted_prclmm$step2, fitted_prclmm$step3, 
@@ -62,9 +68,11 @@ perf$tdAUC
 }
 }
 \references{
-Signorelli, M., Spitali, P., Tsonaka, R. (in review). 
-On the prediction of survival outcomes using longitudinal 
-and high-dimensional (omic) data.
+Signorelli, M., Spitali, P., Al-Khalili Szigyarto, C, 
+The MARK-MD Consortium, Tsonaka, R. (2021). 
+Penalized regression calibration: a method for the prediction 
+of survival outcomes using complex longitudinal and 
+high-dimensional data. arXiv preprint: arXiv:2101.04426.
 }
 \seealso{
 \code{\link{fit_lmms}} (step 1),

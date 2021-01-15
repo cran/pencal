@@ -44,9 +44,11 @@ Bender, R., Augustin, T., & Blettner, M. (2005).
 Generating survival times to simulate Cox proportional 
 hazards models. Statistics in medicine, 24(11), 1713-1723.
 
-Signorelli, M., Spitali, P., Tsonaka, R. (in review). 
-On the prediction of survival outcomes using longitudinal 
-and high-dimensional (omic) data.
+Signorelli, M., Spitali, P., Al-Khalili Szigyarto, C, 
+The MARK-MD Consortium, Tsonaka, R. (2021). 
+Penalized regression calibration: a method for the prediction 
+of survival outcomes using complex longitudinal and 
+high-dimensional data. arXiv preprint: arXiv:2101.04426.
 }
 \author{
 Mirko Signorelli

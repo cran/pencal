@@ -18,11 +18,22 @@ Each subsection corresponds to a specific package version.
 0.2.x
 =====
 
+pencal 0.2.2
+------------
+
+-   Released: January 2021
+-   Fixed CRAN error caused by parallel::detectCores()
+-   Added link to arXiv preprint in package description and vignette
+-   Added CITATION file
+-   Vignettes updated and revised
+-   Updated references in help pages
+
 pencal 0.2.1
 ------------
 
 -   Released: January 2021
--   Added the vignette “An introduction to the R package pencal”
+-   Added the vignette “[An introduction to the R package
+    pencal](https://cran.r-project.org/package=pencal/vignettes/pencal-vignette.html)”
 
 0.1.x
 =====

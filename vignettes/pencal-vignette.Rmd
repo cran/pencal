@@ -22,25 +22,29 @@ options(warn=-1)
 
 ## What is pencal?
 
-`pencal` is an `R` package that has been created to make it easy and efficient to estimate and apply Penalized Regression Calibration.
+`pencal` is an `R` package that has been created to make it easy and efficient to estimate and apply **Penalized Regression Calibration**.
 
 ## What is Penalized Regression Calibration?
 
-Penalized Regression Calibration (PRC) is a statistical method that allows to compute predictions for a survival outcome using a set of high-dimensional and longitudinal covariates as predictors.
+Longitudinal and high-dimensional measurements have become increasingly common in biomedical research. However, methods to predict survival outcomes using covariates that are both longitudinal and high-dimensional are currently missing.
 
-The methodological details behind PRC are described in detail in the following article:
+Penalized Regression Calibration (PRC) is a statistical method that has been developed to fill this methodological gap, making it possible to **predict survival using as predictors a set of covariates that are at the same time longitudinal and high-dimensional**.
 
-Signorelli, M., Spitali, P., Al-Khalili Sgyziarto, C., The Mark-MD Consortium, Tsonaka, R. (in review). <!-- arXiv preprint: [arxiv number](arXiv link). --> NB: an arXiv preprint will be available soon!
+PRC is described in detail in the following article:
+
+Signorelli, M., Spitali, P., Al-Khalili Sgyziarto, C., The Mark-MD Consortium, Tsonaka, R. (in review). arXiv preprint: [arXiv:2101.04426](https://arxiv.org/abs/2101.04426).
+
+## How does PRC work?
 
 In short, PRC comprises three modelling steps:
 
-1. in the first step, we model the trajectories described by the longitudinal biomarkers using mixed effects models (using either linear mixed models, or multivariate latent process mixed models);
-2. in the second step, we compute the predicted random effects for the models estimated in step 1; in practice, the predicted random effects are subject-specific summaries of the longitudinal trajectories, which summarize the way in which the biomarkers change over time across subjects;
-3. in the third step, we estimate a penalized Cox model where the summaries computed in step 3 are employed as covariates (alongside with other relevant covariates, such as baseline age or important confounders).
+1. in the first step, we **model the trajectories described by the longitudinal biomarkers using mixed effects models** (using either linear mixed models, or multivariate latent process mixed models);
+2. in the second step, we **compute** the predicted random effects for the models estimated in step 1; in practice, the predicted random effects are **subject-specific summaries of the longitudinal trajectories**, which summarize the way in which the biomarkers change over time across subjects;
+3. in the third step, we **estimate a penalized Cox model** where the summaries computed in step 3 are employed as covariates (alongside with other relevant covariates, such as baseline age or important confounders).
 
 These steps allow to estimate PRC, and to obtain a model that can be used to compute predicted survival probabilities.
 
-Additionally, one may want to quantify the predictive performance of the fitted model. To achieve this aim, in `pencal` we have implemented a Cluster Bootstrap Optimism Correction Procedure (CBOCP) that can be used to obtain optimism-corrected estimates of the C index and time-dependent AUC associated to the fitted model. Depending on the dimensionality of your dataset, computing the CBOCP might be time consuming; for this reason, we offer the possibility to parallelize the CBOCP using multiple cores.
+Additionally, one may want to quantify the predictive performance of the fitted model. To achieve this aim, in `pencal` we have implemented a **Cluster Bootstrap Optimism Correction Procedure** (CBOCP) that can be used to obtain optimism-corrected estimates of the C index and time-dependent AUC associated to the fitted model. Depending on the dimensionality of your dataset, computing the CBOCP might be time consuming; for this reason, we offer the possibility to parallelize the CBOCP using multiple cores.
 
 Below you can see a graphical representation of the steps involved in the estimation of PRC (see the elements in the lightblue box) and in the computation of the CBOCP (elements in the salmon box).
 
@@ -108,9 +112,9 @@ Note that in this example we are setting $n > p$, but `pencal` can handle both l
 
 ## Input data
 
-In order to estimate the PRC-LMM, you need to provide the following two inputs:
+In order to estimate the PRC-LMM, you need to **provide the following two inputs**:
 
-1. a dataset in long format, which should contain (at least) the following variables: a subject identifier that should be named `id`, the longitudinal biomarkers (here called `marker1`, ..., `marker10`), and the relevant time variables (in this example we will use `age` as covariate in the LMMs estimated in step 1, and `baseline.age` as covariate in the penalized Cox model estimated in step 3):
+1. **a dataset in long format**, which should contain (at least) the following variables: a subject identifier that should be named `id`, the longitudinal biomarkers (here called `marker1`, ..., `marker10`), and the relevant time variables (in this example we will use `age` as covariate in the LMMs estimated in step 1, and `baseline.age` as covariate in the penalized Cox model estimated in step 3):
 
 ```{r view_longdata, fig.height=4, fig.width=5}
 # view the dataset in long format
@@ -124,7 +128,7 @@ ptmixed::make.spaghetti(x = age, y = marker5,
                legend.inset = - 1)
 ```
 
-2. a dataset with information on the survival outcome, which should contain (at least) the following variables: a subject identifier that should be named `id`, the time to event outcome called `time`, and the binary event indicator called `event` (NB: make sure that the variable names associated to these three variables are indeed `id`, `time` and `event`!)
+2. **a dataset with information on the survival outcome**, which should contain (at least) the following variables: a subject identifier that should be named `id`, the time to event outcome called `time`, and the binary event indicator called `event` (NB: make sure that the variable names associated to these three variables are indeed `id`, `time` and `event`!)
 
 ```{r view_survdata, fig.height=4.5, fig.width=4}
 # view the dataset with the survival data
@@ -163,7 +167,7 @@ Be aware, however, that **using more than 2 cores will speed computations up, an
 
 ### Step 1
 
-In the first step, for each biomarker we estimate a linear mixed model (LMM) where the longitudinal biomarker levels $y_{ij}$ depend on two fixed effects (one intercept, $\beta_0$ and one slope for age, $\beta_1$), on a subject-specific random intercept $u_{0i}$ and on a random slope for age $u_{1i}$:
+In the first step, for each biomarker we estimate a **linear mixed model** (LMM) where the longitudinal biomarker levels $y_{ij}$ depend on two fixed effects (one intercept, $\beta_0$ and one slope for age, $\beta_1$), on a subject-specific random intercept $u_{0i}$ and on a random slope for age $u_{1i}$:
 
 $$y_{ij} = \beta_0 + u_{0i} + \beta_1 a_{ij} + u_{1i} a_{ij} + \varepsilon_{ij}.$$
 
@@ -178,6 +182,8 @@ step1 = fit_lmms(y.names = y.names,
                  t.from.base = t.from.base,
                  n.boots = 10, n.cores = n.cores)
 ```
+
+Of course, the LMM fitted here is just an example of how to model longitudinal biomarker trajectories, and depending on the data you are dealing with you may choose to specify different fixed and random effects formulas.
 
 Note that here I have set `n.boots = 10` to reduce computing time for the CBOCP, given that CRAN only allows me to use two cores.
 
@@ -195,7 +201,7 @@ For more details about the arguments of `fit_lmms` and its outputs, see the help
 
 ### Step 2
 
-In the second step we compute the predicted random intercepts and random slopes for the LMMs fitted in step 1:
+In the second step we **compute the predicted random intercepts and random slopes** for the LMMs fitted in step 1:
 
 ```{r step2, cache = T}
 step2 = summarize_lmms(object = step1, n.cores = n.cores)
@@ -213,7 +219,7 @@ For more details about the arguments of `summarize_lmms` and its outputs, see th
 
 ### Step 3
 
-Lastly, in the third step of PRC-LMM we estimate a penalized Cox model where we employ as predictors baseline age and all the summaries (predicted random effects) computed in step 2:
+Lastly, in the third step of PRC-LMM we estimate a **penalized Cox model** where we employ as predictors baseline age and all the summaries (predicted random effects) computed in step 2:
 
 ```{r step3, cache = T}
 step3 = fit_prclmm(object = step2, surv.data = simdata$surv.data,
@@ -236,7 +242,7 @@ For more details about the arguments of `fit_prclmm` and its outputs, see the he
 
 ## Predicted survival probabilities
 
-After fitting the model, you will probably want to obtain predicted survival probabilities for each individual at several time points. This can be done through the function `survpred_prclmm`, which takes as inputs the outputs of step 2 and step 3, alongside with the time points at which to compute the survival probabilities:
+After fitting the model, you will probably want to obtain **predicted survival probabilities** for each individual at several time points. This can be done through the function `survpred_prclmm`, which takes as inputs the outputs of step 2 and step 3, alongside with the time points at which to compute the survival probabilities:
 
 ```{r}
 preds = survpred_prclmm(step2, step3, times = c(1, 2, 3))
@@ -245,9 +251,9 @@ head(preds)
 
 ## Cluster bootstrap optimism correction and performance measures
 
-To accurately quantify the predicted performance of the fitted PRC-LMM, we need to recur to some form of internal validation strategy (e.g., bootstrap, cross-validation, etc...).
+To accurately quantify the predicted performance of the fitted PRC-LMM, we need to recur to some form of **internal validation** strategy (e.g., bootstrap, cross-validation, etc...).
 
-In `pencal` the internal validation is performed through a Cluster Bootstrap Optimism Correction Procedure (CBOCP) that allows to compute optimism-corrected estimates of the concordance (C) index and of the time-dependent AUC.
+In `pencal` the internal validation is performed through a Cluster Bootstrap Optimism Correction Procedure (CBOCP) that allows to compute **optimism-corrected estimates of the concordance (C) index and of the time-dependent AUC**.
 
 Most of the steps that the CBOCP requires are directly computed by the functions `fit_lmms`, `summarize_lmms` and  `fit_prclmm` whenever the argument `n.boots` of `fit_lmms` is set equal to an integer > 0 (in other words: most of the computations needed for the CBOCP have already been performed in the code chunks executed above, so we are almost done!).
 
@@ -275,4 +281,4 @@ The aim of this vignette is to provide a quick-start introduction to the `R` pac
 
 Further details, functions and examples can be found in [the manual of the package](https://CRAN.R-project.org/package=pencal/pencal.pdf).
 
-<!-- The description of the method is available in an article [that you can read here](arXiv link). -->
+The description of the method is available in an article [that you can read here](https://arxiv.org/abs/2101.04426).

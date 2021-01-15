@@ -111,9 +111,11 @@ step3 = fit_prclmm(object = step2, surv.data = simdata$surv.data,
                    penalty = 'ridge', n.cores = n.cores)
 }
 \references{
-Signorelli, M., Spitali, P., Tsonaka, R. (in review). 
-On the prediction of survival outcomes using longitudinal 
-and high-dimensional (omic) data.
+Signorelli, M., Spitali, P., Al-Khalili Szigyarto, C, 
+The MARK-MD Consortium, Tsonaka, R. (2021). 
+Penalized regression calibration: a method for the prediction 
+of survival outcomes using complex longitudinal and 
+high-dimensional data. arXiv preprint: arXiv:2101.04426.
 }
 \seealso{
 \code{\link{fit_lmms}} (step 1), 
