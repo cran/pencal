@@ -1,16 +1,17 @@
-#' Predictive performance of the PRC-LMM model
+#' Predictive performance of the PRC-LMM and PRC-MLPMM models
 #'
 #' This function computes the naive and optimism-corrected
 #' measures of performance (C index and time-dependent AUC) 
-#' for the PRC-LMM model proposed 
-#' in Signorelli et al. (2020, in review). The optimism
+#' for the PRC models proposed 
+#' in Signorelli et al. (2021, in review). The optimism
 #' correction is computed based on a cluster bootstrap
 #' optimism correction procedure (CBOCP)
 #' 
-#' @param step2 the output of \code{\link{summarize_lmms}} 
-#' (step 2 of the estimation of the PRC-LMM model)
-#' @param step3 the output of \code{\link{fit_prclmm}}
-#' (step 3 of the estimation of the PRC-LMM model)
+#' @param step2 the output of either \code{\link{summarize_lmms}} 
+#' or \code{\link{summarize_mlpmms}} (step 2 of the estimation of
+#' PRC)
+#' @param step3 the output of \code{\link{fit_prclmm}} or
+#' \code{\link{fit_prcmlpmm}} (step 3 of PRC)
 #' @param times numeric vector with the time points at which
 #' to estimate the time-dependent AUC
 #' @param n.cores number of cores to use to parallelize the computation
@@ -42,9 +43,10 @@
 #' of survival outcomes using complex longitudinal and 
 #' high-dimensional data. arXiv preprint: arXiv:2101.04426.
 #' 
-#' @seealso \code{\link{fit_lmms}} (step 1),
-#' \code{\link{summarize_lmms}} (step 2),
-#' \code{\link{fit_prclmm}} (step 3)
+#' @seealso for the PRC-LMM model: \code{\link{fit_lmms}} (step 1),
+#' \code{\link{summarize_lmms}} (step 2) and \code{\link{fit_prclmm}} (step 3);
+#' for the PRC-MLPMM model: \code{\link{fit_mlpmms}} (step 1),
+#' \code{\link{summarize_mlpmms}} (step 2) and \code{\link{fit_prcmlpmm}} (step 3).
 #' 
 #' @examples
 #' \donttest{
@@ -61,7 +63,7 @@
 #' }
 #'                    
 #' # compute the performance measures
-#' perf = performance_prclmm(fitted_prclmm$step2, fitted_prclmm$step3, 
+#' perf = performance_prc(fitted_prclmm$step2, fitted_prclmm$step3, 
 #'           times = c(0.5, 1, 1.5, 2), n.cores = n.cores)
 #' 
 #' # concordance index:
@@ -70,7 +72,7 @@
 #' perf$tdAUC
 #' }
 
-performance_prclmm = function(step2, step3, times = 1,
+performance_prc = function(step2, step3, times = 1,
                               n.cores = 1, verbose = TRUE) {
   call = match.call()
   # load namespaces

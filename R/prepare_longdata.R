@@ -10,8 +10,8 @@
 #' 
 #' @param df dataframe with the longitudinal measurements
 #' @param subj.id name of the subject id variable in \code{df}
-#' @param t.from.base name of the variable containing time from 
-#' baseline in \code{df}
+#' @param t.from.base name (as character) of the variable containing
+#' time from baseline in \code{df}
 #' @param survtime vector containing the survival time or censoring time
 #' @param verbose if \code{TRUE}, a summary of the data manipulation
 #' is printed
@@ -33,7 +33,7 @@
 
 prepare_longdata = function(df, t.from.base, subj.id, survtime, verbose = TRUE) {
   id = df[ , deparse(substitute(subj.id))]
-  time = df[ , deparse(substitute(t.from.base))]
+  time = df[ , t.from.base]
   id.vals = unique(id)
   n = length(id.vals)
   keep = c()

@@ -3,7 +3,7 @@
 #' This list contains a fitted PRC LMM, where the CBOCP is
 #' computed using 50 cluster bootstrap samples. It is
 #' used to reduce the computing time in the example of
-#' the function \code{performance_prclmm} 
+#' the function \code{performance_prc} 
 #' 
 #' @docType data
 #' @keywords datasets
@@ -20,7 +20,7 @@
 #' of survival outcomes using complex longitudinal and 
 #' high-dimensional data. arXiv preprint: arXiv:2101.04426.
 #' 
-#' @seealso \code{\link{performance_prclmm}}
+#' @seealso \code{\link{performance_prc}}
 #' 
 #' @examples 
 #' data(fitted_prclmm)

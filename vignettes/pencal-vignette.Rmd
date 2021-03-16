@@ -17,12 +17,11 @@ options(warn=-1)
 # suppress warnings related to number of cores when rendering the vignette
 ```
 
-
 # Introduction
 
-## What is pencal?
+## What is `pencal`?
 
-`pencal` is an `R` package that has been created to make it easy and efficient to estimate and apply **Penalized Regression Calibration**.
+`pencal` is an `R` package that has been created to make it easy and efficient to estimate and apply **Penalized Regression Calibration** ([Signorelli et al., 2021](https://arxiv.org/abs/2101.04426)).
 
 ## What is Penalized Regression Calibration?
 
@@ -32,17 +31,19 @@ Penalized Regression Calibration (PRC) is a statistical method that has been dev
 
 PRC is described in detail in the following article:
 
-Signorelli, M., Spitali, P., Al-Khalili Sgyziarto, C., The Mark-MD Consortium, Tsonaka, R. (in review). arXiv preprint: [arXiv:2101.04426](https://arxiv.org/abs/2101.04426).
+Signorelli, M., Spitali, P., Al-Khalili Sgyziarto, C., The Mark-MD Consortium, Tsonaka, R. (2021). Penalized regression calibration: a method for the prediction of survival outcomes using complex longitudinal and high-dimensional data. arXiv preprint: [arXiv:2101.04426](https://arxiv.org/abs/2101.04426).
 
 ## How does PRC work?
 
 In short, PRC comprises three modelling steps:
 
-1. in the first step, we **model the trajectories described by the longitudinal biomarkers using mixed effects models** (using either linear mixed models, or multivariate latent process mixed models);
-2. in the second step, we **compute** the predicted random effects for the models estimated in step 1; in practice, the predicted random effects are **subject-specific summaries of the longitudinal trajectories**, which summarize the way in which the biomarkers change over time across subjects;
-3. in the third step, we **estimate a penalized Cox model** where the summaries computed in step 3 are employed as covariates (alongside with other relevant covariates, such as baseline age or important confounders).
+1. in the first step, we **model the trajectories described by the longitudinal biomarkers using mixed effects models**;
 
-These steps allow to estimate PRC, and to obtain a model that can be used to compute predicted survival probabilities.
+2. in the second step, we **compute subject-specific summaries of the longitudinal trajectories**. In practice, these summaries are the predicted random effects from the mixed models estimated in step 1, and they allow us to summarize the way in which the biomarkers change over time across subjects;
+
+3. in the third step, we **estimate a penalized Cox model** where the summaries computed in step 3 (alongside with other relevant covariates, such as baseline age or important confounders) are employed as predictors of the survival time.
+
+By performing these 3 steps we can estimate PRC, obtaining a model that allows us to compute predicted survival probabilities.
 
 Additionally, one may want to quantify the predictive performance of the fitted model. To achieve this aim, in `pencal` we have implemented a **Cluster Bootstrap Optimism Correction Procedure** (CBOCP) that can be used to obtain optimism-corrected estimates of the C index and time-dependent AUC associated to the fitted model. Depending on the dimensionality of your dataset, computing the CBOCP might be time consuming; for this reason, we offer the possibility to parallelize the CBOCP using multiple cores.
 
@@ -68,36 +69,49 @@ After installing `pencal`, you can load the package with
 library('pencal')
 ```
 
-# Overview of the functionalities of pencal
+# Overview of the functionalities of `pencal`
+
+Currently, `pencal` contains functions to estimate the PRC-LMM and PRC-MLPMM models proposed in [Signorelli et al. (2021)](https://arxiv.org/abs/2101.04426). An overview of the different functions is presented in the following subsections.
 
 ## Model estimation and prediction
 
-Estimation of the PRC-LMM model described in Signorelli et al. (in review) <!-- (arXiv link) --> can be performed using the following three functions:
+Estimation of the PRC-LMM model can be performed by running sequentially the following three functions:
 
 1. `fit_lmms`, which implements the first step of the estimation of the PRC-LMM;
 2. `summarize_lmms`, which carries out the second step;
 3. `fit_prclmm`, which performs the third step.
 
-These functions are run sequentially, with the output of `fit_lmms` used as input for `summarize_lmms`, and the output of `summarize_lmms` as input for `fit_prclmm`.
+As already mentioned, these functions have to be run sequentially, with the output of `fit_lmms` used as input for `summarize_lmms`, and the output of `summarize_lmms` as input for `fit_prclmm`.
 
-Lastly, the function `survpred_prclmm` computes survival probabilities based on the fitted PRC-LMM. 
+Similarly, estimation of the PRC-MLPMM model can be performed using:
 
-## Cluster bootstrap optimism correction procedure
+1. `fit_mlpmms`, which implements the first step of the estimation of the PRC-MLPMM;
+2. `summarize_mlmms`, which carries out the second step;
+3. `fit_prcmlpmpm`, which performs the third step.
 
-Most of the computations required by the CBOCP are performed by `fit_lmms`, `summarize_lmms` and `fit_prclmm`. Such computations may be time-consuming, and for this reason these functions make it possible to use parallel computing (this can be easily done with the argument `n.cores`). The last step of the CBOCP is performed by the function `performance_prclmm`, which returns the naive and optimism-corrected estimates of the C index and of the time-dependent AUC.
+## Predicted survival probabilities
 
-**Important note**: if you just want to estimate the PRC model, and you do not wish to compute the CBOCP, simply set `n.boots = 0` as argument of `fit_lmms`. If, instead, you do want to compute the CBOCP, set `n.boots` to the desired number of bootstrap samples (e.g., 100).
+Computation of the predicted survival probabilities from the PRC-LMM and PRC-MLPMM models can be done with the `survpred_prc` function.
+
+## Predictive performance and cluster bootstrap optimism correction procedure (CBOCP)
+
+The evaluation of the predicted performance of the estimated PRC-LMM and PRC-MLPMM can be done using the function `performance_prc`, which returns the naive and optimism-corrected estimates of the C index and of the time-dependent AUC. The optimism-corrected estimates are based on the CBOCP proposed in [Signorelli et al. (2021)](https://arxiv.org/abs/2101.04426).
+
+A technical note on how the CBOCP is implemented in `pencal`: most of the computations required by the CBOCP are performed by `fit_lmms`, `summarize_lmms` and `fit_prclmm` for the PRC-LMM, and by `fit_mlpmms`, `summarize_mlpmms` and `fit_prclmpmm` for the PRC-MLPMM. Such computations may be time-consuming, and for this reason these functions are designed to work with parallel computing (this can be easily done by setting the argument `n.cores` to a value $> 1$). The last step of the CBOCP is performed by the function `performance_prc`, which aggregates the outputs of the previous functions and computes the naive and optimism-corrected estimates of the C index and of the time-dependent AUC.
+
+**Important note**: if you just want to estimate the PRC model, and you do not wish to compute the CBOCP, simply set `n.boots = 0` as argument of `fit_lmms`. If, instead, you do want to compute the CBOCP, set `n.boots` equal to the desired number of bootstrap samples (e.g., 100).
 
 ## Further functions
 
-In addition to the functions mentioned above, `pencal` comprises also two functions that can be used to simulate example datasets:
+In addition to the functions mentioned above, `pencal` comprises also 3 functions that can be used to simulate example datasets:
 
 * `simulate_t_weibull` to simulate survival data from a Weibull model;
-* `simulate_prclmm_data` to simulate an example dataset for PRC-LMM which is comprehensive of a number of longitudinal biomarkers, a survival outcome and a censoring indicator.
+* `simulate_prclmm_data` to simulate an example dataset for PRC-LMM that is comprehensive of a number of longitudinal biomarkers, a survival outcome and a censoring indicator;
+* `simulate_prclmm_data` to simulate an example dataset for PRC-MLPMM.
 
 # A step by step example
 
-To illustrate how `pencal` works, let us simulate an example dataset that comprises $n = 100$ subjects, $p = 10$ longitudinal biomarkers that are measured at $t = 0, 0.2, 0.5, 1, 1.5, 2$ years from baseline, and a survival outcome that is associated with 5 (`p.relev`) of the 10 biomarkers:
+To illustrate how `pencal` works, let us simulate an example dataset from the PRC-LMM model. Hereafter we generate a dataset that comprises $n = 100$ subjects, $p = 10$ longitudinal biomarkers that are measured at $t = 0, 0.2, 0.5, 1, 1.5, 2$ years from baseline, and a survival outcome that is associated with 5 (`p.relev`) of the 10 biomarkers:
 
 ```{r simulate, cache = T}
 set.seed(1234)
@@ -145,13 +159,9 @@ kaplan = survival::survfit(surv.obj ~ 1,
 survminer::ggsurvplot(kaplan, data = simdata$surv.data)
 ```
 
-## Estimation of the PRC-LMM
-
-Hereafter we show how to implement the three steps involved in the estimation of the PRC-LMM, alongside with the computation of the CBOCP.
-
 ## Some remarks on parallel computing with `pencal`
 
-Before doing that, let's determine the number of cores that will be used for the computation of the CBOCP. In general you can use as many cores as available to you; to do this, you can set
+Before we begin to estimate the PRC-LMM, let's determine the number of cores that will be used for the computation of the CBOCP. In general you can use as many cores as available to you; to do this, you can set
 
 ```{r, eval=F}
 n.cores = parallel::detectCores()
@@ -164,6 +174,10 @@ n.cores = 2
 ```
 
 Be aware, however, that **using more than 2 cores will speed computations up, and it is thus recommended**. Several functions in `pencal` will actually return a warning when you perform computations using less cores than available: the goal of such warnings is to remind you that you could use more cores to speed computations up; however, if you are purposedly using a smaller number of cores you can ignore the warning.
+
+## Estimation of the PRC-LMM
+
+Hereafter we show how to implement the three steps involved in the estimation of the PRC-LMM, alongside with the computation of the CBOCP.
 
 ### Step 1
 
@@ -185,9 +199,7 @@ step1 = fit_lmms(y.names = y.names,
 
 Of course, the LMM fitted here is just an example of how to model longitudinal biomarker trajectories, and depending on the data you are dealing with you may choose to specify different fixed and random effects formulas.
 
-Note that here I have set `n.boots = 10` to reduce computing time for the CBOCP, given that CRAN only allows me to use two cores.
-
-In general, it is recommended to set `n.boots = 0` if you do not wish to compute the CBOCP, or to set `n.boots` equal to a larger number (e.g., 50, 100 or 200) if you want to accurately compute the CBOCP. In the latter case, consider using as many cores as available to you to speed the computations up.
+Note that here I have set `n.boots = 10` to reduce computing time for the CBOCP, given that CRAN only allows me to use two cores. In general, it is recommended to set `n.boots = 0` if you do not wish to compute the CBOCP, or to set `n.boots` equal to a larger number (e.g., 50, 100 or 200) if you want to accurately compute the CBOCP. In the latter case, consider using as many cores as available to you to speed the computations up.
 
 `fit_lmms` returns as output a list with several elements; among them is `lmm.fits.orig`, which contains the LMMs fitted to each biomarker:
 
@@ -242,10 +254,10 @@ For more details about the arguments of `fit_prclmm` and its outputs, see the he
 
 ## Predicted survival probabilities
 
-After fitting the model, you will probably want to obtain **predicted survival probabilities** for each individual at several time points. This can be done through the function `survpred_prclmm`, which takes as inputs the outputs of step 2 and step 3, alongside with the time points at which to compute the survival probabilities:
+After fitting the model, you will probably want to obtain **predicted survival probabilities** for each individual at several time points. This can be done through the function `survpred_prc`, which takes as inputs the outputs of step 2 and step 3, alongside with the time points at which to compute the survival probabilities:
 
 ```{r}
-preds = survpred_prclmm(step2, step3, times = c(1, 2, 3))
+preds = survpred_prc(step2, step3, times = c(1, 2, 3))
 head(preds)
 ```
 
@@ -257,10 +269,10 @@ In `pencal` the internal validation is performed through a Cluster Bootstrap Opt
 
 Most of the steps that the CBOCP requires are directly computed by the functions `fit_lmms`, `summarize_lmms` and  `fit_prclmm` whenever the argument `n.boots` of `fit_lmms` is set equal to an integer > 0 (in other words: most of the computations needed for the CBOCP have already been performed in the code chunks executed above, so we are almost done!).
 
-To gather the results of the CBOCP we can use the function `performance_prclmm`:
+To gather the results of the CBOCP we can use the function `performance_prc`:
 
 ```{r cbocp, cache=T}
-cbocp = performance_prclmm(step2, step3, times = c(1, 2, 3), 
+cbocp = performance_prc(step2, step3, times = c(1, 2, 3), 
                    n.cores = n.cores)
 # C index estimates:
 cbocp$concordance

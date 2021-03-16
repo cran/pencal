@@ -2,16 +2,25 @@
 #'
 #' This function allows to simulate a survival outcome
 #' from longitudinal predictors. Specifically, the longitudinal
-#' predictors are simulated from linear mixed models (LMMs), and 
+#' predictors are simulated from multivariate latent process
+#' mixed models (MLPMMs), and 
 #' the survival outcome from a Weibull model where the time
-#' to event depends on the random effects from the LMMs.
+#' to event depends on the random effects from the MLPMMs.
 #' It is an implementation of the simulation method used in
 #' Signorelli et al. (2021, in review)
 #' 
 #' @param n sample size
-#' @param p number of longitudinal outcomes
-#' @param p.relev number of longitudinal outcomes that
+#' @param p number of longitudinal latent processes
+#' @param p.relev number of latent processes that
 #' are associated with the survival outcome (min: 1, max: p)
+#' @param n.items number of items that are observed for each 
+#' latent process of interest. It must be either a scalar, or
+#' a vector of length \code{p}
+#' @param type the type of relation between the longitudinal
+#' outcomes and survival time. Two values can be used: 'u' 
+#' refers to the PRC-MLPMM(U) model, and 'u+b' to the PRC-MLPMM(U+B)
+#' model presented in Section 2.3 of Signorelli et al. (2021).
+#' See the article for the mathematical details
 #' @param lambda Weibull location parameter, positive
 #' @param nu Weibull scale parameter, positive
 #' @param seed random seed (defaults to 1)
@@ -41,6 +50,7 @@
 #' }
 #' 
 #' @import stats
+#' @importFrom Matrix bdiag
 #' @export
 #' 
 #' @author Mirko Signorelli
@@ -53,14 +63,23 @@
 #' 
 #' @examples
 #' # generate example data
-#' simdata = simulate_prclmm_data(n = 20, p = 10, 
-#'                         p.relev = 4, seed = 1)
-#' # view the longitudinal markers:
+#' simdata = simulate_prcmlpmm_data(n = 40, p = 6,  
+#'              p.relev = 3, n.items = c(3,4,2,5,4,2), 
+#'              type = 'u+b', seed = 1)
+#' 
+#' # names of the longitudinal outcomes:
+#' names(simdata$long.data)
+#' # markerx_y is the y-th item for latent process (LP) x
+#' # we have 6 latent processes of interest, and for LP1 
+#' # we measure 3 items, for LP2 4, for LP3 2 items, and so on
+#' 
+#' # visualize trajectories of marker1_1
 #' library(ptmixed)
-#' make.spaghetti(x = age, y = marker1, 
+#' make.spaghetti(x = age, y = marker1_1, 
 #'                id = id, group = id,
 #'                data = simdata$long.data, 
 #'                legend.inset = - 1)
+#'
 #' # proportion of censored subjects
 #' simdata$censoring.prop
 #' # visualize KM estimate of survival
@@ -68,10 +87,11 @@
 #' surv.obj = Surv(time = simdata$surv.data$time, 
 #'                 event = simdata$surv.data$event)
 #' kaplan <- survfit(surv.obj ~ 1,  
-#'                   type="kaplan-meier")
+#'                  type="kaplan-meier")
 #' plot(kaplan)
 
-simulate_prclmm_data = function(n = 100, p = 10, p.relev = 4, 
+simulate_prcmlpmm_data = function(n = 100, p = 5, p.relev = 2,
+              n.items = c(3, 2, 3, 4, 1), type = 'u',
               lambda = 0.2, nu = 2, seed = 1,
               base.age.range = c(3, 5),
               cens.range = c(0.5, 10), t.values = c(0, 0.5, 1, 2)) {
@@ -79,10 +99,23 @@ simulate_prclmm_data = function(n = 100, p = 10, p.relev = 4,
   if (p < 1 | p.relev < 1) stop('p and p.relev should be a positive integer')
   if (p.relev > p) stop('p.relev should be <= p')
   if (lambda <=0 | nu <= 0 | n <=0) stop('lambda, nu and n should be positive!')
-
+  # extra checks for the MLPMM:
+  if (length(n.items) != p) {
+    if (length(n.items) == 1) n.items = rep(n.items, p)
+    else stop('n.items is neither of length 1 nor of length p')
+  }
+  check2 = all(n.items >=1, T)
+  if (!check2) stop('all elements of n.items should be >=1')
+  check3 = type %in% c('u', 'u+b')
+  if (!check3) stop("vtype should be either 'u' or 'u+b'")
+  
+  requireNamespace('Matrix')
+  
   set.seed(seed)
-  beta0 = runif(p, min = 3, max = 7)
-  beta1 = .sim.eff.sizes(n = p, abs.range = c(1, 2))
+  n.total.items = sum(n.items)
+  beta0 = runif(n.total.items, min = 3, max = 7)
+  beta1 = .sim.eff.sizes(n = n.total.items, 
+                        abs.range = c(1, 2))
   gamma = c(.sim.eff.sizes(n = p.relev,  
                           abs.range = c(0.5, 1),
                           seed = seed+1), 
@@ -91,35 +124,58 @@ simulate_prclmm_data = function(n = 100, p = 10, p.relev = 4,
                           abs.range = c(0.5, 1), 
                           seed = seed+2), 
                     rep(0, p - p.relev))
+  if (type == 'u') xi = rep(0, n.total.items)
+  if (type == 'u+b') {
+    n.relev.items = sum(n.items[1:p.relev])
+    xi = c(.sim.eff.sizes(n = n.relev.items,  
+                          abs.range = c(0.2, 0.4), 
+                          seed = seed+3), 
+           rep(0, n.total.items - n.relev.items))
+  }
+  
   baseline.age = runif(n, base.age.range[1], base.age.range[2])
   tau.age = 0.2
   
-  Sigma = diag(1, p)
-  rand.int = MASS::mvrnorm(n = n, mu = rep(0, p), Sigma = Sigma)
-  rand.slope = MASS::mvrnorm(n = n, mu = rep(0, p), Sigma = Sigma)
+  # generate random effects
+  sigma.b0 = diag(0.7, n.total.items)
+  b0 = MASS::mvrnorm(n = n, mu = rep(0, n.total.items), Sigma = sigma.b0)
+  sigma.u = matrix(c(1, 0.5, 0.5, 1), 2, 2)
+  sigma = sigma.u
+  for (i in 2:p) sigma = bdiag(sigma, sigma.u)
+  us = MASS::mvrnorm(n = n, mu = rep(0, p*2), Sigma = sigma)
+  u0 = us[, seq(1, 2*p-1, by = 2)]
+  u1 = us[, seq(2, 2*p, by = 2)]
+  
   m = length(t.values) # maximum theoretical number of repeated measurements
   id = rep(1:n, each = m)
   t.measures = rep(t.values, n) + rep(baseline.age, each = length(t.values))
   
-  Y = matrix(NA, n*m, p)
-  
-  for (i in 1:p){
-    inter = rep(beta0[i] + rand.int[,i], each = m)
-    slope = rep(beta1[i] + rand.slope[,i], each = m)
-    mu = inter + slope*t.measures
-    Y[,i] = rnorm(n = n*m, mean = mu, sd = 0.7)
+  # create the longitudinal markers
+  Y = matrix(NA, n*m, n.total.items)
+  y.names = rep(NA, n.total.items)
+  k = 1
+  for (i in 1:p){ # latent process
+    for (j in 1:n.items[i]) { # item for process i
+      pos = j + ifelse(i ==1, 0, sum(n.items[1:(i-1)]))
+      inter = rep(beta0[pos] + u0[,i] + b0[,pos], each = m)
+      slope = rep(beta1[pos] + + u1[,i], each = m)
+      mu = inter + slope*t.measures
+      Y[,k] = rnorm(n = n*m, mean = mu, sd = 0.7)
+      y.names[k] = paste('marker', i, '_', j, sep = '')
+      k = k + 1
+    }
   }
   
   long.data = cbind(id, rep(baseline.age, each = length(t.values)),
                     t.values, t.measures, Y)
   long.data = as.data.frame(long.data)
   names(long.data) = c('id', 'base.age', 't.from.base', 'age',
-                       paste('marker', 1:p, sep = ''))
+                       y.names)
   
   # simulate survival times
-  X.temp = cbind(baseline.age, rand.int, rand.slope)
+  X.temp = cbind(baseline.age, u0, u1, b0)
   true.t = simulate_t_weibull(n = n, lambda = lambda, nu = nu,
-             beta = c(tau.age, gamma, delta), 
+             beta = c(tau.age, gamma, delta, xi), 
              X = X.temp, seed = seed)
   censoring.times = runif(n = n, min = cens.range[1],
                         max = cens.range[2])
@@ -132,11 +188,3 @@ simulate_prclmm_data = function(n = 100, p = 10, p.relev = 4,
   return(out)
 }
 
-.sim.eff.sizes = function(n, abs.range, seed = 1) {
-  # simulates from a U(a,b) and adds a sign (p = 0.5)
-  set.seed(seed)
-  abs.val = stats::runif(n, min = abs.range[1], max = abs.range[2])
-  signs = 2*stats::rbinom(n, 1, prob = 0.5) - 1
-  out = signs*abs.val
-  return(out)
-}

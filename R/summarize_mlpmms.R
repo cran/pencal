@@ -1,10 +1,10 @@
-#' Step 2 of PRC-LMM (computation of the predicted random effects)
+#' Step 2 of PRC-MLPMM (computation of the predicted random effects)
 #'
 #' This function performs the second step for the estimation
-#' of the PRC-LMM model proposed in Signorelli et al. (2021, 
+#' of the PRC-MLPMM model proposed in Signorelli et al. (2021, 
 #' in review)
 #' 
-#' @param object a list of objects as produced by \code{\link{fit_lmms}}
+#' @param object a list of objects as produced by \code{\link{fit_mlpmms}}
 #' @param n.cores number of cores to use to parallelize the computation
 #' of the cluster bootstrap optimism correction procedure. If 
 #' \code{ncores = 1} (default), no parallelization is done. 
@@ -26,10 +26,10 @@
 #' (when \code{n.boots > 0});
 #' \item \code{ranef.boot.valid}: a list where each element is a matrix that 
 #' contains the predicted random effects on the original data, based on the 
-#' lmms fitted on the cluster bootstrap samples (when \code{n.boots > 0});
+#' mlpmms fitted on the cluster bootstrap samples (when \code{n.boots > 0});
 #' }
 #' 
-#' @import nlme foreach doParallel stats
+#' @import foreach doParallel stats
 #' @export
 #' 
 #' @author Mirko Signorelli
@@ -40,23 +40,25 @@
 #' of survival outcomes using complex longitudinal and 
 #' high-dimensional data. arXiv preprint: arXiv:2101.04426.
 #' 
-#' @seealso \code{\link{fit_lmms}} (step 1), 
-#' \code{\link{fit_prclmm}} (step 3),
+#' @seealso \code{\link{fit_mlpmms}} (step 1), 
+#' \code{\link{fit_prcmlpmm}} (step 3),
 #' \code{\link{performance_prc}}
 #' 
 #' @examples
+#' \donttest{
 #' # generate example data
-#' set.seed(1234)
-#' p = 4 # number of longitudinal predictors
-#' simdata = simulate_prclmm_data(n = 100, p = p, p.relev = 2, 
-#'              seed = 123, t.values = c(0, 0.2, 0.5, 1, 1.5, 2))
-#'              
+#' set.seed(123)
+#' n.items = c(4,2,2,3,4,2)
+#' simdata = simulate_prcmlpmm_data(n = 100, p = length(n.items),  
+#'              p.relev = 3, n.items = n.items, 
+#'              type = 'u+b', seed = 1)
+#'  
 #' # specify options for cluster bootstrap optimism correction
 #' # procedure and for parallel computing 
 #' do.bootstrap = FALSE
 #' # IMPORTANT: set do.bootstrap = TRUE to compute the optimism correction!
 #' n.boots = ifelse(do.bootstrap, 100, 0)
-#' parallelize = FALSE
+#' parallelize = TRUE
 #' # IMPORTANT: set parallelize = TRUE to speed computations up!
 #' if (!parallelize) n.cores = 1
 #' if (parallelize) {
@@ -65,39 +67,45 @@
 #'    if (is.na(n.cores)) n.cores = 1
 #' }
 #' 
-#' # step 1 of PRC-LMM: estimate the LMMs
-#' y.names = paste('marker', 1:p, sep = '')
-#' step1 = fit_lmms(y.names = y.names, 
-#'                  fixefs = ~ age, ranefs = ~ age | id, 
+#' # step 1 of PRC-MLPMM: estimate the MLPMMs
+#' y.names = vector('list', length(n.items))
+#' for (i in 1:length(n.items)) {
+#'   y.names[[i]] = paste('marker', i, '_', 1:n.items[i], sep = '')
+#' }
+#' 
+#' step1 = fit_mlpmms(y.names, fixefs = ~ contrast(age),  
+#'                  ranef.time = age, randint.items = T, 
 #'                  long.data = simdata$long.data, 
 #'                  surv.data = simdata$surv.data,
 #'                  t.from.base = t.from.base,
 #'                  n.boots = n.boots, n.cores = n.cores)
-#'                  
-#' # step 2 of PRC-LMM: compute the summaries 
-#' # of the longitudinal outcomes
-#' step2 = summarize_lmms(object = step1, n.cores = n.cores)
+#'
+#' # step 2 of PRC-MLPMM: compute the summaries 
+#' step2 = summarize_mlpmms(object = step1, n.cores = n.cores)
+#' }
 
-summarize_lmms = function(object, n.cores = 1, verbose = TRUE) {
+summarize_mlpmms = function(object, n.cores = 1, verbose = TRUE) {
+  # fix for 'no visible binding for global variable...' note
+  j = NULL
+  
   call = match.call()
   # load namespaces
   requireNamespace('lcmm')
   requireNamespace('foreach')
   requireNamespace('doParallel')
-  # fix for 'no visible binding for global variable...' note
-  j = i = numeric.id = b = NULL
   
   # checks on step 1 output + retrieve info from it
   if (!is.list(object)) stop('object should be a list, as outputted from fit_lmms')
-  minimal.elements = c('call.info', 'lmm.fits.orig', 'df.sanitized', 'n.boots')
+  minimal.elements = c('call.info', 'mlpmm.fits.orig', 'df.sanitized', 'n.boots')
   check1 = minimal.elements %in% ls(object)
   mess = paste('At least one of the following elements is missing in object:',
                paste(minimal.elements, collapse = ', '))
   if (!all(check1, TRUE)) stop(mess)
-  data = object$df.sanitized
+  df.sanitized = object$df.sanitized
   y.names = object$call.info$y.names
   fixefs = object$call.info$fixefs
   ranefs = object$call.info$ranefs
+  randint.items = object$call.info$randint.items
   p = length(y.names)
   n.boots = object$n.boots
   if (n.boots < 0) {
@@ -105,7 +113,7 @@ summarize_lmms = function(object, n.cores = 1, verbose = TRUE) {
     n.boots = 0
   }
   if (n.boots > 0) {
-    extra.inputs = c('boot.ids', 'lmm.fits.boot')
+    extra.inputs = c('boot.ids', 'mlpmm.fits.boot')
     check2 = extra.inputs %in% ls(object)
     mess = paste('At least one of the following elements is missing in object:',
                  paste(extra.inputs, collapse = ', '))
@@ -137,15 +145,19 @@ summarize_lmms = function(object, n.cores = 1, verbose = TRUE) {
   ########################
   if (verbose) cat('Computing the predicted random effects on the original dataset...\n')
   # create matrix with predicted random effects computed on original dataset
-  lmms = object$lmm.fits.orig
+  mlpmms = object$mlpmm.fits.orig
+  
   ranef.orig = foreach(j = 1:p, .combine = 'cbind') %do% {
-    x = ranef(lmms[[j]])
-    # fix column names
-    is.inter = (names(x) == '(Intercept)')
-    if (sum(is.inter) > 0) names(x)[which(is.inter == 1)] = 'int'
-    names(x) = paste(y.names[j], 'b', names(x), sep = '_')
+    out = mlpmms[[j]]$predRE[,-1]
+    rownames(out) = mlpmms[[j]]$predRE[,1]
+    colnames(out) = paste(c('u0', 'u1'), j, sep = '_')
+    if (randint.items[j]) {
+      b = mlpmms[[j]]$predRE_Y[,-1]
+      colnames(b) = paste('b0', j, colnames(b), sep = '_')
+      out = cbind(out, b)
+    }
     # return
-    x
+    out
   }
   if (verbose) cat('...done\n')
   
@@ -158,8 +170,9 @@ summarize_lmms = function(object, n.cores = 1, verbose = TRUE) {
                   paste('in parallel, using', n.cores, 'cores'),
                   'using a single core')
     if (verbose) cat(paste('This computation will be run', mess, '\n'))
-    # retrieve bootstrap ids
+    # retrieve bootstrap ids and fitted mlpmms
     boot.ids = object$boot.ids
+    mlpmm.fits.boot = object$mlpmm.fits.boot
     # set up environment for parallel computing
     cl = parallel::makeCluster(n.cores)
     doParallel::registerDoParallel(cl)
@@ -168,66 +181,51 @@ summarize_lmms = function(object, n.cores = 1, verbose = TRUE) {
     # and for the original dataset (validation set)
     
     # training set
-    ranef.boot.train = foreach(b = 1:n.boots,
-        .packages = c('foreach', 'pencal', 'nlme')) %dopar% {
+    ranef.boot.train = foreach(t = 1:n.boots,
+        .packages = c('foreach', 'pencal', 'lcmm')) %dopar% {
       ranef.train = foreach(j = 1:p, .combine = 'cbind') %do% {
-        x = ranef(object$lmm.fits.boot[[b]][[j]])
-        # fix column names
-        is.inter = (names(x) == '(Intercept)')
-        if (sum(is.inter) > 0) names(x)[which(is.inter == 1)] = 'int'
-        names(x) = paste(y.names[j], 'b', names(x), sep = '_')
+        fit = mlpmm.fits.boot[[t]][[j]]
+        out = fit$predRE[,-1]
+        rownames(out) = fit$predRE[,1]
+        colnames(out) = paste(c('u0', 'u1'), j, sep = '_')
+        if (randint.items[j]) {
+          b = fit$predRE_Y[,-1]
+          colnames(b) = paste('b0', j, colnames(b), sep = '_')
+          out = cbind(out, b)
+        }
         # return
-        x
+        out
       }
       # return
       ranef.train
     }
     
     # validation set
-    ranef.boot.valid = foreach(b = 1:n.boots,
+    # create fixed effects formulas for each group of items
+    fixed.form = vector('list', p)
+    for (i in 1:p) {
+      f.left = paste(y.names[[i]], collapse = '+')
+      fixed.form[[i]] = as.formula(paste(f.left, deparse(fixefs)))
+    }
+    
+    # predict on the original dataset (called data) using the model 
+    # fitted on the bootstrap sample
+    ranef.boot.valid = foreach(t = 1:n.boots,
               .packages = c('foreach', 'pencal', 'nlme')) %dopar% {
-      ids = unique(data$id)
-      n = length(ids)
-      
       # for each response, derive predicted ranefs for that given bootstrap sample
       ranef.b = foreach(j = 1:p, .combine = 'cbind') %do% {
-        # check if NAs on response
-        new.df = data
-        y = new.df[ , y.names[j]]
-        nas = which(is.na(y))
-        if (length(nas) > 0) {
-          new.df = new.df[-nas, ]
-          y = new.df[ , y.names[j]]
-        }
-        # retrieve the right pieces from lmm
-        lmms = object$lmm.fits.boot[[b]]
-        D.hat = getVarCov(lmms[[j]], type = 'random.effects')
-        beta.hat = fixef(lmms[[j]])
-        sigma2.hat = summary(lmms[[j]])$sigma^2 # error variance
-        # create X and Z
-        X = model.matrix(as.formula(fixefs), data = new.df)
-        formYz = formula(lmms[[j]]$modelStruct$reStruct[[1]]) 
-        mfZ = model.frame(terms(formYz), data = new.df)
-        Z = model.matrix(formYz, mfZ)
-        #####
-        current = foreach(i = 1:n, .combine = 'rbind') %do% {
-          rows = which(new.df$id == ids[i])
-          Xi = X[rows, , drop = FALSE] 
-          # drop = F prevents conversion to vector when rows has length 1
-          yi = y[rows]
-          Zi = Z[rows, , drop = FALSE]
-          I.matr = diag(1, length(rows), length(rows))
-          Vi = Zi %*% D.hat %*% t(Zi) + sigma2.hat * I.matr
-          temp = yi - Xi %*% beta.hat
-          t(D.hat %*% t(Zi) %*% solve(Vi) %*% temp)
-        }
+        fit = mlpmm.fits.boot[[t]][[j]]
+        out = .ranef.mlpmm(fixed = fixed.form[[j]], random = ranefs, 
+                          subject = 'numeric.id', 
+                          mlpmm.fit = fit, newdata = df.sanitized)
         # return
-        current
+        out
       }
-      rownames(ranef.b) = ids
-      colnames(ranef.b) = names(ranef.boot.train[[b]])
+      # fix the column names
+      colnames(ranef.b) = names(ranef.boot.train[[t]])
       ranef.b
     }
+    
     # close the cluster
     parallel::stopCluster(cl)
     if (verbose) {

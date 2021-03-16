@@ -65,7 +65,7 @@ on each bootstrapped datasets (when \code{n.boots > 0}).
 }
 \description{
 This function performs the first step for the estimation
-of the PRC-LMM model proposed in Signorelli et al. (2020, 
+of the PRC-LMM model proposed in Signorelli et al. (2021, 
 in review)
 }
 \examples{
@@ -109,7 +109,7 @@ high-dimensional data. arXiv preprint: arXiv:2101.04426.
 \code{\link{simulate_prclmm_data}},
 \code{\link{summarize_lmms}} (step 2),
 \code{\link{fit_prclmm}} (step 3),
-\code{\link{performance_prclmm}}
+\code{\link{performance_prc}}
 }
 \author{
 Mirko Signorelli

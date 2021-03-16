@@ -1,12 +1,15 @@
-#' Compute predictive survival probabilities from PRC-LMM
+#' Compute the predicted survival probabilities obtained
+#' from the PRC models
 #'
 #' This function computes the predictive survival probabilities 
-#' for the PRC-LMM model proposed in Signorelli et al. (2020, in review)
+#' for the for the PRC models proposed 
+#' in Signorelli et al. (2021, in review)
 #' 
-#' @param step2 the output of \code{\link{summarize_lmms}} 
-#' (step 2 of the estimation of the PRC-LMM model)
-#' @param step3 the output of \code{\link{fit_prclmm}}
-#' (step 3 of the estimation of the PRC-LMM model)
+#' @param step2 the output of either \code{\link{summarize_lmms}} 
+#' or \code{\link{summarize_mlpmms}} (step 2 of the estimation of
+#' PRC)
+#' @param step3 the output of \code{\link{fit_prclmm}} or
+#' \code{\link{fit_prcmlpmm}} (step 3 of PRC)
 #' @param times numeric vector with the time points at which
 #' to estimate the time-dependent AUC
 #' 
@@ -24,9 +27,10 @@
 #' of survival outcomes using complex longitudinal and 
 #' high-dimensional data. arXiv preprint: arXiv:2101.04426.
 #' 
-#' @seealso \code{\link{fit_lmms}} (step 1),
-#' \code{\link{summarize_lmms}} (step 2),
-#' \code{\link{fit_prclmm}} (step 3)
+#' @seealso for the PRC-LMM model: \code{\link{fit_lmms}} (step 1),
+#' \code{\link{summarize_lmms}} (step 2) and \code{\link{fit_prclmm}} (step 3);
+#' for the PRC-MLPMM model: \code{\link{fit_mlpmms}} (step 1),
+#' \code{\link{summarize_mlpmms}} (step 2) and \code{\link{fit_prcmlpmm}} (step 3).
 #' 
 #' @examples
 #' # generate example data
@@ -54,10 +58,10 @@
 #'                    penalty = 'ridge')
 #'                    
 #' # predict survival probabilities at times 1, 2, 3
-#' surv.probs = survpred_prclmm(step2, step3, times = 1:3)
+#' surv.probs = survpred_prc(step2, step3, times = 1:3)
 #' head(surv.probs)
 
-survpred_prclmm = function(step2, step3, times = 1) {
+survpred_prc = function(step2, step3, times = 1) {
   call = match.call()
   # load namespaces
   requireNamespace('survival')

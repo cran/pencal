@@ -1,16 +1,23 @@
-#' Step 1 of PRC-LMM (estimation of the linear mixed models)
+#' Step 1 of PRC-MLPMM (estimation of the linear mixed models)
 #'
 #' This function performs the first step for the estimation
-#' of the PRC-LMM model proposed in Signorelli et al. (2021, 
+#' of the PRC-MLPMM model proposed in Signorelli et al. (2021, 
 #' in review)
 #' 
-#' @param y.names character vector with the names of the
-#' response variables which the LMMs have to be fitted to
-#' @param fixefs fixed effects formula for the model, example:
-#' \code{~ time}
-#' @param ranefs random effects formula for the model,
-#' specified using the representation of random effect
-#' structures of the \code{R} package \code{nlme}
+#' @param y.names a list with the names of the
+#' response variables which the MLPMMs have to be fitted to.
+#' Each element in the list contains all the items used to 
+#' reconstruct a latent biological process of interest
+#' @param fixefs a fixed effects formula for the model, where the
+#' time variable (specified also in \code{ranef.time}) is
+#' included as first element and within the function 
+#' \code{contrast()}. Examples: \code{~ contrast(age)}, 
+#' \code{~ contrast(age) + group + treatment}
+#' @param ranef.time a character with the name of the time variable 
+#' for which to include a shared random slope
+#' @param randint.items logical: should item-specific random intercepts
+#' be included in the MLCMMs? Default is \code{TRUE}. It can also be a
+#' vector, with different values for different elements of \code{y.names}
 #' @param long.data a data frame with the longitudinal predictors,
 #' comprehensive of a variable called \code{id} with the subject 
 #' ids
@@ -30,14 +37,19 @@
 #' cores are available on your computer
 #' @param verbose if \code{TRUE} (default and recommended value), information
 #' on the ongoing computations is printed in the console
+#' @param maxiter maximum number of iterations to use when calling
+#' the function \code{multlcmm}. Default is 1e3
+#' @param conv a vector containing the three convergence criteria
+#' (\code{convB}, \code{convL} and \code{convG}) to use when calling
+#' the function \code{\link{multlcmm}}. Default is c(1e-3, 1e-3, 1e-3)
 #' 
 #' @return A list containing the following objects:
 #' \itemize{
 #' \item \code{call.info}: a list containing the following function
 #' call information: \code{call}, \code{y.names}, \code{fixefs},
-#' \code{ranefs};
-#' \item \code{lmm.fits.orig}: a list with the LMMs fitted on the
-#' original dataset (it should comprise as many LMMs as the elements
+#' \code{ranef.time}, \code{randint.items};
+#' \item \code{mlpmm.fits.orig}: a list with the MLPMMs fitted on the
+#' original dataset (it should comprise as many MLPMMs as the elements
 #' of \code{y.names} are);
 #' \item \code{df.sanitized}: a sanitized version of the supplied 
 #' \code{long.data} dataframe, without the
@@ -46,11 +58,26 @@
 #' \item \code{n.boots}: number of bootstrap samples;
 #' \item \code{boot.ids}: a list with the ids of bootstrapped subjects 
 #' (when \code{n.boots > 0});
-#' \item \code{lmms.fits.boot}: a list of lists, which contains the LMMs fitted 
-#' on each bootstrapped datasets (when \code{n.boots > 0}).
+#' \item \code{mlpmm.fits.boot}: a list of lists, which contains the MLPMMs 
+#' fitted on each bootstrapped datasets (when \code{n.boots > 0}).
 #' }
 #' 
-#' @import nlme foreach doParallel stats
+#' @details This function is essentially a wrapper of the 
+#' \code{\link{multlcmm}} function that has the goal of simplifying
+#' the estimation of several MLPMMs. In general, ensuring 
+#' convergence of the algorithm implemented in \code{multlcmm}
+#' is sometimes difficult, and it is hard to write a function that
+#' can automatically solve these convergence problems. \code{fit_mplmms}
+#' returns a warning when estimation did not converge for one or 
+#' more MLPMMs. If this happens, try to change the convergence 
+#' criteria in \code{conv} or the relevant \code{randint.items} value.
+#' If doing this doesn't solve the problem, it is recommended to
+#' re-estimate the specific MLPMMs for which estimation didn't converge
+#' directly with \code{\link{multlcmm}}, trying to manually solve
+#' the convergence issues
+#' 
+#' @import foreach doParallel stats
+#' @importFrom lcmm multlcmm
 #' @importFrom dplyr arrange
 #' @export
 #' 
@@ -62,24 +89,26 @@
 #' of survival outcomes using complex longitudinal and 
 #' high-dimensional data. arXiv preprint: arXiv:2101.04426.
 #' 
-#' @seealso \code{\link{simulate_prclmm_data}},
-#' \code{\link{summarize_lmms}} (step 2),
-#' \code{\link{fit_prclmm}} (step 3),
+#' @seealso \code{\link{simulate_prcmlpmm_data}},
+#' \code{\link{summarize_mlpmms}} (step 2),
+#' \code{\link{fit_prcmlpmm}} (step 3),
 #' \code{\link{performance_prc}}
 #' 
 #' @examples
+#' \donttest{
 #' # generate example data
-#' set.seed(1234)
-#' p = 4 # number of longitudinal predictors
-#' simdata = simulate_prclmm_data(n = 100, p = p, p.relev = 2, 
-#'              seed = 123, t.values = c(0, 0.2, 0.5, 1, 1.5, 2))
+#' set.seed(123)
+#' n.items = c(4,2,2,3,4,2)
+#' simdata = simulate_prcmlpmm_data(n = 100, p = length(n.items),  
+#'              p.relev = 3, n.items = n.items, 
+#'              type = 'u+b', seed = 1)
 #'  
 #' # specify options for cluster bootstrap optimism correction
 #' # procedure and for parallel computing 
 #' do.bootstrap = FALSE
 #' # IMPORTANT: set do.bootstrap = TRUE to compute the optimism correction!
 #' n.boots = ifelse(do.bootstrap, 100, 0)
-#' parallelize = FALSE
+#' parallelize = TRUE
 #' # IMPORTANT: set parallelize = TRUE to speed computations up!
 #' if (!parallelize) n.cores = 1
 #' if (parallelize) {
@@ -88,26 +117,34 @@
 #'    if (is.na(n.cores)) n.cores = 1
 #' }
 #' 
-#' # step 1 of PRC-LMM: estimate the LMMs
-#' y.names = paste('marker', 1:p, sep = '')
-#' step1 = fit_lmms(y.names = y.names, 
-#'                  fixefs = ~ age, ranefs = ~ age | id, 
+#' # step 1 of PRC-MLPMM: estimate the MLPMMs
+#' y.names = vector('list', length(n.items))
+#' for (i in 1:length(n.items)) {
+#'   y.names[[i]] = paste('marker', i, '_', 1:n.items[i], sep = '')
+#' }
+#' 
+#' step1 = fit_mlpmms(y.names, fixefs = ~ contrast(age),  
+#'                  ranef.time = age, randint.items = T, 
 #'                  long.data = simdata$long.data, 
 #'                  surv.data = simdata$surv.data,
 #'                  t.from.base = t.from.base,
 #'                  n.boots = n.boots, n.cores = n.cores)
+#' }
 
-fit_lmms = function(y.names, fixefs, ranefs, long.data, 
+fit_mlpmms = function(y.names, fixefs, ranef.time, 
+                    randint.items = TRUE, long.data, 
                     surv.data, t.from.base, n.boots = 0, 
-                    n.cores = 1, verbose = TRUE) {
+                    n.cores = 1, verbose = TRUE,
+                    maxiter = 1e3, conv = rep(1e-3, 3)) {
   call = match.call()
   # load namespaces
-  requireNamespace('nlme')
+  requireNamespace('lcmm')
   requireNamespace('foreach')
   requireNamespace('doParallel')
   # fix for 'no visible binding for global variable...' note
   id = i = numeric.id = b = NULL
   # setup and checks
+  n.items = lengths(y.names)
   p = length(y.names)
   if (n.boots < 0) {
     warning('Input n.boots < 0, so we set n.boots = 0', immediate. = TRUE)
@@ -135,6 +172,18 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
     }
   }
   
+  # checks on randint.items
+  if (!is.logical(randint.items)) stop('randint.items has to be TRUE or FALSE')
+  if (length(randint.items) == 1) {
+    randint.items = rep(randint.items, length(y.names))
+  }
+  if (length(randint.items) != length(y.names)) {
+    mess = paste('randint.items should either have length 1 or',
+                  length(y.names))
+    stop(mess)
+  }
+  # get ranef.time
+  ranef.time = deparse(substitute(ranef.time))
   # get longitudinal predictors
   check1 = is.data.frame(long.data)
   if (!check1) stop('long.data should be a dataframe')
@@ -166,48 +215,36 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
   ########################
   ### original dataset ###
   ########################
-  # fit the LMMs
-  if (verbose) cat('Estimating the LMMs on the original dataset...\n')
+  # fit the MLPMMs
+  if (verbose) cat('Estimating the MLPMMs on the original dataset...\n')
   fit.orig = foreach (i = 1:p) %do% {
-    # check if NAs on response
-    n1 = length(unique(df$numeric.id))
-    nas = which(is.na(df[ , y.names[i]]))
-    df.sub = df
-    if (length(nas) > 0) df.sub = df[-nas, ]
-    n2 = length(unique(df.sub$numeric.id))
-    if (n1 != n2) {
-      mess = paste('There is at least one subject without any information available for variable',
-                   y.names[i], '- double-check your input long.data!')
-      stop()
+    # fit MLPMM
+    ys = paste( paste(y.names[[i]], collapse = '+', sep = ''), sep = '')
+    fixef.formula = as.formula(paste(ys, deparse(fixefs), sep = ''))
+    ranef.formula = as.formula(paste('~ 1 +', ranef.time))
+
+    mlpmm = try(multlcmm(fixed = fixef.formula, subject = 'id', 
+             random = ranef.formula, randomY = randint.items[i],
+             data = df, maxiter = maxiter, verbose = F,
+             convB = conv[1], convG = conv[2], convL = conv[3]))
+    
+    mess.part2 = paste('Try to increase maxiter, or (if this fails) to change the ',
+                i, '-th element of randint.items. ',
+                'See also point C of the Details section of ?multlcmm',
+                sep = '')
+    if (inherits(mlpmm, 'try-error')) {
+      mess = paste('Estimation of the MLPMM for the ', i, '-th ',
+             'latent biological process (on the original dataset) failed. ', 
+             mess.part2,
+             sep = '')
+      stop(mess)
     }
-    # fit LMM
-    fixef.formula = as.formula(paste(y.names[i], deparse(fixefs)))
-    ranef.formula = as.formula(deparse(ranefs))
-    lmm = try( nlme::lme(fixed = fixef.formula, 
-                    random = ranef.formula, data = df.sub),
-                silent = TRUE)
-    if (inherits(lmm, 'try-error')) { # retry with increased max number of iterations
-      lmm = try( nlme::lme(fixed = fixef.formula, 
-                     random = ranef.formula, data = df.sub,
-                     control = list(maxIter = 1e4, msMaxIter = 1e3,
-                                    niterEM = 1e3, msMaxEval = 1e3)),
-                 silent = TRUE)
-    }
-    if (inherits(lmm, 'try-error')) {
-      mess = paste('The desired model for response', y.names[i],
-                   'did not converge. A simpler model comprising only a random
-                   intercept was fitted for', y.names[i])
+    if (mlpmm$conv != 1) {
+      mess = paste('Convergence not reached (on the original dataset) for the ', 
+             i, '-th ', 'latent biological process. ', mess.part2, sep = '')
       warning(mess, immediate. = TRUE)
-      lmm = try( nlme::lme(fixed = fixef.formula, 
-                           random = ~ 1 | id, data = df.sub,
-                           control = list(maxIter = 1e4, msMaxIter = 1e3,
-                                          niterEM = 1e3, msMaxEval = 1e3)),
-                 silent = TRUE)
     }
-    if (inherits(temp, 'try-error')) {
-      stop(paste('no model could be fitted for response', y.names[i]))
-    }
-    lmm
+    mlpmm
   }
   names(fit.orig) = y.names
   if (verbose) cat('...done\n')
@@ -232,8 +269,8 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
     doParallel::registerDoParallel(cl)
     
     # compute fitted LMMS for each bootstrap sample (in parallel)
-    fit.boots = foreach(b = 1:n.boots,
-    .packages = c('foreach', 'pencal', 'nlme')) %dopar% {
+    fit.boots = foreach(b = 1:n.boots, .export = 'draw_cluster_bootstrap',
+    .packages = c('foreach', 'pencal', 'lcmm')) %dopar% {
       
       # bootstrap the longitudinal dataset for variable j
       boot.df = draw_cluster_bootstrap(df = df,
@@ -243,36 +280,31 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
       
       # for each response, derive predicted ranefs for that given bootstrap sample
       this.fit = foreach(i = 1:p) %do% {
-        # check if NAs on response
-        nas = which(is.na(boot.df[ , y.names[i]]))
-        df.sub = boot.df
-        if (length(nas) > 0) df.sub = boot.df[-nas, ]
-        # fit LMM
-        fixef.formula = as.formula(paste(y.names[i], deparse(fixefs)))
-        ranef.formula = as.formula(deparse(ranefs))
-        lmm = try( nlme::lme(fixed = fixef.formula, 
-                              random = ranef.formula, data = df.sub),
-                    silent = TRUE)
-        if (inherits(lmm, 'try-error')) { # retry with increased max number of iterations
-          lmm = try( nlme::lme(fixed = fixef.formula, 
-                               random = ranef.formula, data = df.sub,
-                               control = list(maxIter = 1e4, msMaxIter = 1e3,
-                                            niterEM = 1e3, msMaxEval = 1e3)),
-                     silent = TRUE)
+        # fit MLPMM
+        ys = paste( paste(y.names[[i]], collapse = '+'))
+        fixef.formula = as.formula(paste(ys, deparse(fixefs)))
+        
+        ranef.formula = as.formula(paste('~1+', ranef.time))
+        
+        mlpmm = try(multlcmm(fixed = fixef.formula, subject = 'id', 
+                             random = ranef.formula, randomY = randint.items[i],
+                             data = df, maxiter = maxiter, verbose = F,
+                             convB = conv[1], convG = conv[2], convL = conv[3]))
+        
+        if (inherits(mlpmm, 'try-error')) {
+          mess = paste('Bootstrap sample', b,
+                     ': estimation of the MLPMM for the ', i, '-th ',
+                     'latent biological process failed. Try to increase maxiter', 
+                     sep = '')
+          warning(mess, immediate. = TRUE)
         }
-        if (inherits(lmm, 'try-error')) {
-          lmm = try( nlme::lme(fixed = fixef.formula, 
-                               random = ~ 1 | id, data = df.sub,
-                               control = list(maxIter = 1e4, msMaxIter = 1e3,
-                                            niterEM = 1e3, msMaxEval = 1e3)),
-                     silent = TRUE)
+        if (mlpmm$conv != 1) {
+          mess = paste('Bootstrap sample', b,
+                       ': convergence not reached for the ', i, '-th ',
+                       'latent biological process. Try to increase maxiter', sep = '')
+          warning(mess, immediate. = TRUE)
         }
-        if (inherits(lmm, 'try-error')) {
-          warning(paste('Bootstrap sample', b,
-            ': the LMM could not be fitted for response', y.names[i]), 
-            immediate. = TRUE)
-        }
-        lmm
+        mlpmm
       }
       # all proteins done for each b
       names(this.fit) = y.names
@@ -286,14 +318,14 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
     }
   }
   
-  
   call.info = list('call' = call, 'y.names' = y.names,
-                   'fixefs' = fixefs, 'ranefs' = ranefs)
-  out = list('call.info' = call.info, 'lmm.fits.orig' = fit.orig, 
+                   'fixefs' = fixefs, 'ranefs' = ranef.formula,
+                   'randint.items' = randint.items)
+  out = list('call.info' = call.info, 'mlpmm.fits.orig' = fit.orig, 
              'df.sanitized' = df, 'n.boots' = n.boots)
   if (n.boots >= 1) {
     out[['boot.ids']] = boot.ids
-    out[['lmm.fits.boot']] = fit.boots
+    out[['mlpmm.fits.boot']] = fit.boots
   }
   return(out)
 }

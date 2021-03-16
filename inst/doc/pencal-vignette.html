@@ -333,25 +333,26 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="TOC">
 <ul>
 <li><a href="#introduction">Introduction</a><ul>
-<li><a href="#what-is-pencal">What is pencal?</a></li>
+<li><a href="#what-is-pencal">What is <code>pencal</code>?</a></li>
 <li><a href="#what-is-penalized-regression-calibration">What is Penalized Regression Calibration?</a></li>
 <li><a href="#how-does-prc-work">How does PRC work?</a></li>
 <li><a href="#get-started">Get started</a></li>
 </ul></li>
-<li><a href="#overview-of-the-functionalities-of-pencal">Overview of the functionalities of pencal</a><ul>
+<li><a href="#overview-of-the-functionalities-of-pencal">Overview of the functionalities of <code>pencal</code></a><ul>
 <li><a href="#model-estimation-and-prediction">Model estimation and prediction</a></li>
-<li><a href="#cluster-bootstrap-optimism-correction-procedure">Cluster bootstrap optimism correction procedure</a></li>
+<li><a href="#predicted-survival-probabilities">Predicted survival probabilities</a></li>
+<li><a href="#predictive-performance-and-cluster-bootstrap-optimism-correction-procedure-cbocp">Predictive performance and cluster bootstrap optimism correction procedure (CBOCP)</a></li>
 <li><a href="#further-functions">Further functions</a></li>
 </ul></li>
 <li><a href="#a-step-by-step-example">A step by step example</a><ul>
 <li><a href="#input-data">Input data</a></li>
-<li><a href="#estimation-of-the-prc-lmm">Estimation of the PRC-LMM</a></li>
-<li><a href="#some-remarks-on-parallel-computing-with-pencal">Some remarks on parallel computing with <code>pencal</code></a><ul>
+<li><a href="#some-remarks-on-parallel-computing-with-pencal">Some remarks on parallel computing with <code>pencal</code></a></li>
+<li><a href="#estimation-of-the-prc-lmm">Estimation of the PRC-LMM</a><ul>
 <li><a href="#step-1">Step 1</a></li>
 <li><a href="#step-2">Step 2</a></li>
 <li><a href="#step-3">Step 3</a></li>
 </ul></li>
-<li><a href="#predicted-survival-probabilities">Predicted survival probabilities</a></li>
+<li><a href="#predicted-survival-probabilities-1">Predicted survival probabilities</a></li>
 <li><a href="#cluster-bootstrap-optimism-correction-and-performance-measures">Cluster bootstrap optimism correction and performance measures</a></li>
 </ul></li>
 <li><a href="#further-details-and-material">Further details and material</a></li>
@@ -361,25 +362,25 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
 <div id="what-is-pencal" class="section level2">
-<h2>What is pencal?</h2>
-<p><code>pencal</code> is an <code>R</code> package that has been created to make it easy and efficient to estimate and apply <strong>Penalized Regression Calibration</strong>.</p>
+<h2>What is <code>pencal</code>?</h2>
+<p><code>pencal</code> is an <code>R</code> package that has been created to make it easy and efficient to estimate and apply <strong>Penalized Regression Calibration</strong> (<a href="https://arxiv.org/abs/2101.04426">Signorelli et al., 2021</a>).</p>
 </div>
 <div id="what-is-penalized-regression-calibration" class="section level2">
 <h2>What is Penalized Regression Calibration?</h2>
 <p>Longitudinal and high-dimensional measurements have become increasingly common in biomedical research. However, methods to predict survival outcomes using covariates that are both longitudinal and high-dimensional are currently missing.</p>
 <p>Penalized Regression Calibration (PRC) is a statistical method that has been developed to fill this methodological gap, making it possible to <strong>predict survival using as predictors a set of covariates that are at the same time longitudinal and high-dimensional</strong>.</p>
 <p>PRC is described in detail in the following article:</p>
-<p>Signorelli, M., Spitali, P., Al-Khalili Sgyziarto, C., The Mark-MD Consortium, Tsonaka, R. (in review). arXiv preprint: <a href="https://arxiv.org/abs/2101.04426">arXiv:2101.04426</a>.</p>
+<p>Signorelli, M., Spitali, P., Al-Khalili Sgyziarto, C., The Mark-MD Consortium, Tsonaka, R. (2021). Penalized regression calibration: a method for the prediction of survival outcomes using complex longitudinal and high-dimensional data. arXiv preprint: <a href="https://arxiv.org/abs/2101.04426">arXiv:2101.04426</a>.</p>
 </div>
 <div id="how-does-prc-work" class="section level2">
 <h2>How does PRC work?</h2>
 <p>In short, PRC comprises three modelling steps:</p>
 <ol style="list-style-type: decimal">
-<li>in the first step, we <strong>model the trajectories described by the longitudinal biomarkers using mixed effects models</strong> (using either linear mixed models, or multivariate latent process mixed models);</li>
-<li>in the second step, we <strong>compute</strong> the predicted random effects for the models estimated in step 1; in practice, the predicted random effects are <strong>subject-specific summaries of the longitudinal trajectories</strong>, which summarize the way in which the biomarkers change over time across subjects;</li>
-<li>in the third step, we <strong>estimate a penalized Cox model</strong> where the summaries computed in step 3 are employed as covariates (alongside with other relevant covariates, such as baseline age or important confounders).</li>
+<li><p>in the first step, we <strong>model the trajectories described by the longitudinal biomarkers using mixed effects models</strong>;</p></li>
+<li><p>in the second step, we <strong>compute subject-specific summaries of the longitudinal trajectories</strong>. In practice, these summaries are the predicted random effects from the mixed models estimated in step 1, and they allow us to summarize the way in which the biomarkers change over time across subjects;</p></li>
+<li><p>in the third step, we <strong>estimate a penalized Cox model</strong> where the summaries computed in step 3 (alongside with other relevant covariates, such as baseline age or important confounders) are employed as predictors of the survival time.</p></li>
 </ol>
-<p>These steps allow to estimate PRC, and to obtain a model that can be used to compute predicted survival probabilities.</p>
+<p>By performing these 3 steps we can estimate PRC, obtaining a model that allows us to compute predicted survival probabilities.</p>
 <p>Additionally, one may want to quantify the predictive performance of the fitted model. To achieve this aim, in <code>pencal</code> we have implemented a <strong>Cluster Bootstrap Optimism Correction Procedure</strong> (CBOCP) that can be used to obtain optimism-corrected estimates of the C index and time-dependent AUC associated to the fitted model. Depending on the dimensionality of your dataset, computing the CBOCP might be time consuming; for this reason, we offer the possibility to parallelize the CBOCP using multiple cores.</p>
 <p>Below you can see a graphical representation of the steps involved in the estimation of PRC (see the elements in the lightblue box) and in the computation of the CBOCP (elements in the salmon box).</p>
 <p align="center">
@@ -395,35 +396,47 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </div>
 </div>
 <div id="overview-of-the-functionalities-of-pencal" class="section level1">
-<h1>Overview of the functionalities of pencal</h1>
+<h1>Overview of the functionalities of <code>pencal</code></h1>
+<p>Currently, <code>pencal</code> contains functions to estimate the PRC-LMM and PRC-MLPMM models proposed in <a href="https://arxiv.org/abs/2101.04426">Signorelli et al. (2021)</a>. An overview of the different functions is presented in the following subsections.</p>
 <div id="model-estimation-and-prediction" class="section level2">
 <h2>Model estimation and prediction</h2>
-<p>Estimation of the PRC-LMM model described in Signorelli et al. (in review) <!-- (arXiv link) --> can be performed using the following three functions:</p>
+<p>Estimation of the PRC-LMM model can be performed by running sequentially the following three functions:</p>
 <ol style="list-style-type: decimal">
 <li><code>fit_lmms</code>, which implements the first step of the estimation of the PRC-LMM;</li>
 <li><code>summarize_lmms</code>, which carries out the second step;</li>
 <li><code>fit_prclmm</code>, which performs the third step.</li>
 </ol>
-<p>These functions are run sequentially, with the output of <code>fit_lmms</code> used as input for <code>summarize_lmms</code>, and the output of <code>summarize_lmms</code> as input for <code>fit_prclmm</code>.</p>
-<p>Lastly, the function <code>survpred_prclmm</code> computes survival probabilities based on the fitted PRC-LMM.</p>
+<p>As already mentioned, these functions have to be run sequentially, with the output of <code>fit_lmms</code> used as input for <code>summarize_lmms</code>, and the output of <code>summarize_lmms</code> as input for <code>fit_prclmm</code>.</p>
+<p>Similarly, estimation of the PRC-MLPMM model can be performed using:</p>
+<ol style="list-style-type: decimal">
+<li><code>fit_mlpmms</code>, which implements the first step of the estimation of the PRC-MLPMM;</li>
+<li><code>summarize_mlmms</code>, which carries out the second step;</li>
+<li><code>fit_prcmlpmpm</code>, which performs the third step.</li>
+</ol>
 </div>
-<div id="cluster-bootstrap-optimism-correction-procedure" class="section level2">
-<h2>Cluster bootstrap optimism correction procedure</h2>
-<p>Most of the computations required by the CBOCP are performed by <code>fit_lmms</code>, <code>summarize_lmms</code> and <code>fit_prclmm</code>. Such computations may be time-consuming, and for this reason these functions make it possible to use parallel computing (this can be easily done with the argument <code>n.cores</code>). The last step of the CBOCP is performed by the function <code>performance_prclmm</code>, which returns the naive and optimism-corrected estimates of the C index and of the time-dependent AUC.</p>
-<p><strong>Important note</strong>: if you just want to estimate the PRC model, and you do not wish to compute the CBOCP, simply set <code>n.boots = 0</code> as argument of <code>fit_lmms</code>. If, instead, you do want to compute the CBOCP, set <code>n.boots</code> to the desired number of bootstrap samples (e.g., 100).</p>
+<div id="predicted-survival-probabilities" class="section level2">
+<h2>Predicted survival probabilities</h2>
+<p>Computation of the predicted survival probabilities from the PRC-LMM and PRC-MLPMM models can be done with the <code>survpred_prc</code> function.</p>
+</div>
+<div id="predictive-performance-and-cluster-bootstrap-optimism-correction-procedure-cbocp" class="section level2">
+<h2>Predictive performance and cluster bootstrap optimism correction procedure (CBOCP)</h2>
+<p>The evaluation of the predicted performance of the estimated PRC-LMM and PRC-MLPMM can be done using the function <code>performance_prc</code>, which returns the naive and optimism-corrected estimates of the C index and of the time-dependent AUC. The optimism-corrected estimates are based on the CBOCP proposed in <a href="https://arxiv.org/abs/2101.04426">Signorelli et al. (2021)</a>.</p>
+<p>A technical note on how the CBOCP is implemented in <code>pencal</code>: most of the computations required by the CBOCP are performed by <code>fit_lmms</code>, <code>summarize_lmms</code> and <code>fit_prclmm</code> for the PRC-LMM, and by <code>fit_mlpmms</code>, <code>summarize_mlpmms</code> and <code>fit_prclmpmm</code> for the PRC-MLPMM. Such computations may be time-consuming, and for this reason these functions are designed to work with parallel computing (this can be easily done by setting the argument <code>n.cores</code> to a value <span class="math inline">\(&gt; 1\)</span>). The last step of the CBOCP is performed by the function <code>performance_prc</code>, which aggregates the outputs of the previous functions and computes the naive and optimism-corrected estimates of the C index and of the time-dependent AUC.</p>
+<p><strong>Important note</strong>: if you just want to estimate the PRC model, and you do not wish to compute the CBOCP, simply set <code>n.boots = 0</code> as argument of <code>fit_lmms</code>. If, instead, you do want to compute the CBOCP, set <code>n.boots</code> equal to the desired number of bootstrap samples (e.g., 100).</p>
 </div>
 <div id="further-functions" class="section level2">
 <h2>Further functions</h2>
-<p>In addition to the functions mentioned above, <code>pencal</code> comprises also two functions that can be used to simulate example datasets:</p>
+<p>In addition to the functions mentioned above, <code>pencal</code> comprises also 3 functions that can be used to simulate example datasets:</p>
 <ul>
 <li><code>simulate_t_weibull</code> to simulate survival data from a Weibull model;</li>
-<li><code>simulate_prclmm_data</code> to simulate an example dataset for PRC-LMM which is comprehensive of a number of longitudinal biomarkers, a survival outcome and a censoring indicator.</li>
+<li><code>simulate_prclmm_data</code> to simulate an example dataset for PRC-LMM that is comprehensive of a number of longitudinal biomarkers, a survival outcome and a censoring indicator;</li>
+<li><code>simulate_prclmm_data</code> to simulate an example dataset for PRC-MLPMM.</li>
 </ul>
 </div>
 </div>
 <div id="a-step-by-step-example" class="section level1">
 <h1>A step by step example</h1>
-<p>To illustrate how <code>pencal</code> works, let us simulate an example dataset that comprises <span class="math inline">\(n = 100\)</span> subjects, <span class="math inline">\(p = 10\)</span> longitudinal biomarkers that are measured at <span class="math inline">\(t = 0, 0.2, 0.5, 1, 1.5, 2\)</span> years from baseline, and a survival outcome that is associated with 5 (<code>p.relev</code>) of the 10 biomarkers:</p>
+<p>To illustrate how <code>pencal</code> works, let us simulate an example dataset from the PRC-LMM model. Hereafter we generate a dataset that comprises <span class="math inline">\(n = 100\)</span> subjects, <span class="math inline">\(p = 10\)</span> longitudinal biomarkers that are measured at <span class="math inline">\(t = 0, 0.2, 0.5, 1, 1.5, 2\)</span> years from baseline, and a survival outcome that is associated with 5 (<code>p.relev</code>) of the 10 biomarkers:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">set.seed</span>(<span class="dv">1234</span>)</span>
 <span id="cb3-2"><a href="#cb3-2"></a>p =<span class="st"> </span><span class="dv">10</span></span>
 <span id="cb3-3"><a href="#cb3-3"></a>simdata =<span class="st"> </span><span class="kw">simulate_prclmm_data</span>(<span class="dt">n =</span> <span class="dv">100</span>, <span class="dt">p =</span> p, <span class="dt">p.relev =</span> <span class="dv">5</span>, </span>
@@ -489,17 +502,17 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb15-5"><a href="#cb15-5"></a>survminer<span class="op">::</span><span class="kw">ggsurvplot</span>(kaplan, <span class="dt">data =</span> simdata<span class="op">$</span>surv.data)</span></code></pre></div>
 <p><img src="data:image/png;base64,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" /><!-- --></p>
 </div>
-<div id="estimation-of-the-prc-lmm" class="section level2">
-<h2>Estimation of the PRC-LMM</h2>
-<p>Hereafter we show how to implement the three steps involved in the estimation of the PRC-LMM, alongside with the computation of the CBOCP.</p>
-</div>
 <div id="some-remarks-on-parallel-computing-with-pencal" class="section level2">
 <h2>Some remarks on parallel computing with <code>pencal</code></h2>
-<p>Before doing that, let’s determine the number of cores that will be used for the computation of the CBOCP. In general you can use as many cores as available to you; to do this, you can set</p>
+<p>Before we begin to estimate the PRC-LMM, let’s determine the number of cores that will be used for the computation of the CBOCP. In general you can use as many cores as available to you; to do this, you can set</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>n.cores =<span class="st"> </span>parallel<span class="op">::</span><span class="kw">detectCores</span>()</span></code></pre></div>
 <p>Since the <a href="https://cran.r-project.org/web/packages/policies.html">CRAN Repository Policy</a> allow us to use at most 2 cores when building the vignettes, in this example we will limit the number of cores used to 2:</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>n.cores =<span class="st"> </span><span class="dv">2</span></span></code></pre></div>
 <p>Be aware, however, that <strong>using more than 2 cores will speed computations up, and it is thus recommended</strong>. Several functions in <code>pencal</code> will actually return a warning when you perform computations using less cores than available: the goal of such warnings is to remind you that you could use more cores to speed computations up; however, if you are purposedly using a smaller number of cores you can ignore the warning.</p>
+</div>
+<div id="estimation-of-the-prc-lmm" class="section level2">
+<h2>Estimation of the PRC-LMM</h2>
+<p>Hereafter we show how to implement the three steps involved in the estimation of the PRC-LMM, alongside with the computation of the CBOCP.</p>
 <div id="step-1" class="section level3">
 <h3>Step 1</h3>
 <p>In the first step, for each biomarker we estimate a <strong>linear mixed model</strong> (LMM) where the longitudinal biomarker levels <span class="math inline">\(y_{ij}\)</span> depend on two fixed effects (one intercept, <span class="math inline">\(\beta_0\)</span> and one slope for age, <span class="math inline">\(\beta_1\)</span>), on a subject-specific random intercept <span class="math inline">\(u_{0i}\)</span> and on a random slope for age <span class="math inline">\(u_{1i}\)</span>:</p>
@@ -523,8 +536,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 ## Bootstrap procedure finished
 ## Computation of step 1: finished :)</code></pre>
 <p>Of course, the LMM fitted here is just an example of how to model longitudinal biomarker trajectories, and depending on the data you are dealing with you may choose to specify different fixed and random effects formulas.</p>
-<p>Note that here I have set <code>n.boots = 10</code> to reduce computing time for the CBOCP, given that CRAN only allows me to use two cores.</p>
-<p>In general, it is recommended to set <code>n.boots = 0</code> if you do not wish to compute the CBOCP, or to set <code>n.boots</code> equal to a larger number (e.g., 50, 100 or 200) if you want to accurately compute the CBOCP. In the latter case, consider using as many cores as available to you to speed the computations up.</p>
+<p>Note that here I have set <code>n.boots = 10</code> to reduce computing time for the CBOCP, given that CRAN only allows me to use two cores. In general, it is recommended to set <code>n.boots = 0</code> if you do not wish to compute the CBOCP, or to set <code>n.boots</code> equal to a larger number (e.g., 50, 100 or 200) if you want to accurately compute the CBOCP. In the latter case, consider using as many cores as available to you to speed the computations up.</p>
 <p><code>fit_lmms</code> returns as output a list with several elements; among them is <code>lmm.fits.orig</code>, which contains the LMMs fitted to each biomarker:</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a><span class="kw">ls</span>(step1)</span></code></pre></div>
 <pre><code>## [1] &quot;boot.ids&quot;      &quot;call.info&quot;     &quot;df.sanitized&quot;  &quot;lmm.fits.boot&quot;
@@ -610,10 +622,10 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>For more details about the arguments of <code>fit_prclmm</code> and its outputs, see the help page: <code>?fit_prclmm</code>.</p>
 </div>
 </div>
-<div id="predicted-survival-probabilities" class="section level2">
+<div id="predicted-survival-probabilities-1" class="section level2">
 <h2>Predicted survival probabilities</h2>
-<p>After fitting the model, you will probably want to obtain <strong>predicted survival probabilities</strong> for each individual at several time points. This can be done through the function <code>survpred_prclmm</code>, which takes as inputs the outputs of step 2 and step 3, alongside with the time points at which to compute the survival probabilities:</p>
-<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a>preds =<span class="st"> </span><span class="kw">survpred_prclmm</span>(step2, step3, <span class="dt">times =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>))</span>
+<p>After fitting the model, you will probably want to obtain <strong>predicted survival probabilities</strong> for each individual at several time points. This can be done through the function <code>survpred_prc</code>, which takes as inputs the outputs of step 2 and step 3, alongside with the time points at which to compute the survival probabilities:</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a>preds =<span class="st"> </span><span class="kw">survpred_prc</span>(step2, step3, <span class="dt">times =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>))</span>
 <span id="cb41-2"><a href="#cb41-2"></a><span class="kw">head</span>(preds)</span></code></pre></div>
 <pre><code>##   id      S(1)      S(2)       S(3)
 ## 1  1 0.4685893 0.1666528 0.08151238
@@ -628,8 +640,8 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>To accurately quantify the predicted performance of the fitted PRC-LMM, we need to recur to some form of <strong>internal validation</strong> strategy (e.g., bootstrap, cross-validation, etc…).</p>
 <p>In <code>pencal</code> the internal validation is performed through a Cluster Bootstrap Optimism Correction Procedure (CBOCP) that allows to compute <strong>optimism-corrected estimates of the concordance (C) index and of the time-dependent AUC</strong>.</p>
 <p>Most of the steps that the CBOCP requires are directly computed by the functions <code>fit_lmms</code>, <code>summarize_lmms</code> and <code>fit_prclmm</code> whenever the argument <code>n.boots</code> of <code>fit_lmms</code> is set equal to an integer &gt; 0 (in other words: most of the computations needed for the CBOCP have already been performed in the code chunks executed above, so we are almost done!).</p>
-<p>To gather the results of the CBOCP we can use the function <code>performance_prclmm</code>:</p>
-<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1"></a>cbocp =<span class="st"> </span><span class="kw">performance_prclmm</span>(step2, step3, <span class="dt">times =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>), </span>
+<p>To gather the results of the CBOCP we can use the function <code>performance_prc</code>:</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1"></a>cbocp =<span class="st"> </span><span class="kw">performance_prc</span>(step2, step3, <span class="dt">times =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>), </span>
 <span id="cb43-2"><a href="#cb43-2"></a>                   <span class="dt">n.cores =</span> n.cores)</span></code></pre></div>
 <pre><code>## Computation of optimism correction started
 ## This computation will be run in parallel, using 2 cores 

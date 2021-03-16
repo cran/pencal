@@ -1,7 +1,7 @@
 #' Step 3 of PRC-LMM (estimation of the penalized Cox model(s))
 #'
 #' This function performs the third step for the estimation
-#' of the PRC-LMM model proposed in Signorelli et al. (2020, 
+#' of the PRC-LMM model proposed in Signorelli et al. (2021, 
 #' in review)
 #' 
 #' @param object the output of step 2 of the PRC-LMM procedure, 
@@ -65,7 +65,7 @@
 #' 
 #' @seealso \code{\link{fit_lmms}} (step 1), 
 #' \code{\link{summarize_lmms}} (step 2),
-#' \code{\link{performance_prclmm}}
+#' \code{\link{performance_prc}}
 #' 
 #' @examples
 #' # generate example data

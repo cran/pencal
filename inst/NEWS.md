@@ -15,6 +15,21 @@ package - in other words, within a section you will find all those
 package versions a.b.x where a and b are fixed whereas x = 1, 2, 3, …
 Each subsection corresponds to a specific package version.
 
+0.3.x
+=====
+
+pencal 0.3.1
+------------
+
+-   Released: March 2021
+-   Added a set of functions that can be used to fit the PRC-MLPMM
+    model(s): `simulate_prcmlpmm_data`, `fit_mlpmms`, `summarize_mlpmms`
+    and `fit_prcmlpmm`
+-   Renamed `performance_prclmm` to `performance_prc`, and
+    `survpred_prclmm` to `survpred_prc` (the functions work both for the
+    PRC-LMM, and the PRC-MLPMM)
+-   Vignettes and documentation updated to reflect the changes
+
 0.2.x
 =====
 

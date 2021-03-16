@@ -9,8 +9,8 @@ prepare_longdata(df, t.from.base, subj.id, survtime, verbose = TRUE)
 \arguments{
 \item{df}{dataframe with the longitudinal measurements}
 
-\item{t.from.base}{name of the variable containing time from 
-baseline in \code{df}}
+\item{t.from.base}{name (as character) of the variable containing
+time from baseline in \code{df}}
 
 \item{subj.id}{name of the subject id variable in \code{df}}
 
