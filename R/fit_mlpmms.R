@@ -124,7 +124,7 @@
 #' }
 #' 
 #' step1 = fit_mlpmms(y.names, fixefs = ~ contrast(age),  
-#'                  ranef.time = age, randint.items = T, 
+#'                  ranef.time = age, randint.items = TRUE, 
 #'                  long.data = simdata$long.data, 
 #'                  surv.data = simdata$surv.data,
 #'                  t.from.base = t.from.base,
@@ -225,7 +225,7 @@ fit_mlpmms = function(y.names, fixefs, ranef.time,
 
     mlpmm = try(multlcmm(fixed = fixef.formula, subject = 'id', 
              random = ranef.formula, randomY = randint.items[i],
-             data = df, maxiter = maxiter, verbose = F,
+             data = df, maxiter = maxiter, verbose = FALSE,
              convB = conv[1], convG = conv[2], convL = conv[3]))
     
     mess.part2 = paste('Try to increase maxiter, or (if this fails) to change the ',
@@ -288,7 +288,7 @@ fit_mlpmms = function(y.names, fixefs, ranef.time,
         
         mlpmm = try(multlcmm(fixed = fixef.formula, subject = 'id', 
                              random = ranef.formula, randomY = randint.items[i],
-                             data = df, maxiter = maxiter, verbose = F,
+                             data = df, maxiter = maxiter, verbose = FALSE,
                              convB = conv[1], convG = conv[2], convL = conv[3]))
         
         if (inherits(mlpmm, 'try-error')) {

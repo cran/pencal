@@ -74,7 +74,7 @@
 #' }
 #' 
 #' step1 = fit_mlpmms(y.names, fixefs = ~ contrast(age),  
-#'                  ranef.time = age, randint.items = T, 
+#'                  ranef.time = age, randint.items = TRUE, 
 #'                  long.data = simdata$long.data, 
 #'                  surv.data = simdata$surv.data,
 #'                  t.from.base = t.from.base,

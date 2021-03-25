@@ -86,7 +86,7 @@ As already mentioned, these functions have to be run sequentially, with the outp
 Similarly, estimation of the PRC-MLPMM model can be performed using:
 
 1. `fit_mlpmms`, which implements the first step of the estimation of the PRC-MLPMM;
-2. `summarize_mlmms`, which carries out the second step;
+2. `summarize_mlpmms`, which carries out the second step;
 3. `fit_prcmlpmpm`, which performs the third step.
 
 ## Predicted survival probabilities
@@ -97,7 +97,7 @@ Computation of the predicted survival probabilities from the PRC-LMM and PRC-MLP
 
 The evaluation of the predicted performance of the estimated PRC-LMM and PRC-MLPMM can be done using the function `performance_prc`, which returns the naive and optimism-corrected estimates of the C index and of the time-dependent AUC. The optimism-corrected estimates are based on the CBOCP proposed in [Signorelli et al. (2021)](https://arxiv.org/abs/2101.04426).
 
-A technical note on how the CBOCP is implemented in `pencal`: most of the computations required by the CBOCP are performed by `fit_lmms`, `summarize_lmms` and `fit_prclmm` for the PRC-LMM, and by `fit_mlpmms`, `summarize_mlpmms` and `fit_prclmpmm` for the PRC-MLPMM. Such computations may be time-consuming, and for this reason these functions are designed to work with parallel computing (this can be easily done by setting the argument `n.cores` to a value $> 1$). The last step of the CBOCP is performed by the function `performance_prc`, which aggregates the outputs of the previous functions and computes the naive and optimism-corrected estimates of the C index and of the time-dependent AUC.
+A technical note on how the CBOCP is implemented in `pencal`: most of the computations required by the CBOCP are performed by `fit_lmms`, `summarize_lmms` and `fit_prclmm` for the PRC-LMM, and by `fit_mlpmms`, `summarize_mlpmms` and `fit_prcmlpmm` for the PRC-MLPMM. Such computations may be time-consuming, and for this reason these functions are designed to work with parallel computing (this can be easily done by setting the argument `n.cores` to a value $> 1$). The last step of the CBOCP is performed by the function `performance_prc`, which aggregates the outputs of the previous functions and computes the naive and optimism-corrected estimates of the C index and of the time-dependent AUC.
 
 **Important note**: if you just want to estimate the PRC model, and you do not wish to compute the CBOCP, simply set `n.boots = 0` as argument of `fit_lmms`. If, instead, you do want to compute the CBOCP, set `n.boots` equal to the desired number of bootstrap samples (e.g., 100).
 
@@ -107,7 +107,7 @@ In addition to the functions mentioned above, `pencal` comprises also 3 function
 
 * `simulate_t_weibull` to simulate survival data from a Weibull model;
 * `simulate_prclmm_data` to simulate an example dataset for PRC-LMM that is comprehensive of a number of longitudinal biomarkers, a survival outcome and a censoring indicator;
-* `simulate_prclmm_data` to simulate an example dataset for PRC-MLPMM.
+* `simulate_prcmlpmm_data` to simulate an example dataset for PRC-MLPMM.
 
 # A step by step example
 
@@ -197,9 +197,9 @@ step1 = fit_lmms(y.names = y.names,
                  n.boots = 10, n.cores = n.cores)
 ```
 
-Of course, the LMM fitted here is just an example of how to model longitudinal biomarker trajectories, and depending on the data you are dealing with you may choose to specify different fixed and random effects formulas.
+The LMM fitted here is just an example of how to model longitudinal biomarker trajectories: depending on the data you are dealing with, you may choose to specify different fixed and random effects formulas, or even to consider the MLPMM instead of the LMM.
 
-Note that here I have set `n.boots = 10` to reduce computing time for the CBOCP, given that CRAN only allows me to use two cores. In general, it is recommended to set `n.boots = 0` if you do not wish to compute the CBOCP, or to set `n.boots` equal to a larger number (e.g., 50, 100 or 200) if you want to accurately compute the CBOCP. In the latter case, consider using as many cores as available to you to speed the computations up.
+Note that here I have set `n.boots = 10` to reduce computing time for the CBOCP, given that CRAN only allows me to use two cores when compiling the vignette. In general, it is recommended to set `n.boots = 0` if you do not wish to compute the CBOCP, or to set `n.boots` equal to a larger number (e.g., 50, 100 or 200) if you want to accurately compute the CBOCP. In the latter case, consider using as many cores as available to you to speed computations up.
 
 `fit_lmms` returns as output a list with several elements; among them is `lmm.fits.orig`, which contains the LMMs fitted to each biomarker:
 
@@ -239,7 +239,7 @@ step3 = fit_prclmm(object = step2, surv.data = simdata$surv.data,
                    penalty = 'ridge', n.cores = n.cores)
 ```
 
-Note that here we have specified `penalty = 'ridge'`, but alternatively one may also use elasticnet or lasso as penalties. Moreover, by default the predicted random effects are standardized when included in the penalized Cox model (if you don't want to perform such standardization, set `standardize = F`).
+In this example I have set `penalty = 'ridge'`, but you may also use elasticnet or lasso as alternatives. Moreover, by default the predicted random effects are standardized when included in the penalized Cox model (if you don't want to perform such standardization, set `standardize = F`).
 
 `fit_prclmm` returns as output a list that contains, among other elements, the fitted penalized Cox model `pcox.orig`, which is a `glmnet` object:
 
@@ -263,7 +263,7 @@ head(preds)
 
 ## Cluster bootstrap optimism correction and performance measures
 
-To accurately quantify the predicted performance of the fitted PRC-LMM, we need to recur to some form of **internal validation** strategy (e.g., bootstrap, cross-validation, etc...).
+To accurately quantify the predicted performance of the fitted PRC model, we need to recur to some form of **internal validation** strategy (e.g., bootstrap, cross-validation, etc...).
 
 In `pencal` the internal validation is performed through a Cluster Bootstrap Optimism Correction Procedure (CBOCP) that allows to compute **optimism-corrected estimates of the concordance (C) index and of the time-dependent AUC**.
 

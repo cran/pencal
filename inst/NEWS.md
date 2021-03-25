@@ -18,6 +18,13 @@ Each subsection corresponds to a specific package version.
 0.3.x
 =====
 
+pencal 0.3.2
+------------
+
+-   Released: March 2021
+-   Fixed CRAN error in PRC MLPMM examples (replaced `T` with `TRUE`)
+-   Corrected typos in vignette
+
 pencal 0.3.1
 ------------
 

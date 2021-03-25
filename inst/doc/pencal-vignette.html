@@ -410,7 +410,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>Similarly, estimation of the PRC-MLPMM model can be performed using:</p>
 <ol style="list-style-type: decimal">
 <li><code>fit_mlpmms</code>, which implements the first step of the estimation of the PRC-MLPMM;</li>
-<li><code>summarize_mlmms</code>, which carries out the second step;</li>
+<li><code>summarize_mlpmms</code>, which carries out the second step;</li>
 <li><code>fit_prcmlpmpm</code>, which performs the third step.</li>
 </ol>
 </div>
@@ -421,7 +421,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="predictive-performance-and-cluster-bootstrap-optimism-correction-procedure-cbocp" class="section level2">
 <h2>Predictive performance and cluster bootstrap optimism correction procedure (CBOCP)</h2>
 <p>The evaluation of the predicted performance of the estimated PRC-LMM and PRC-MLPMM can be done using the function <code>performance_prc</code>, which returns the naive and optimism-corrected estimates of the C index and of the time-dependent AUC. The optimism-corrected estimates are based on the CBOCP proposed in <a href="https://arxiv.org/abs/2101.04426">Signorelli et al. (2021)</a>.</p>
-<p>A technical note on how the CBOCP is implemented in <code>pencal</code>: most of the computations required by the CBOCP are performed by <code>fit_lmms</code>, <code>summarize_lmms</code> and <code>fit_prclmm</code> for the PRC-LMM, and by <code>fit_mlpmms</code>, <code>summarize_mlpmms</code> and <code>fit_prclmpmm</code> for the PRC-MLPMM. Such computations may be time-consuming, and for this reason these functions are designed to work with parallel computing (this can be easily done by setting the argument <code>n.cores</code> to a value <span class="math inline">\(&gt; 1\)</span>). The last step of the CBOCP is performed by the function <code>performance_prc</code>, which aggregates the outputs of the previous functions and computes the naive and optimism-corrected estimates of the C index and of the time-dependent AUC.</p>
+<p>A technical note on how the CBOCP is implemented in <code>pencal</code>: most of the computations required by the CBOCP are performed by <code>fit_lmms</code>, <code>summarize_lmms</code> and <code>fit_prclmm</code> for the PRC-LMM, and by <code>fit_mlpmms</code>, <code>summarize_mlpmms</code> and <code>fit_prcmlpmm</code> for the PRC-MLPMM. Such computations may be time-consuming, and for this reason these functions are designed to work with parallel computing (this can be easily done by setting the argument <code>n.cores</code> to a value <span class="math inline">\(&gt; 1\)</span>). The last step of the CBOCP is performed by the function <code>performance_prc</code>, which aggregates the outputs of the previous functions and computes the naive and optimism-corrected estimates of the C index and of the time-dependent AUC.</p>
 <p><strong>Important note</strong>: if you just want to estimate the PRC model, and you do not wish to compute the CBOCP, simply set <code>n.boots = 0</code> as argument of <code>fit_lmms</code>. If, instead, you do want to compute the CBOCP, set <code>n.boots</code> equal to the desired number of bootstrap samples (e.g., 100).</p>
 </div>
 <div id="further-functions" class="section level2">
@@ -430,7 +430,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <ul>
 <li><code>simulate_t_weibull</code> to simulate survival data from a Weibull model;</li>
 <li><code>simulate_prclmm_data</code> to simulate an example dataset for PRC-LMM that is comprehensive of a number of longitudinal biomarkers, a survival outcome and a censoring indicator;</li>
-<li><code>simulate_prclmm_data</code> to simulate an example dataset for PRC-MLPMM.</li>
+<li><code>simulate_prcmlpmm_data</code> to simulate an example dataset for PRC-MLPMM.</li>
 </ul>
 </div>
 </div>
@@ -535,8 +535,8 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 ## This computation will be run in parallel, using 2 cores 
 ## Bootstrap procedure finished
 ## Computation of step 1: finished :)</code></pre>
-<p>Of course, the LMM fitted here is just an example of how to model longitudinal biomarker trajectories, and depending on the data you are dealing with you may choose to specify different fixed and random effects formulas.</p>
-<p>Note that here I have set <code>n.boots = 10</code> to reduce computing time for the CBOCP, given that CRAN only allows me to use two cores. In general, it is recommended to set <code>n.boots = 0</code> if you do not wish to compute the CBOCP, or to set <code>n.boots</code> equal to a larger number (e.g., 50, 100 or 200) if you want to accurately compute the CBOCP. In the latter case, consider using as many cores as available to you to speed the computations up.</p>
+<p>The LMM fitted here is just an example of how to model longitudinal biomarker trajectories: depending on the data you are dealing with, you may choose to specify different fixed and random effects formulas, or even to consider the MLPMM instead of the LMM.</p>
+<p>Note that here I have set <code>n.boots = 10</code> to reduce computing time for the CBOCP, given that CRAN only allows me to use two cores when compiling the vignette. In general, it is recommended to set <code>n.boots = 0</code> if you do not wish to compute the CBOCP, or to set <code>n.boots</code> equal to a larger number (e.g., 50, 100 or 200) if you want to accurately compute the CBOCP. In the latter case, consider using as many cores as available to you to speed computations up.</p>
 <p><code>fit_lmms</code> returns as output a list with several elements; among them is <code>lmm.fits.orig</code>, which contains the LMMs fitted to each biomarker:</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a><span class="kw">ls</span>(step1)</span></code></pre></div>
 <pre><code>## [1] &quot;boot.ids&quot;      &quot;call.info&quot;     &quot;df.sanitized&quot;  &quot;lmm.fits.boot&quot;
@@ -599,7 +599,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 ## This computation will be run in parallel, using 2 cores 
 ## Bootstrap procedure finished
 ## Computation of step 3: finished :)</code></pre>
-<p>Note that here we have specified <code>penalty = &#39;ridge&#39;</code>, but alternatively one may also use elasticnet or lasso as penalties. Moreover, by default the predicted random effects are standardized when included in the penalized Cox model (if you don’t want to perform such standardization, set <code>standardize = F</code>).</p>
+<p>In this example I have set <code>penalty = &#39;ridge&#39;</code>, but you may also use elasticnet or lasso as alternatives. Moreover, by default the predicted random effects are standardized when included in the penalized Cox model (if you don’t want to perform such standardization, set <code>standardize = F</code>).</p>
 <p><code>fit_prclmm</code> returns as output a list that contains, among other elements, the fitted penalized Cox model <code>pcox.orig</code>, which is a <code>glmnet</code> object:</p>
 <div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1"></a><span class="kw">ls</span>(step3)</span></code></pre></div>
 <pre><code>## [1] &quot;boot.ids&quot;  &quot;call&quot;      &quot;n.boots&quot;   &quot;pcox.boot&quot; &quot;pcox.orig&quot; &quot;surv.data&quot;</code></pre>
@@ -637,7 +637,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </div>
 <div id="cluster-bootstrap-optimism-correction-and-performance-measures" class="section level2">
 <h2>Cluster bootstrap optimism correction and performance measures</h2>
-<p>To accurately quantify the predicted performance of the fitted PRC-LMM, we need to recur to some form of <strong>internal validation</strong> strategy (e.g., bootstrap, cross-validation, etc…).</p>
+<p>To accurately quantify the predicted performance of the fitted PRC model, we need to recur to some form of <strong>internal validation</strong> strategy (e.g., bootstrap, cross-validation, etc…).</p>
 <p>In <code>pencal</code> the internal validation is performed through a Cluster Bootstrap Optimism Correction Procedure (CBOCP) that allows to compute <strong>optimism-corrected estimates of the concordance (C) index and of the time-dependent AUC</strong>.</p>
 <p>Most of the steps that the CBOCP requires are directly computed by the functions <code>fit_lmms</code>, <code>summarize_lmms</code> and <code>fit_prclmm</code> whenever the argument <code>n.boots</code> of <code>fit_lmms</code> is set equal to an integer &gt; 0 (in other words: most of the computations needed for the CBOCP have already been performed in the code chunks executed above, so we are almost done!).</p>
 <p>To gather the results of the CBOCP we can use the function <code>performance_prc</code>:</p>

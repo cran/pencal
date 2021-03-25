@@ -105,7 +105,7 @@ for (i in 1:length(n.items)) {
 }
 
 step1 = fit_mlpmms(y.names, fixefs = ~ contrast(age),  
-                 ranef.time = age, randint.items = T, 
+                 ranef.time = age, randint.items = TRUE, 
                  long.data = simdata$long.data, 
                  surv.data = simdata$surv.data,
                  t.from.base = t.from.base,
@@ -117,7 +117,7 @@ step2 = summarize_mlpmms(object = step1, n.cores = n.cores)
 # step 3 of PRC-LMM: fit the penalized Cox models
 step3 = fit_prcmlpmm(object = step2, surv.data = simdata$surv.data,
                    baseline.covs = ~ baseline.age,
-                   include.b0s = T,
+                   include.b0s = TRUE,
                    penalty = 'ridge', n.cores = n.cores)
 }
 }
