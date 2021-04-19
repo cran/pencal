@@ -6,7 +6,7 @@
 \usage{
 fit_mlpmms(y.names, fixefs, ranef.time, randint.items = TRUE, long.data,
   surv.data, t.from.base, n.boots = 0, n.cores = 1, verbose = TRUE,
-  maxiter = 1000, conv = rep(0.001, 3))
+  maxiter = 100, conv = rep(0.001, 3), lcmm.warnings = FALSE)
 }
 \arguments{
 \item{y.names}{a list with the names of the
@@ -53,11 +53,15 @@ cores are available on your computer}
 on the ongoing computations is printed in the console}
 
 \item{maxiter}{maximum number of iterations to use when calling
-the function \code{multlcmm}. Default is 1e3}
+the function \code{multlcmm}. Default is 100}
 
 \item{conv}{a vector containing the three convergence criteria
 (\code{convB}, \code{convL} and \code{convG}) to use when calling
 the function \code{\link{multlcmm}}. Default is c(1e-3, 1e-3, 1e-3)}
+
+\item{lcmm.warnings}{logical. If TRUE, a warning is printed every 
+time the (strict) convergence criteria of the \code{multlcmm} function
+are not met. Default is \code{FALSE}}
 }
 \value{
 A list containing the following objects:

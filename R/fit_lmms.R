@@ -184,11 +184,13 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
     fixef.formula = as.formula(paste(y.names[i], deparse(fixefs)))
     ranef.formula = as.formula(deparse(ranefs))
     lmm = try( nlme::lme(fixed = fixef.formula, 
-                    random = ranef.formula, data = df.sub),
+                    random = ranef.formula, 
+                    data = df.sub, keep.data = FALSE),
                 silent = TRUE)
     if (inherits(lmm, 'try-error')) { # retry with increased max number of iterations
       lmm = try( nlme::lme(fixed = fixef.formula, 
-                     random = ranef.formula, data = df.sub,
+                     random = ranef.formula, 
+                     data = df.sub, keep.data = FALSE,
                      control = list(maxIter = 1e4, msMaxIter = 1e3,
                                     niterEM = 1e3, msMaxEval = 1e3)),
                  silent = TRUE)
@@ -199,7 +201,8 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
                    intercept was fitted for', y.names[i])
       warning(mess, immediate. = TRUE)
       lmm = try( nlme::lme(fixed = fixef.formula, 
-                           random = ~ 1 | id, data = df.sub,
+                           random = ~ 1 | id, 
+                           data = df.sub, keep.data = FALSE,
                            control = list(maxIter = 1e4, msMaxIter = 1e3,
                                           niterEM = 1e3, msMaxEval = 1e3)),
                  silent = TRUE)
@@ -251,18 +254,21 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
         fixef.formula = as.formula(paste(y.names[i], deparse(fixefs)))
         ranef.formula = as.formula(deparse(ranefs))
         lmm = try( nlme::lme(fixed = fixef.formula, 
-                              random = ranef.formula, data = df.sub),
+                              random = ranef.formula, 
+                              data = df.sub, keep.data = FALSE),
                     silent = TRUE)
         if (inherits(lmm, 'try-error')) { # retry with increased max number of iterations
           lmm = try( nlme::lme(fixed = fixef.formula, 
-                               random = ranef.formula, data = df.sub,
+                               random = ranef.formula, 
+                               data = df.sub, keep.data = FALSE,
                                control = list(maxIter = 1e4, msMaxIter = 1e3,
                                             niterEM = 1e3, msMaxEval = 1e3)),
                      silent = TRUE)
         }
         if (inherits(lmm, 'try-error')) {
           lmm = try( nlme::lme(fixed = fixef.formula, 
-                               random = ~ 1 | id, data = df.sub,
+                               random = ~ 1 | id, 
+                               data = df.sub, keep.data = FALSE,
                                control = list(maxIter = 1e4, msMaxIter = 1e3,
                                             niterEM = 1e3, msMaxEval = 1e3)),
                      silent = TRUE)

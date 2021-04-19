@@ -15,6 +15,20 @@ package - in other words, within a section you will find all those
 package versions a.b.x where a and b are fixed whereas x = 1, 2, 3, …
 Each subsection corresponds to a specific package version.
 
+0.4.x
+=====
+
+pencal 0.4.1
+------------
+
+-   Released: April 2021
+-   `fit_lmms` is now more memory efficient (`keep.data = F` when
+    calling lme)
+-   `fit_mlpmms` is now faster (parallelization implemented also before
+    the CBOCP is started)
+-   Added functions `pencox_baseline` and `performance_pencox_baseline`
+-   Minor updates to the vignette
+
 0.3.x
 =====
 

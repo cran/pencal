@@ -28,7 +28,7 @@
 #' @param n.alpha.elnet number of alpha values for the two-dimensional 
 #' grid of tuning parameteres in elasticnet.
 #' Only relevant if \code{penalty = 'elasticnet'}. Default is 11,
-#' so that the resulting alpha grid is c(1, 0.95, 0.90, ..., 0.05, 0)
+#' so that the resulting alpha grid is c(1, 0.9, 0.8, ..., 0.1, 0)
 #' @param n.folds.elnet number of folds to be used for the selection
 #' of the tuning parameter in elasticnet. Only relevant if 
 #' \code{penalty = 'elasticnet'}. Default is 5

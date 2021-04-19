@@ -1,27 +1,26 @@
-#' Step 3 of PRC-LMM (estimation of the penalized Cox model(s))
+#' Estimation of a penalized Cox model with baseline covariates onlu
 #'
-#' This function performs the third step for the estimation
-#' of the PRC-LMM model proposed in Signorelli et al. (2021, 
-#' in review)
+#' This function estimates a penalized Cox model where only
+#' baseline covariates are included as predictors, and then
+#' computes a bootstrap optimism correction procedure that 
+#' is used to validate the predictive performance of the model
 #' 
-#' @param object the output of step 2 of the PRC-LMM procedure, 
-#' as produced by the \code{\link{summarize_lmms}} function
-#' @param surv.data a data frame with the survival data and (if 
-#' relevant) additional baseline covariates. \code{surv.data} should at least
-#' contain a subject id (called \code{id}), the time to event outcome  
-#' (\code{time}), and binary event variable (\code{event})
-#' @param baseline.covs a formula specifying the variables 
-#' (e.g., baseline age) in \code{surv.data} that should be included 
-#' as baseline covariates in the penalized Cox model. Example:
-#' \code{baseline.covs = '~ baseline.age'}. Default is \code{NULL}
+#' @param data a data frame with one row for each subject.It
+#' should at least contain a subject id (called \code{id}), 
+#' the time to event outcome (\code{time}), and the binary censoring
+#' indicator (\code{event}), plus at least one covariate to
+#' be included in the linear predictor
+#' @param formula a formula specifying the variables 
+#' in \code{data} to include as predictors in 
+#' the penalized Cox model
 #' @param penalty the type of penalty function used for regularization.
 #' Default is \code{'ridge'}, other possible values are \code{'elasticnet'} 
 #' and \code{'lasso'}
 #' @param standardize logical argument: should the predicted random effects
 #' be standardized when included in the penalized Cox model? Default is \code{TRUE}
-#' @param pfac.base.covs a single value, or a vector of values, indicating
-#' whether the baseline covariates (if any) should be penalized (1) or not (0).
-#' Default is \code{pfac.base.covs = 0} (no penalization of all baseline covariates)
+#' @param penalty.factor a single value, or a vector of values, indicating
+#' whether the covariates (if any) should be penalized (1) or not (0).
+#' Default is \code{penalty.factor = 1}
 #' @param n.alpha.elnet number of alpha values for the two-dimensional 
 #' grid of tuning parameteres in elasticnet.
 #' Only relevant if \code{penalty = 'elasticnet'}. Default is 11,
@@ -29,8 +28,11 @@
 #' @param n.folds.elnet number of folds to be used for the selection
 #' of the tuning parameter in elasticnet. Only relevant if 
 #' \code{penalty = 'elasticnet'}. Default is 5
+#' @param n.boots number of bootstrap samples to be used 
+#' in the bootstrap optimism correction procedure. If 0, no
+#' bootstrapping is performed
 #' @param n.cores number of cores to use to parallelize the computation
-#' of the cluster bootstrap optimism correction procedure. If 
+#' of the bootstrap optimism correction procedure. If 
 #' \code{ncores = 1} (default), no parallelization is done. 
 #' Pro tip: you can use \code{parallel::detectCores()} to check 
 #' how many cores are available on your computer
@@ -42,8 +44,9 @@
 #' \item \code{call}: the function call
 #' \item \code{pcox.orig}: the penalized Cox model fitted on the
 #' original dataset;
-#' \item \code{surv.data}: the supplied survival data (ordered by
-#' subject id)
+#' \item \code{surv.data}: a data frame with the survival data
+#' \item \code{X.orig}: a data frame with the design matrix used
+#' to estimate the Cox model
 #' \item \code{n.boots}: number of bootstrap samples;
 #' \item \code{boot.ids}: a list with the ids of bootstrapped subjects 
 #' (when \code{n.boots > 0});
@@ -63,9 +66,8 @@
 #' of survival outcomes using complex longitudinal and 
 #' high-dimensional data. arXiv preprint: arXiv:2101.04426.
 #' 
-#' @seealso \code{\link{fit_lmms}} (step 1), 
-#' \code{\link{summarize_lmms}} (step 2),
-#' \code{\link{performance_prc}}
+#' @seealso \code{\link{fit_prclmm}}, 
+#' \code{\link{fit_prcmlpmm}}
 #' 
 #' @examples
 #' # generate example data
@@ -73,9 +75,11 @@
 #' p = 4 # number of longitudinal predictors
 #' simdata = simulate_prclmm_data(n = 100, p = p, p.relev = 2, 
 #'              seed = 123, t.values = c(0, 0.2, 0.5, 1, 1.5, 2))
-#'              
-#' # specify options for cluster bootstrap optimism correction
-#' # procedure and for parallel computing 
+#' #create dataframe with baseline measurements only
+#' baseline.visits = simdata$long.data[which(!duplicated(simdata$long.data$id)),]
+#' df = cbind(simdata$surv.data, baseline.visits)
+#' df = df[ , -c(5:7)]
+#' 
 #' do.bootstrap = FALSE
 #' # IMPORTANT: set do.bootstrap = TRUE to compute the optimism correction!
 #' n.boots = ifelse(do.bootstrap, 100, 0)
@@ -83,34 +87,23 @@
 #' # IMPORTANT: set parallelize = TRUE to speed computations up!
 #' if (!parallelize) n.cores = 1
 #' if (parallelize) {
-#'    # identify number of available cores on your machine
-#'    n.cores = parallel::detectCores()
-#'    if (is.na(n.cores)) n.cores = 1
+#'   # identify number of available cores on your machine
+#'   n.cores = parallel::detectCores()
+#'   if (is.na(n.cores)) n.cores = 1
 #' }
 #' 
-#' # step 1 of PRC-LMM: estimate the LMMs
-#' y.names = paste('marker', 1:p, sep = '')
-#' step1 = fit_lmms(y.names = y.names, 
-#'                  fixefs = ~ age, ranefs = ~ age | id, 
-#'                  long.data = simdata$long.data, 
-#'                  surv.data = simdata$surv.data,
-#'                  t.from.base = t.from.base,
-#'                  n.boots = n.boots, n.cores = n.cores)
-#'                  
-#' # step 2 of PRC-LMM: compute the summaries 
-#' # of the longitudinal outcomes
-#' step2 = summarize_lmms(object = step1, n.cores = n.cores)
-#' 
-#' # step 3 of PRC-LMM: fit the penalized Cox models
-#' step3 = fit_prclmm(object = step2, surv.data = simdata$surv.data,
-#'                    baseline.covs = ~ baseline.age,
-#'                    penalty = 'ridge', n.cores = n.cores)
+#' form = as.formula(~ baseline.age + marker1 + marker2
+#'                      + marker3 + marker4)
+#' base.pcox = pencox_baseline(data = df, 
+#'               formula = form, 
+#'               n.boots = n.boots, n.cores = n.cores) 
+#' ls(base.pcox)
 
-fit_prclmm = function(object, surv.data, baseline.covs = NULL,
+pencox_baseline = function(data, formula,
                       penalty = 'ridge', standardize = TRUE,
-                      pfac.base.covs = 0,
+                      penalty.factor = 1,
                       n.alpha.elnet = 11, n.folds.elnet = 5,
-                      n.cores = 1, verbose = TRUE) {
+                      n.boots = 0, n.cores = 1, verbose = TRUE) {
   call = match.call()
   requireNamespace('foreach')
   requireNamespace('glmnet')
@@ -118,22 +111,11 @@ fit_prclmm = function(object, surv.data, baseline.covs = NULL,
   requireNamespace('doParallel')
   # fix for 'no visible binding for global variable...' note
   id = i = b = NULL
-  # identify inputs and perform checks
-  ranef.orig = object$ranef.orig
-  n.boots = object$n.boots
-  do.bootstrap = ifelse(n.boots > 0, TRUE, FALSE)
-  if (do.bootstrap) {
-    boot.ids = object$boot.ids
-    ranef.boot.train = object$ranef.boot.train
-  }
   # preliminary checks
-  check1 = is.data.frame(surv.data)
-  if (!check1) stop('surv.data should be a data.frame')
-  check2 = c('id', 'time', 'event') %in% names(surv.data)
-  if (sum(check2) != 3) stop("surv.data should contain at least: 'id', 'time', 'event' variables")
-  # order survdata by id (in case it wasn't sorted) because
-  # in step 1 everything was also sorted by id (relevant for bootstrap!)
-  surv.data = dplyr::arrange(surv.data, id)
+  check1 = is.data.frame(data)
+  if (!check1) stop('data should be a data.frame')
+  check2 = c('id', 'time', 'event') %in% names(data)
+  if (sum(check2) != 3) stop("data should contain at least: 'id', 'time', 'event' variables")
   check3 = penalty %in% c('ridge', 'elasticnet', 'lasso')
   if (!check3) stop('penalty should be ridge, elasticnet or lasso')
   if (penalty == 'elasticnet') {
@@ -161,7 +143,11 @@ fit_prclmm = function(object, surv.data, baseline.covs = NULL,
     warning('Input n.cores < 1, so we set n.cores = 1', immediate. = TRUE)
     n.cores = 1
   }
+  check9 = inherits(formula, 'formula')
+  if (!check9) stop('formula should be of class: formula')
+  
   # check how many cores are actually available for this computation
+  do.bootstrap = ifelse(n.boots > 0, TRUE, FALSE)
   if (n.boots > 0) {
     max.cores = parallel::detectCores()
     if (!is.na(max.cores)) {
@@ -186,49 +172,37 @@ fit_prclmm = function(object, surv.data, baseline.covs = NULL,
   }
   if (double.cv) { # elasticnet
     alpha = seq(1, 0, length.out = n.alpha.elnet)
-    n.reps = floor(nrow(ranef.orig) / n.folds.elnet)
+    n.reps = floor(nrow(data) / n.folds.elnet)
     fold.ids = rep(1:n.folds.elnet, n.reps)
-    n.remaining = nrow(ranef.orig) - n.folds.elnet*n.reps
+    n.remaining = nrow(data) - n.folds.elnet*n.reps
     if (n.remaining > 0) {
       fold.ids = c(fold.ids, 1:n.remaining)
     }
   }
   
   ###########################################
-  ###### fit step 3 on original dataset #####
+  ###### fit penCox on original dataset #####
   ###########################################
-  if (verbose) cat('Estimating penalized Cox model on the original dataset...\n')
-  surv.orig = Surv(time = surv.data$time, event = surv.data$event)
-  if (is.null(baseline.covs)) {
-    X.orig = as.matrix(ranef.orig)
-    pen.fac = rep(1, ncol(X.orig))
+  if (verbose) cat('Estimated penalized Cox model on the original dataset...\n')
+  surv.orig = Surv(time = data$time, event = data$event)
+  X.orig = model.matrix(formula, data)[ , -1]
+  # fix penalty factor
+  if (length(penalty.factor) > ncol(X.orig)) {
+    stop('penalty.factor contains too many elements!')
   }
-  if (!is.null(baseline.covs)) {
-    X0 = model.matrix(as.formula(baseline.covs), data = surv.data)
-    X.orig = as.matrix(cbind(X0, ranef.orig))
-    contains.int = '(Intercept)' %in% colnames(X.orig)
-    if (contains.int) {
-      X.orig = X.orig[ , -1] 
-    }
-    # fix penalty factor
-    if (length(pfac.base.covs) > ncol(X0)) {
-      stop('pfac.base.covs contains too many elements!')
-    }
-    if (length(pfac.base.covs) < ncol(X0) & length(pfac.base.covs) > 1) {
-      stop('wrong number of elements in pfac.base.covs')
-    }
-    if (length(pfac.base.covs) == 1) {
-      pfac.base.covs = rep(pfac.base.covs, ncol(X0)-1)
-    }
-    pen.fac = c(pfac.base.covs, rep(1, ncol(X.orig) - length(pfac.base.covs)))
+  if (length(penalty.factor) < ncol(X.orig) & length(penalty.factor) > 1) {
+    stop('wrong number of elements in penalty.factor')
   }
-  
+  if (length(penalty.factor) == 1) {
+    penalty.factor = rep(penalty.factor, ncol(X.orig))
+  }
+
   # if penalty is ridge or lasso:
   if (!double.cv) {
     # alpha already defined above :)
     pcox.orig = cv.glmnet(x = X.orig, y = surv.orig, family="cox", 
                      standardize = standardize, 
-                     penalty.factor = pen.fac,
+                     penalty.factor = penalty.factor,
                      alpha = alpha, maxit = 1e7)
   }
   # if penalty is elasticnet:
@@ -241,7 +215,7 @@ fit_prclmm = function(object, surv.data, baseline.covs = NULL,
       alpha.el = alpha[i]
       temp = cv.glmnet(x = X.orig, y = surv.orig, family="cox", 
                             standardize = standardize,
-                            penalty.factor = pen.fac,
+                            penalty.factor = penalty.factor,
                             foldid = fold.ids,
                             alpha = alpha.el, maxit = 1e7)
       tuning.matr[i, ] = c(alpha.el, temp$lambda.min,
@@ -266,32 +240,28 @@ fit_prclmm = function(object, surv.data, baseline.covs = NULL,
     cl = parallel::makeCluster(n.cores)
     doParallel::registerDoParallel(cl)
     
+    # sample bootstrap row ids
+    n = nrow(data)
+    boot.ids = foreach(i = 1:n.boots) %do% {
+      set.seed(i)
+      sort(sample(1:n, n, TRUE))
+    }
+    
     booty = foreach(b = 1:n.boots,
     .packages = c('survival', 'pencal', 'glmnet')) %dopar% {
       # prepare data
-      boot.surv.data = surv.data[boot.ids[[b]], ]
+      boot.surv.data = data[boot.ids[[b]], ]
       surv.boot = Surv(time = boot.surv.data$time, 
                        event = boot.surv.data$event)
-      if (is.null(baseline.covs)) {
-        X.boot = as.matrix(ranef.boot.train[[b]])
-        pen.fac = rep(1, ncol(X.boot))
-      }
-      if (!is.null(baseline.covs)) {
-        X0 = model.matrix(as.formula(baseline.covs), data = boot.surv.data)
-        X.boot = as.matrix(cbind(X0, ranef.boot.train[[b]]))
-        contains.int = '(Intercept)' %in% colnames(X.boot)
-        if (contains.int) {
-          X.boot = X.boot[ , -1] 
-        }
-        pen.fac = c(pfac.base.covs, rep(1, ncol(X.boot) - length(pfac.base.covs)))
-      }
+      X.boot = model.matrix(formula, 
+                            data = boot.surv.data)[ , -1] 
 
       # if penalty is ridge or lasso:
       if (!double.cv) {
         # alpha already defined above :)
         pcox.boot = cv.glmnet(x = X.boot, y = surv.boot, family="cox", 
                               standardize = standardize,
-                              penalty.factor = pen.fac,
+                              penalty.factor = penalty.factor,
                               alpha = alpha, maxit = 1e7)
       }
       # if penalty is elasticnet:
@@ -304,7 +274,7 @@ fit_prclmm = function(object, surv.data, baseline.covs = NULL,
           alpha.el = alpha[i]
           temp = cv.glmnet(x = X.boot, y = surv.boot, family="cox", 
                            standardize = standardize,
-                           penalty.factor = pen.fac,
+                           penalty.factor = penalty.factor,
                            foldid = fold.ids,
                            alpha = alpha.el, maxit = 1e7)
           tuning.matr[i, ] = c(alpha.el, temp$lambda.min,
@@ -335,13 +305,15 @@ fit_prclmm = function(object, surv.data, baseline.covs = NULL,
     parallel::stopCluster(cl)  
     if (verbose) {
       cat('Bootstrap procedure finished\n')
-      cat('Computation of step 3: finished :)\n')
+      cat('Computation of bootstrap procedure: finished :)\n')
     }
   }
   
   # export results
+  surv.data = data[, c('id', 'time', 'event')]
   out = list('call' = call, 'pcox.orig' = pcox.orig,
-            'surv.data' = surv.data, 'n.boots' = n.boots)
+            'surv.data' = surv.data, 'X.orig' = X.orig,
+            'n.boots' = n.boots)
   if (n.boots >= 1) {
     out[['boot.ids']] = boot.ids
     out[['pcox.boot']] = pcox.boot

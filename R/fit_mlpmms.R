@@ -38,10 +38,13 @@
 #' @param verbose if \code{TRUE} (default and recommended value), information
 #' on the ongoing computations is printed in the console
 #' @param maxiter maximum number of iterations to use when calling
-#' the function \code{multlcmm}. Default is 1e3
+#' the function \code{multlcmm}. Default is 100
 #' @param conv a vector containing the three convergence criteria
 #' (\code{convB}, \code{convL} and \code{convG}) to use when calling
 #' the function \code{\link{multlcmm}}. Default is c(1e-3, 1e-3, 1e-3)
+#' @param lcmm.warnings logical. If TRUE, a warning is printed every 
+#' time the (strict) convergence criteria of the \code{multlcmm} function
+#' are not met. Default is \code{FALSE}
 #' 
 #' @return A list containing the following objects:
 #' \itemize{
@@ -135,7 +138,8 @@ fit_mlpmms = function(y.names, fixefs, ranef.time,
                     randint.items = TRUE, long.data, 
                     surv.data, t.from.base, n.boots = 0, 
                     n.cores = 1, verbose = TRUE,
-                    maxiter = 1e3, conv = rep(1e-3, 3)) {
+                    maxiter = 100, conv = rep(1e-3, 3),
+                    lcmm.warnings = FALSE) {
   call = match.call()
   # load namespaces
   requireNamespace('lcmm')
@@ -215,13 +219,19 @@ fit_mlpmms = function(y.names, fixefs, ranef.time,
   ########################
   ### original dataset ###
   ########################
+  # set up environment for parallel computing
+  cl = parallel::makeCluster(n.cores)
+  doParallel::registerDoParallel(cl)
   # fit the MLPMMs
   if (verbose) cat('Estimating the MLPMMs on the original dataset...\n')
-  fit.orig = foreach (i = 1:p) %do% {
+  ranef.formula = as.formula(paste('~ 1 +', ranef.time))
+  # keep ranef.formula definition out of %dopar%
+  
+  fit.orig = foreach (i = 1:p, 
+                .packages = c('foreach', 'pencal', 'lcmm')) %dopar% {
     # fit MLPMM
     ys = paste( paste(y.names[[i]], collapse = '+', sep = ''), sep = '')
     fixef.formula = as.formula(paste(ys, deparse(fixefs), sep = ''))
-    ranef.formula = as.formula(paste('~ 1 +', ranef.time))
 
     mlpmm = try(multlcmm(fixed = fixef.formula, subject = 'id', 
              random = ranef.formula, randomY = randint.items[i],
@@ -239,7 +249,7 @@ fit_mlpmms = function(y.names, fixefs, ranef.time,
              sep = '')
       stop(mess)
     }
-    if (mlpmm$conv != 1) {
+    if (mlpmm$conv != 1 & lcmm.warnings) {
       mess = paste('Convergence not reached (on the original dataset) for the ', 
              i, '-th ', 'latent biological process. ', mess.part2, sep = '')
       warning(mess, immediate. = TRUE)
@@ -247,6 +257,8 @@ fit_mlpmms = function(y.names, fixefs, ranef.time,
     mlpmm
   }
   names(fit.orig) = y.names
+  # close the cluster
+  parallel::stopCluster(cl)
   if (verbose) cat('...done\n')
   
   #######################
@@ -298,7 +310,7 @@ fit_mlpmms = function(y.names, fixefs, ranef.time,
                      sep = '')
           warning(mess, immediate. = TRUE)
         }
-        if (mlpmm$conv != 1) {
+        if (mlpmm$conv != 1 & lcmm.warnings) {
           mess = paste('Bootstrap sample', b,
                        ': convergence not reached for the ', i, '-th ',
                        'latent biological process. Try to increase maxiter', sep = '')

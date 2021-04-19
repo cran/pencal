@@ -1,17 +1,14 @@
-#' Predictive performance of the PRC-LMM and PRC-MLPMM models
+#' Predictive performance of the penalized Cox model
+#' with baseline covariates
 #'
 #' This function computes the naive and optimism-corrected
 #' measures of performance (C index and time-dependent AUC) 
-#' for the PRC models proposed 
-#' in Signorelli et al. (2021, in review). The optimism
-#' correction is computed based on a cluster bootstrap
-#' optimism correction procedure (CBOCP)
+#' for a penalized Cox model with baseline covariates as
+#' presented in Signorelli et al. (2021, in review). 
+#' The optimism correction is a bootstrap
+#' optimism correction procedure
 #' 
-#' @param step2 the output of either \code{\link{summarize_lmms}} 
-#' or \code{\link{summarize_mlpmms}} (step 2 of the estimation of
-#' PRC)
-#' @param step3 the output of \code{\link{fit_prclmm}} or
-#' \code{\link{fit_prcmlpmm}} (step 3 of PRC)
+#' @param fitted_pencox the output of \code{\link{pencox_baseline}}
 #' @param times numeric vector with the time points at which
 #' to estimate the time-dependent AUC
 #' @param n.cores number of cores to use to parallelize the computation
@@ -43,36 +40,48 @@
 #' of survival outcomes using complex longitudinal and 
 #' high-dimensional data. arXiv preprint: arXiv:2101.04426.
 #' 
-#' @seealso for the PRC-LMM model: \code{\link{fit_lmms}} (step 1),
-#' \code{\link{summarize_lmms}} (step 2) and \code{\link{fit_prclmm}} (step 3);
-#' for the PRC-MLPMM model: \code{\link{fit_mlpmms}} (step 1),
-#' \code{\link{summarize_mlpmms}} (step 2) and \code{\link{fit_prcmlpmm}} (step 3).
+#' @seealso \code{\link{pencox_baseline}}
 #' 
 #' @examples
-#' \donttest{
-# load fitted model
-#' data(fitted_prclmm)
+#' # generate example data
+#' set.seed(1234)
+#' p = 4 # number of longitudinal predictors
+#' simdata = simulate_prclmm_data(n = 100, p = p, p.relev = 2, 
+#'              seed = 123, t.values = c(0, 0.2, 0.5, 1, 1.5, 2))
+#' # create dataframe with baseline measurements only
+#' baseline.visits = simdata$long.data[which(!duplicated(simdata$long.data$id)),]
+#' df = cbind(simdata$surv.data, baseline.visits)
+#' df = df[ , -c(5:7)]
 #' 
+#' do.bootstrap = FALSE
+#' # IMPORTANT: set do.bootstrap = TRUE to compute the optimism correction!
+#' n.boots = ifelse(do.bootstrap, 100, 0)
 #' parallelize = FALSE
 #' # IMPORTANT: set parallelize = TRUE to speed computations up!
 #' if (!parallelize) n.cores = 1
 #' if (parallelize) {
-#'    # identify number of available cores on your machine
-#'    n.cores = parallel::detectCores()
-#'    if (is.na(n.cores)) n.cores = 1
+#'   # identify number of available cores on your machine
+#'   n.cores = parallel::detectCores()
+#'   if (is.na(n.cores)) n.cores = 1
 #' }
+#' 
+#' form = as.formula(~ baseline.age + marker1 + marker2
+#'                      + marker3 + marker4)
+#' base.pcox = pencox_baseline(data = df, 
+#'               formula = form, 
+#'               n.boots = n.boots, n.cores = n.cores) 
+#' ls(base.pcox)
 #'                    
 #' # compute the performance measures
-#' perf = performance_prc(fitted_prclmm$step2, fitted_prclmm$step3, 
+#' perf = performance_pencox_baseline(fitted_pencox = base.pcox, 
 #'           times = c(0.5, 1, 1.5, 2), n.cores = n.cores)
 #' 
 #' # concordance index:
 #' perf$concordance
 #' # time-dependent AUC:
 #' perf$tdAUC
-#' }
 
-performance_prc = function(step2, step3, times = 1,
+performance_pencox_baseline = function(fitted_pencox, times = 1,
                               n.cores = 1, verbose = TRUE) {
   call = match.call()
   # load namespaces
@@ -93,45 +102,31 @@ performance_prc = function(step2, step3, times = 1,
                     cb.correction = NA, cb.performance = NA)
   tdauc.out = data.frame(pred.time = times, naive = NA,
                          cb.correction = NA, cb.performance = NA)
-  # checks on step 2 input
-  temp = c('call', 'ranef.orig', 'n.boots')
-  check1 = temp %in% ls(step2)
-  mess1 = paste('step2 input should cointain:', do.call(paste, as.list(temp)) )
-  if (sum(check1) != 3) stop(mess1)
-  n.boots = step2$n.boots
-  ranef.orig = step2$ranef.orig
-  # checks on step 3 input
-  temp = c('call', 'pcox.orig', 'surv.data', 'n.boots')
-  check2 = temp %in% ls(step3)
-  mess2 = paste('step3 input should cointain:', do.call(paste, as.list(temp)) )
-  if (sum(check2) != 4) stop(mess2)
-  baseline.covs = step3$call$baseline.covs
-  pcox.orig = step3$pcox.orig
-  surv.data = step3$surv.data
+  # checks on fitted_pencox
+  temp = c('call', 'pcox.orig', 'surv.data', 'X.orig', 'n.boots')
+  check2 = temp %in% ls(fitted_pencox)
+  mess2 = paste('fitted_pencox input should cointain:', 
+                do.call(paste, as.list(temp)) )
+  if (sum(check2) != 5) stop(mess2)
+  X.orig = fitted_pencox$X.orig
+  pcox.orig = fitted_pencox$pcox.orig
+  surv.data = fitted_pencox$surv.data
   n = length(unique(surv.data$id))
+  n.boots = fitted_pencox$n.boots
   # further checks
-  if (step2$n.boots != step3$n.boots) {
-    stop('step2$n.boots and step3$n.boots are different!')
-  }
   if (n.boots == 0) {
-    mess = paste('The cluster bootstrap optimism correction has not',
+    mess = paste('The bootstrap optimism correction has not',
             'been performed (n.boots = 0). Therefore, only the apparent',
             'values of the performance values will be returned.')
     warning(mess, immediate. = TRUE)
   }
   if (n.boots > 0) {
-    temp = c('boot.ids', 'ranef.boot.train', 'ranef.boot.valid')
-    check3 = temp %in% ls(step2)
-    mess3 = paste('step2 should cointain:', do.call(paste, as.list(temp)) )
-    if (sum(check3) != 3) stop(mess3)
     temp = c('boot.ids', 'pcox.boot')
-    check4 = temp %in% ls(step3)
-    mess4 = paste('step3 should cointain:', do.call(paste, as.list(temp)) )
-    if (sum(check4) != 2) stop(mess4)
-    boot.ids = step2$boot.ids
-    ranef.boot.train = step2$ranef.boot.train
-    ranef.boot.valid = step2$ranef.boot.valid
-    pcox.boot = step3$pcox.boot
+    check3 = temp %in% ls(fitted_pencox)
+    mess3 = paste('fitted_pencox should cointain:', do.call(paste, as.list(temp)) )
+    if (sum(check3) != 2) stop(mess3)
+    boot.ids = fitted_pencox$boot.ids
+    pcox.boot = fitted_pencox$pcox.boot
   }
   if (n.cores < 1) {
     warning('Input n.cores < 1, so we set n.cores = 1', immediate. = TRUE)
@@ -159,17 +154,6 @@ performance_prc = function(step2, step3, times = 1,
   ##### NAIVE PERFORMANCE #####
   #############################
   surv.orig = Surv(time = surv.data$time, event = surv.data$event)
-  if (is.null(baseline.covs)) {
-    X.orig = as.matrix(ranef.orig)
-  }
-  if (!is.null(baseline.covs)) {
-    X0 = model.matrix(as.formula(baseline.covs), data = surv.data)
-    X.orig = as.matrix(cbind(X0, ranef.orig))
-    contains.int = '(Intercept)' %in% colnames(X.orig)
-    if (contains.int) {
-      X.orig = X.orig[ , -1] 
-    }
-  }
   
   # C index on the original dataset
   relrisk.orig = predict(pcox.orig, 
@@ -218,29 +202,8 @@ performance_prc = function(step2, step3, times = 1,
                      'glmnet', 'foreach')) %dopar% {
       # prepare data for the training set
       surv.data.train = surv.data[boot.ids[[b]], ]
-      if (is.null(baseline.covs)) {
-        X.train = as.matrix(ranef.boot.train[[b]])
-      }
-      if (!is.null(baseline.covs)) {
-        X0 = model.matrix(as.formula(baseline.covs), data = surv.data.train)
-        X.train = as.matrix(cbind(X0, ranef.boot.train[[b]]))
-        contains.int = '(Intercept)' %in% colnames(X.train)
-        if (contains.int) {
-          X.train = X.train[ , -1] 
-        }
-      }
-      # prepare X.valid for the validation set (surv.data already available)
-      if (is.null(baseline.covs)) {
-        X.valid = as.matrix(ranef.boot.valid[[b]])
-      }
-      if (!is.null(baseline.covs)) {
-        X0 = model.matrix(as.formula(baseline.covs), data = surv.data)
-        X.valid = as.matrix(cbind(X0, ranef.boot.valid[[b]]))
-        contains.int = '(Intercept)' %in% colnames(X.valid)
-        if (contains.int) {
-          X.valid = X.valid[ , -1] 
-        }
-      }
+      X.train = X.orig[boot.ids[[b]], ]
+      X.valid = X.orig
       
       # C index on boot.train
       relrisk.train = predict(pcox.boot[[b]], 

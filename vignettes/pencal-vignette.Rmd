@@ -107,7 +107,8 @@ In addition to the functions mentioned above, `pencal` comprises also 3 function
 
 * `simulate_t_weibull` to simulate survival data from a Weibull model;
 * `simulate_prclmm_data` to simulate an example dataset for PRC-LMM that is comprehensive of a number of longitudinal biomarkers, a survival outcome and a censoring indicator;
-* `simulate_prcmlpmm_data` to simulate an example dataset for PRC-MLPMM.
+* `simulate_prcmlpmm_data` to simulate an example dataset for PRC-MLPMM;
+* `pencox_baseline` and `performance_pencox_baseline` to estimate a penalized Cox model with baseline predictors only (no longitudinal information used for prediction).
 
 # A step by step example
 
@@ -251,6 +252,10 @@ t(as.matrix(coef(step3$pcox.orig)))
 ```
 
 For more details about the arguments of `fit_prclmm` and its outputs, see the help page: `?fit_prclmm`.
+
+## Estimation of the PRC-MLPMM models
+
+Estimation of the PRC-MLPMM(U) and PRC-MLPMM(U+B) models proceeds in a similar fashion. For details and examples about this multivariate approach, see: `?fit_mlpmms` (step 1), `?summarize_mlpmms` (step 2), and `?fit_prcmlpmm` (step 3).
 
 ## Predicted survival probabilities
 
