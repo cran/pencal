@@ -417,7 +417,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </div>
 <div id="predicted-survival-probabilities" class="section level2">
 <h2>Predicted survival probabilities</h2>
-<p>Computation of the predicted survival probabilities from the PRC-LMM and PRC-MLPMM models can be done with the <code>survpred_prc</code> function.</p>
+<p>Computation of the predicted survival probabilities from the PRC-LMM and PRC-MLPMM models can be done with the functions <code>survpred_prclmm</code> and <code>survpred_prcmlpmm</code>.</p>
 </div>
 <div id="predictive-performance-and-cluster-bootstrap-optimism-correction-procedure-cbocp" class="section level2">
 <h2>Predictive performance and cluster bootstrap optimism correction procedure (CBOCP)</h2>
@@ -630,8 +630,8 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </div>
 <div id="predicted-survival-probabilities-1" class="section level2">
 <h2>Predicted survival probabilities</h2>
-<p>After fitting the model, you will probably want to obtain <strong>predicted survival probabilities</strong> for each individual at several time points. This can be done through the function <code>survpred_prc</code>, which takes as inputs the outputs of step 2 and step 3, alongside with the time points at which to compute the survival probabilities:</p>
-<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a>preds =<span class="st"> </span><span class="kw">survpred_prc</span>(step2, step3, <span class="dt">times =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>))</span>
+<p>After fitting the model, you will probably want to obtain <strong>predicted survival probabilities</strong> for each individual at several time points. This can be done through the function <code>survpred_prclmm</code>, which takes as inputs the outputs of step1, step 2 and step 3, alongside with the time points at which to compute the survival probabilities:</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a>preds =<span class="st"> </span><span class="kw">survpred_prclmm</span>(step1, step2, step3, <span class="dt">times =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>))</span>
 <span id="cb41-2"><a href="#cb41-2"></a><span class="kw">head</span>(preds)</span></code></pre></div>
 <pre><code>##   id      S(1)      S(2)       S(3)
 ## 1  1 0.4685893 0.1666528 0.08151238

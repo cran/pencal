@@ -2,14 +2,13 @@
 #' from the PRC models
 #'
 #' This function computes the predictive survival probabilities 
-#' for the for the PRC models proposed 
+#' for the for the PRC-MLPMM(U) and PRC-MLPMM(U+B) models proposed 
 #' in Signorelli et al. (2021, in review)
 #' 
-#' @param step2 the output of either \code{\link{summarize_lmms}} 
-#' or \code{\link{summarize_mlpmms}} (step 2 of the estimation of
-#' PRC)
-#' @param step3 the output of \code{\link{fit_prclmm}} or
-#' \code{\link{fit_prcmlpmm}} (step 3 of PRC)
+#' @param step2 the output of \code{\link{summarize_mlpmms}} 
+#' (step 2 of the estimation of PRC-MLPMM)
+#' @param step3 the output of \code{\link{fit_prcmlpmm}} (step 3 
+#' of the estimation of PRC-MLPMM)
 #' @param times numeric vector with the time points at which
 #' to estimate the time-dependent AUC
 #' 
@@ -27,41 +26,19 @@
 #' of survival outcomes using complex longitudinal and 
 #' high-dimensional data. arXiv preprint: arXiv:2101.04426.
 #' 
-#' @seealso for the PRC-LMM model: \code{\link{fit_lmms}} (step 1),
-#' \code{\link{summarize_lmms}} (step 2) and \code{\link{fit_prclmm}} (step 3);
-#' for the PRC-MLPMM model: \code{\link{fit_mlpmms}} (step 1),
-#' \code{\link{summarize_mlpmms}} (step 2) and \code{\link{fit_prcmlpmm}} (step 3).
+#' @seealso \code{\link{fit_mlpmms}} (step 1),
+#' \code{\link{summarize_mlpmms}} (step 2) and 
+#' \code{\link{fit_prcmlpmm}} (step 3).
 #' 
 #' @examples
-#' # generate example data
-#' set.seed(1234)
-#' p = 4 # number of longitudinal predictors
-#' simdata = simulate_prclmm_data(n = 100, p = p, p.relev = 2, 
-#'              seed = 123, t.values = c(0, 0.2, 0.5, 1, 1.5, 2))
-#'              
-#' # step 1 of PRC-LMM: estimate the LMMs
-#' y.names = paste('marker', 1:p, sep = '')
-#' step1 = fit_lmms(y.names = y.names, 
-#'                  fixefs = ~ age, ranefs = ~ age | id, 
-#'                  long.data = simdata$long.data, 
-#'                  surv.data = simdata$surv.data,
-#'                  t.from.base = t.from.base,
-#'                  n.boots = 0)
-#'                  
-#' # step 2 of PRC-LMM: compute the summaries 
-#' # of the longitudinal outcomes
-#' step2 = summarize_lmms(object = step1)
-#' 
-#' # step 3 of PRC-LMM: fit the penalized Cox models
-#' step3 = fit_prclmm(object = step2, surv.data = simdata$surv.data,
-#'                    baseline.covs = ~ baseline.age,
-#'                    penalty = 'ridge')
+#' data(fitted_prcmlpmm)
 #'                    
 #' # predict survival probabilities at times 1, 2, 3
-#' surv.probs = survpred_prc(step2, step3, times = 1:3)
+#' surv.probs = survpred_prcmlpmm(fitted_prcmlpmm$step2, 
+#'                  fitted_prcmlpmm$step3, times = 1:3)
 #' head(surv.probs)
 
-survpred_prc = function(step2, step3, times = 1) {
+survpred_prcmlpmm = function(step2, step3, times = 1) {
   call = match.call()
   # load namespaces
   requireNamespace('survival')

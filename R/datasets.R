@@ -10,7 +10,7 @@
 #' @usage data(fitted_prclmm)
 #'
 #' @format A list comprising step 2 and step 3 as obtained
-#' during the estimation of the PRC LMM
+#' during the estimation of a PRC LMM
 #' 
 #' @author Mirko Signorelli
 #' @references 
@@ -26,3 +26,31 @@
 #' data(fitted_prclmm)
 #' ls(fitted_prclmm)
 "fitted_prclmm"
+#'
+#' A fitted PRC MLPMM
+#'
+#' This list contains a fitted PRC MLPMM. It is
+#' used to reduce the computing time in the example of
+#' the function \code{survpred_prcmlpmm} 
+#' 
+#' @docType data
+#' @keywords datasets
+#' @usage data(fitted_prclmm)
+#'
+#' @format A list comprising step 2 and step 3 as obtained
+#' during the estimation of a PRC MLPMM
+#' 
+#' @author Mirko Signorelli
+#' @references 
+#' Signorelli, M., Spitali, P., Al-Khalili Szigyarto, C, 
+#' The MARK-MD Consortium, Tsonaka, R. (2021). 
+#' Penalized regression calibration: a method for the prediction 
+#' of survival outcomes using complex longitudinal and 
+#' high-dimensional data. arXiv preprint: arXiv:2101.04426.
+#' 
+#' @seealso \code{\link{survpred_prcmlpmm}}
+#' 
+#' @examples 
+#' data(fitted_prcmlpmm)
+#' ls(fitted_prcmlpmm)
+"fitted_prcmlpmm"

@@ -91,7 +91,7 @@ Similarly, estimation of the PRC-MLPMM model can be performed using:
 
 ## Predicted survival probabilities
 
-Computation of the predicted survival probabilities from the PRC-LMM and PRC-MLPMM models can be done with the `survpred_prc` function.
+Computation of the predicted survival probabilities from the PRC-LMM and PRC-MLPMM models can be done with the functions `survpred_prclmm` and `survpred_prcmlpmm`.
 
 ## Predictive performance and cluster bootstrap optimism correction procedure (CBOCP)
 
@@ -259,10 +259,10 @@ Estimation of the PRC-MLPMM(U) and PRC-MLPMM(U+B) models proceeds in a similar f
 
 ## Predicted survival probabilities
 
-After fitting the model, you will probably want to obtain **predicted survival probabilities** for each individual at several time points. This can be done through the function `survpred_prc`, which takes as inputs the outputs of step 2 and step 3, alongside with the time points at which to compute the survival probabilities:
+After fitting the model, you will probably want to obtain **predicted survival probabilities** for each individual at several time points. This can be done through the function `survpred_prclmm`, which takes as inputs the outputs of step1, step 2 and step 3, alongside with the time points at which to compute the survival probabilities:
 
 ```{r}
-preds = survpred_prc(step2, step3, times = c(1, 2, 3))
+preds = survpred_prclmm(step1, step2, step3, times = c(1, 2, 3))
 head(preds)
 ```
 

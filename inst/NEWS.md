@@ -18,6 +18,15 @@ Each subsection corresponds to a specific package version.
 0.4.x
 =====
 
+pencal 0.4.2
+------------
+
+-   Released: May 2021
+-   Function `survpred_prc` replaced by two distinct functions:
+    `survpred_prclmm` for the PRC-LMM model, and `survpred_prcmlpmm` for
+    the PRC-MLPMM model
+-   Documentation and vignette updated accordingly
+
 pencal 0.4.1
 ------------
 

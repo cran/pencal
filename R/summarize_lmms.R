@@ -81,7 +81,6 @@
 summarize_lmms = function(object, n.cores = 1, verbose = TRUE) {
   call = match.call()
   # load namespaces
-  requireNamespace('lcmm')
   requireNamespace('foreach')
   requireNamespace('doParallel')
   # fix for 'no visible binding for global variable...' note
