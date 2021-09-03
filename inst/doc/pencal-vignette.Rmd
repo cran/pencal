@@ -21,7 +21,7 @@ options(warn=-1)
 
 ## What is `pencal`?
 
-`pencal` is an `R` package that has been created to make it easy and efficient to estimate and apply **Penalized Regression Calibration** ([Signorelli et al., 2021](https://arxiv.org/abs/2101.04426)).
+`pencal` is an `R` package that has been created to make it easy and efficient to estimate and apply **Penalized Regression Calibration** ([Signorelli et al., 2021](https://doi.org/10.1002/sim.9178)).
 
 ## What is Penalized Regression Calibration?
 
@@ -31,7 +31,7 @@ Penalized Regression Calibration (PRC) is a statistical method that has been dev
 
 PRC is described in detail in the following article:
 
-Signorelli, M., Spitali, P., Al-Khalili Sgyziarto, C., The Mark-MD Consortium, Tsonaka, R. (2021). Penalized regression calibration: a method for the prediction of survival outcomes using complex longitudinal and high-dimensional data. arXiv preprint: [arXiv:2101.04426](https://arxiv.org/abs/2101.04426).
+Signorelli, M., Spitali, P., Al-Khalili Sgyziarto, C., The Mark-MD Consortium, Tsonaka, R. (2021). Penalized regression calibration: A method for the prediction of survival outcomes using complex longitudinal and high-dimensional data. Statistics in Medicine. DOI:  [10.1002/sim.9178](https://doi.org/10.1002/sim.9178).
 
 ## How does PRC work?
 
@@ -71,7 +71,7 @@ library('pencal')
 
 # Overview of the functionalities of `pencal`
 
-Currently, `pencal` contains functions to estimate the PRC-LMM and PRC-MLPMM models proposed in [Signorelli et al. (2021)](https://arxiv.org/abs/2101.04426). An overview of the different functions is presented in the following subsections.
+Currently, `pencal` contains functions to estimate the PRC-LMM and PRC-MLPMM models proposed in [Signorelli et al. (2021)](https://doi.org/10.1002/sim.9178). An overview of the different functions is presented in the following subsections.
 
 ## Model estimation and prediction
 
@@ -95,7 +95,7 @@ Computation of the predicted survival probabilities from the PRC-LMM and PRC-MLP
 
 ## Predictive performance and cluster bootstrap optimism correction procedure (CBOCP)
 
-The evaluation of the predicted performance of the estimated PRC-LMM and PRC-MLPMM can be done using the function `performance_prc`, which returns the naive and optimism-corrected estimates of the C index and of the time-dependent AUC. The optimism-corrected estimates are based on the CBOCP proposed in [Signorelli et al. (2021)](https://arxiv.org/abs/2101.04426).
+The evaluation of the predicted performance of the estimated PRC-LMM and PRC-MLPMM can be done using the function `performance_prc`, which returns the naive and optimism-corrected estimates of the C index and of the time-dependent AUC. The optimism-corrected estimates are based on the CBOCP proposed in [Signorelli et al. (2021)](https://doi.org/10.1002/sim.9178).
 
 A technical note on how the CBOCP is implemented in `pencal`: most of the computations required by the CBOCP are performed by `fit_lmms`, `summarize_lmms` and `fit_prclmm` for the PRC-LMM, and by `fit_mlpmms`, `summarize_mlpmms` and `fit_prcmlpmm` for the PRC-MLPMM. Such computations may be time-consuming, and for this reason these functions are designed to work with parallel computing (this can be easily done by setting the argument `n.cores` to a value $> 1$). The last step of the CBOCP is performed by the function `performance_prc`, which aggregates the outputs of the previous functions and computes the naive and optimism-corrected estimates of the C index and of the time-dependent AUC.
 
@@ -298,4 +298,4 @@ The aim of this vignette is to provide a quick-start introduction to the `R` pac
 
 Further details, functions and examples can be found in [the manual of the package](https://CRAN.R-project.org/package=pencal/pencal.pdf).
 
-The description of the method is available in an article [that you can read here](https://arxiv.org/abs/2101.04426).
+The description of the method is available in an article [that you can read here](https://doi.org/10.1002/sim.9178).

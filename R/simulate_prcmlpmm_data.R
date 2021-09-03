@@ -7,7 +7,7 @@
 #' the survival outcome from a Weibull model where the time
 #' to event depends on the random effects from the MLPMMs.
 #' It is an implementation of the simulation method used in
-#' Signorelli et al. (2021, in review)
+#' Signorelli et al. (2021)
 #' 
 #' @param n sample size
 #' @param p number of longitudinal latent processes
@@ -59,7 +59,8 @@
 #' The MARK-MD Consortium, Tsonaka, R. (2021). 
 #' Penalized regression calibration: a method for the prediction 
 #' of survival outcomes using complex longitudinal and 
-#' high-dimensional data. arXiv preprint: arXiv:2101.04426.
+#' high-dimensional data. Statistics in Medicine.
+#' DOI: 10.1002/sim.9178
 #' 
 #' @examples
 #' # generate example data

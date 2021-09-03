@@ -29,7 +29,8 @@
 #' The MARK-MD Consortium, Tsonaka, R. (2021). 
 #' Penalized regression calibration: a method for the prediction 
 #' of survival outcomes using complex longitudinal and 
-#' high-dimensional data. arXiv preprint: arXiv:2101.04426.
+#' high-dimensional data. Statistics in Medicine.
+#' DOI: 10.1002/sim.9178
 
 prepare_longdata = function(df, t.from.base, subj.id, survtime, verbose = TRUE) {
   id = df[ , deparse(substitute(subj.id))]

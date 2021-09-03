@@ -85,8 +85,7 @@ fitted on each bootstrapped datasets (when \code{n.boots > 0}).
 }
 \description{
 This function performs the first step for the estimation
-of the PRC-MLPMM model proposed in Signorelli et al. (2021, 
-in review)
+of the PRC-MLPMM model proposed in Signorelli et al. (2021)
 }
 \details{
 This function is essentially a wrapper of the 
@@ -145,7 +144,8 @@ Signorelli, M., Spitali, P., Al-Khalili Szigyarto, C,
 The MARK-MD Consortium, Tsonaka, R. (2021). 
 Penalized regression calibration: a method for the prediction 
 of survival outcomes using complex longitudinal and 
-high-dimensional data. arXiv preprint: arXiv:2101.04426.
+high-dimensional data. Statistics in Medicine.
+DOI: 10.1002/sim.9178
 }
 \seealso{
 \code{\link{simulate_prcmlpmm_data}},

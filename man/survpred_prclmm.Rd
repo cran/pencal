@@ -43,7 +43,7 @@ and if \code{keep.ranef = TRUE} also the predicted random effects
 \description{
 This function computes the predictive survival probabilities 
 for the for the PRC-LMM model proposed 
-in Signorelli et al. (2021, in review)
+in Signorelli et al. (2021)
 }
 \examples{
 # generate example data
@@ -90,7 +90,8 @@ Signorelli, M., Spitali, P., Al-Khalili Szigyarto, C,
 The MARK-MD Consortium, Tsonaka, R. (2021). 
 Penalized regression calibration: a method for the prediction 
 of survival outcomes using complex longitudinal and 
-high-dimensional data. arXiv preprint: arXiv:2101.04426.
+high-dimensional data. Statistics in Medicine.
+DOI: 10.1002/sim.9178
 }
 \seealso{
 \code{\link{fit_lmms}} (step 1),

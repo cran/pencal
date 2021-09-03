@@ -1,8 +1,7 @@
 #' Step 2 of PRC-LMM (computation of the predicted random effects)
 #'
 #' This function performs the second step for the estimation
-#' of the PRC-LMM model proposed in Signorelli et al. (2021, 
-#' in review)
+#' of the PRC-LMM model proposed in Signorelli et al. (2021)
 #' 
 #' @param object a list of objects as produced by \code{\link{fit_lmms}}
 #' @param n.cores number of cores to use to parallelize the computation
@@ -38,7 +37,8 @@
 #' The MARK-MD Consortium, Tsonaka, R. (2021). 
 #' Penalized regression calibration: a method for the prediction 
 #' of survival outcomes using complex longitudinal and 
-#' high-dimensional data. arXiv preprint: arXiv:2101.04426.
+#' high-dimensional data. Statistics in Medicine.
+#' DOI: 10.1002/sim.9178
 #' 
 #' @seealso \code{\link{fit_lmms}} (step 1), 
 #' \code{\link{fit_prclmm}} (step 3),

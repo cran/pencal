@@ -3,7 +3,7 @@
 #'
 #' This function computes the predictive survival probabilities 
 #' for the for the PRC-LMM model proposed 
-#' in Signorelli et al. (2021, in review)
+#' in Signorelli et al. (2021)
 #' 
 #' @param step1 the output of \code{\link{fit_lmms}} (step 1
 #' of the estimation of PRC-LMM)
@@ -38,7 +38,8 @@
 #' The MARK-MD Consortium, Tsonaka, R. (2021). 
 #' Penalized regression calibration: a method for the prediction 
 #' of survival outcomes using complex longitudinal and 
-#' high-dimensional data. arXiv preprint: arXiv:2101.04426.
+#' high-dimensional data. Statistics in Medicine.
+#' DOI: 10.1002/sim.9178
 #' 
 #' @seealso \code{\link{fit_lmms}} (step 1),
 #' \code{\link{summarize_lmms}} (step 2) and 

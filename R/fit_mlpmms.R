@@ -1,8 +1,7 @@
 #' Step 1 of PRC-MLPMM (estimation of the linear mixed models)
 #'
 #' This function performs the first step for the estimation
-#' of the PRC-MLPMM model proposed in Signorelli et al. (2021, 
-#' in review)
+#' of the PRC-MLPMM model proposed in Signorelli et al. (2021)
 #' 
 #' @param y.names a list with the names of the
 #' response variables which the MLPMMs have to be fitted to.
@@ -90,7 +89,8 @@
 #' The MARK-MD Consortium, Tsonaka, R. (2021). 
 #' Penalized regression calibration: a method for the prediction 
 #' of survival outcomes using complex longitudinal and 
-#' high-dimensional data. arXiv preprint: arXiv:2101.04426.
+#' high-dimensional data. Statistics in Medicine.
+#' DOI: 10.1002/sim.9178
 #' 
 #' @seealso \code{\link{simulate_prcmlpmm_data}},
 #' \code{\link{summarize_mlpmms}} (step 2),

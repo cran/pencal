@@ -1,8 +1,7 @@
 #' Step 3 of PRC-LMM (estimation of the penalized Cox model(s))
 #'
 #' This function performs the third step for the estimation
-#' of the PRC-LMM model proposed in Signorelli et al. (2021, 
-#' in review)
+#' of the PRC-LMM model proposed in Signorelli et al. (2021)
 #' 
 #' @param object the output of step 2 of the PRC-LMM procedure, 
 #' as produced by the \code{\link{summarize_lmms}} function
@@ -61,7 +60,8 @@
 #' The MARK-MD Consortium, Tsonaka, R. (2021). 
 #' Penalized regression calibration: a method for the prediction 
 #' of survival outcomes using complex longitudinal and 
-#' high-dimensional data. arXiv preprint: arXiv:2101.04426.
+#' high-dimensional data. Statistics in Medicine.
+#' DOI: 10.1002/sim.9178
 #' 
 #' @seealso \code{\link{fit_lmms}} (step 1), 
 #' \code{\link{summarize_lmms}} (step 2),

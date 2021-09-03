@@ -4,7 +4,7 @@
 #' This function computes the naive and optimism-corrected
 #' measures of performance (C index and time-dependent AUC) 
 #' for a penalized Cox model with baseline covariates as
-#' presented in Signorelli et al. (2021, in review). 
+#' presented in Signorelli et al. (2021). 
 #' The optimism correction is a bootstrap
 #' optimism correction procedure
 #' 
@@ -38,7 +38,8 @@
 #' The MARK-MD Consortium, Tsonaka, R. (2021). 
 #' Penalized regression calibration: a method for the prediction 
 #' of survival outcomes using complex longitudinal and 
-#' high-dimensional data. arXiv preprint: arXiv:2101.04426.
+#' high-dimensional data. Statistics in Medicine.
+#' DOI: 10.1002/sim.9178
 #' 
 #' @seealso \code{\link{pencox_baseline}}
 #' 

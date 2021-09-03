@@ -364,14 +364,14 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1>Introduction</h1>
 <div id="what-is-pencal" class="section level2">
 <h2>What is <code>pencal</code>?</h2>
-<p><code>pencal</code> is an <code>R</code> package that has been created to make it easy and efficient to estimate and apply <strong>Penalized Regression Calibration</strong> (<a href="https://arxiv.org/abs/2101.04426">Signorelli et al., 2021</a>).</p>
+<p><code>pencal</code> is an <code>R</code> package that has been created to make it easy and efficient to estimate and apply <strong>Penalized Regression Calibration</strong> (<a href="https://doi.org/10.1002/sim.9178">Signorelli et al., 2021</a>).</p>
 </div>
 <div id="what-is-penalized-regression-calibration" class="section level2">
 <h2>What is Penalized Regression Calibration?</h2>
 <p>Longitudinal and high-dimensional measurements have become increasingly common in biomedical research. However, methods to predict survival outcomes using covariates that are both longitudinal and high-dimensional are currently missing.</p>
 <p>Penalized Regression Calibration (PRC) is a statistical method that has been developed to fill this methodological gap, making it possible to <strong>predict survival using as predictors a set of covariates that are at the same time longitudinal and high-dimensional</strong>.</p>
 <p>PRC is described in detail in the following article:</p>
-<p>Signorelli, M., Spitali, P., Al-Khalili Sgyziarto, C., The Mark-MD Consortium, Tsonaka, R. (2021). Penalized regression calibration: a method for the prediction of survival outcomes using complex longitudinal and high-dimensional data. arXiv preprint: <a href="https://arxiv.org/abs/2101.04426">arXiv:2101.04426</a>.</p>
+<p>Signorelli, M., Spitali, P., Al-Khalili Sgyziarto, C., The Mark-MD Consortium, Tsonaka, R. (2021). Penalized regression calibration: A method for the prediction of survival outcomes using complex longitudinal and high-dimensional data. Statistics in Medicine. DOI: <a href="https://doi.org/10.1002/sim.9178">10.1002/sim.9178</a>.</p>
 </div>
 <div id="how-does-prc-work" class="section level2">
 <h2>How does PRC work?</h2>
@@ -398,7 +398,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </div>
 <div id="overview-of-the-functionalities-of-pencal" class="section level1">
 <h1>Overview of the functionalities of <code>pencal</code></h1>
-<p>Currently, <code>pencal</code> contains functions to estimate the PRC-LMM and PRC-MLPMM models proposed in <a href="https://arxiv.org/abs/2101.04426">Signorelli et al. (2021)</a>. An overview of the different functions is presented in the following subsections.</p>
+<p>Currently, <code>pencal</code> contains functions to estimate the PRC-LMM and PRC-MLPMM models proposed in <a href="https://doi.org/10.1002/sim.9178">Signorelli et al. (2021)</a>. An overview of the different functions is presented in the following subsections.</p>
 <div id="model-estimation-and-prediction" class="section level2">
 <h2>Model estimation and prediction</h2>
 <p>Estimation of the PRC-LMM model can be performed by running sequentially the following three functions:</p>
@@ -421,7 +421,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </div>
 <div id="predictive-performance-and-cluster-bootstrap-optimism-correction-procedure-cbocp" class="section level2">
 <h2>Predictive performance and cluster bootstrap optimism correction procedure (CBOCP)</h2>
-<p>The evaluation of the predicted performance of the estimated PRC-LMM and PRC-MLPMM can be done using the function <code>performance_prc</code>, which returns the naive and optimism-corrected estimates of the C index and of the time-dependent AUC. The optimism-corrected estimates are based on the CBOCP proposed in <a href="https://arxiv.org/abs/2101.04426">Signorelli et al. (2021)</a>.</p>
+<p>The evaluation of the predicted performance of the estimated PRC-LMM and PRC-MLPMM can be done using the function <code>performance_prc</code>, which returns the naive and optimism-corrected estimates of the C index and of the time-dependent AUC. The optimism-corrected estimates are based on the CBOCP proposed in <a href="https://doi.org/10.1002/sim.9178">Signorelli et al. (2021)</a>.</p>
 <p>A technical note on how the CBOCP is implemented in <code>pencal</code>: most of the computations required by the CBOCP are performed by <code>fit_lmms</code>, <code>summarize_lmms</code> and <code>fit_prclmm</code> for the PRC-LMM, and by <code>fit_mlpmms</code>, <code>summarize_mlpmms</code> and <code>fit_prcmlpmm</code> for the PRC-MLPMM. Such computations may be time-consuming, and for this reason these functions are designed to work with parallel computing (this can be easily done by setting the argument <code>n.cores</code> to a value <span class="math inline">\(&gt; 1\)</span>). The last step of the CBOCP is performed by the function <code>performance_prc</code>, which aggregates the outputs of the previous functions and computes the naive and optimism-corrected estimates of the C index and of the time-dependent AUC.</p>
 <p><strong>Important note</strong>: if you just want to estimate the PRC model, and you do not wish to compute the CBOCP, simply set <code>n.boots = 0</code> as argument of <code>fit_lmms</code>. If, instead, you do want to compute the CBOCP, set <code>n.boots</code> equal to the desired number of bootstrap samples (e.g., 100).</p>
 </div>
@@ -633,13 +633,112 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>After fitting the model, you will probably want to obtain <strong>predicted survival probabilities</strong> for each individual at several time points. This can be done through the function <code>survpred_prclmm</code>, which takes as inputs the outputs of step1, step 2 and step 3, alongside with the time points at which to compute the survival probabilities:</p>
 <div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a>preds =<span class="st"> </span><span class="kw">survpred_prclmm</span>(step1, step2, step3, <span class="dt">times =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>))</span>
 <span id="cb41-2"><a href="#cb41-2"></a><span class="kw">head</span>(preds)</span></code></pre></div>
-<pre><code>##   id      S(1)      S(2)       S(3)
-## 1  1 0.4685893 0.1666528 0.08151238
-## 2  2 0.7506514 0.5076432 0.38729468
-## 3  3 0.7088022 0.4432699 0.32036642
-## 4  4 0.5153831 0.2087025 0.11167056
-## 5  5 0.6207733 0.3239896 0.20662124
-## 6  6 0.5630938 0.2572870 0.14965965</code></pre>
+<pre><code>## $call
+## survpred_prclmm(step1 = step1, step2 = step2, step3 = step3, 
+##     times = c(1, 2, 3))
+## 
+## $predicted_survival
+##      id      S(1)        S(2)        S(3)
+## 1     1 0.4685893 0.166652764 0.081512378
+## 2     2 0.7506514 0.507643162 0.387294678
+## 3     3 0.7088022 0.443269876 0.320366425
+## 4     4 0.5153831 0.208702527 0.111670556
+## 5     5 0.6207733 0.323989577 0.206621238
+## 6     6 0.5630938 0.257286990 0.149659648
+## 7     7 0.5609297 0.254955812 0.147765868
+## 8     8 0.7795296 0.555024037 0.438795250
+## 9     9 0.6788175 0.400216048 0.277691705
+## 10   10 0.7135979 0.450391956 0.327591227
+## 11   11 0.3018944 0.058948274 0.019043355
+## 12   12 0.7695261 0.538334972 0.420446488
+## 13   13 0.7286212 0.473128494 0.350959721
+## 14   14 0.7766883 0.550253948 0.433527996
+## 15   15 0.2875713 0.052549907 0.016215437
+## 16   16 0.6549235 0.367711900 0.246657201
+## 17   17 0.8236114 0.632095764 0.526346400
+## 18   18 0.7135237 0.450281347 0.327478671
+## 19   19 0.7261976 0.469416730 0.347113525
+## 20   20 0.6212937 0.324631930 0.207194620
+## 21   21 0.7804104 0.556507660 0.440437199
+## 22   22 0.8757447 0.730786991 0.644803238
+## 23   23 0.7342705 0.481845679 0.360039954
+## 24   24 0.5357598 0.228735872 0.126950024
+## 25   25 0.6677481 0.384960367 0.262995257
+## 26   26 0.4349778 0.139765987 0.063725828
+## 27   27 0.4897810 0.185020741 0.094352755
+## 28   28 0.4555019 0.155859224 0.074222774
+## 29   29 0.5910285 0.288485192 0.175650293
+## 30   30 0.8836914 0.746559465 0.664357851
+## 31   31 0.6939248 0.421590774 0.298660801
+## 32   32 0.7294177 0.474351914 0.352230097
+## 33   33 0.5717768 0.266764010 0.157428749
+## 34   34 0.4970991 0.191622249 0.099096174
+## 35   35 0.3296104 0.072550594 0.025462544
+## 36   36 0.4036116 0.117103271 0.049752828
+## 37   37 0.8068504 0.602109553 0.491745006
+## 38   38 0.5860879 0.282817223 0.170840855
+## 39   39 0.5277030 0.220688142 0.120744987
+## 40   40 0.7100518 0.445119294 0.322238096
+## 41   41 0.7622675 0.526408802 0.407472284
+## 42   42 0.6104232 0.311365478 0.195445360
+## 43   43 0.2564489 0.040085245 0.011102223
+## 44   44 0.7102389 0.445396707 0.322519114
+## 45   45 0.6825948 0.405500267 0.282835024
+## 46   46 0.7293954 0.474317716 0.352194568
+## 47   47 0.3897014 0.107786470 0.044303988
+## 48   48 0.6197816 0.322767449 0.205531586
+## 49   49 0.2796043 0.049173299 0.014776597
+## 50   50 0.7538625 0.512791451 0.392801192
+## 51   51 0.6072944 0.307606154 0.192151774
+## 52   52 0.8387284 0.659864352 0.558979265
+## 53   53 0.8712684 0.721988090 0.633967163
+## 54   54 0.6880572 0.413212693 0.290389887
+## 55   55 0.4820958 0.178231504 0.089544430
+## 56   56 0.3582817 0.088362385 0.033550836
+## 57   57 0.8172524 0.620620189 0.513025436
+## 58   58 0.1826324 0.017968139 0.003612794
+## 59   59 0.2593642 0.041170783 0.011525138
+## 60   60 0.5298865 0.222852801 0.122405268
+## 61   61 0.4112892 0.122437331 0.052952135
+## 62   62 0.8317470 0.646954444 0.543738281
+## 63   63 0.3619861 0.090537218 0.034711840
+## 64   64 0.9288615 0.839927685 0.783439459
+## 65   65 0.6360424 0.343144127 0.223911661
+## 66   66 0.2369778 0.033259957 0.008550537
+## 67   67 0.1628656 0.013705883 0.002473502
+## 68   68 0.5346720 0.227639589 0.126099553
+## 69   69 0.7780045 0.552460626 0.435962410
+## 70   70 0.4758134 0.172789984 0.085742901
+## 71   71 0.3048189 0.060307037 0.019660311
+## 72   72 0.5337322 0.226694864 0.125367967
+## 73   73 0.6421054 0.350926443 0.231048663
+## 74   74 0.5298084 0.222775086 0.122345549
+## 75   75 0.6615420 0.376556487 0.254997619
+## 76   76 0.5246160 0.217648579 0.118424618
+## 77   77 0.6500893 0.361328263 0.240686898
+## 78   78 0.4398578 0.143500888 0.066121047
+## 79   79 0.7587311 0.520654226 0.401253691
+## 80   80 0.5840445 0.280491925 0.168878829
+## 81   81 0.8800870 0.739381405 0.655437878
+## 82   82 0.6382305 0.345941071 0.226469323
+## 83   83 0.5805367 0.276525962 0.165547425
+## 84   84 0.8260257 0.636484312 0.531466337
+## 85   85 0.6208574 0.324093378 0.206713863
+## 86   86 0.7663670 0.533125416 0.414764868
+## 87   87 0.4611324 0.160451753 0.077300589
+## 88   88 0.5940981 0.292039484 0.178685560
+## 89   89 0.9043709 0.788517324 0.717177579
+## 90   90 0.5737243 0.268916815 0.159209134
+## 91   91 0.2652522 0.043414417 0.012413338
+## 92   92 0.1155001 0.006082949 0.000793804
+## 93   93 0.4607822 0.160163875 0.077106614
+## 94   94 0.6371249 0.344526231 0.225174488
+## 95   95 0.2064206 0.023999380 0.005416366
+## 96   96 0.7348284 0.482711569 0.360945510
+## 97   97 0.6421368 0.350967009 0.231086032
+## 98   98 0.5807598 0.276777259 0.165757952
+## 99   99 0.4946143 0.189365826 0.097467396
+## 100 100 0.5963680 0.294683903 0.180953414</code></pre>
 </div>
 <div id="cluster-bootstrap-optimism-correction-and-performance-measures" class="section level2">
 <h2>Cluster bootstrap optimism correction and performance measures</h2>
@@ -675,7 +774,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1>Further details and material</h1>
 <p>The aim of this vignette is to provide a quick-start introduction to the <code>R</code> package <code>pencal</code>. Here I have focused my attention on the fundamental aspects that one needs to use the package.</p>
 <p>Further details, functions and examples can be found in <a href="https://CRAN.R-project.org/package=pencal/pencal.pdf">the manual of the package</a>.</p>
-<p>The description of the method is available in an article <a href="https://arxiv.org/abs/2101.04426">that you can read here</a>.</p>
+<p>The description of the method is available in an article <a href="https://doi.org/10.1002/sim.9178">that you can read here</a>.</p>
 </div>
 
 

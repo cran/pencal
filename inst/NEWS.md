@@ -15,6 +15,20 @@ package - in other words, within a section you will find all those
 package versions a.b.x where a and b are fixed whereas x = 1, 2, 3, …
 Each subsection corresponds to a specific package version.
 
+1.0.x
+=====
+
+pencal 1.0.0
+------------
+
+-   Released: September 2021
+-   The article describing Penalized Regression Calibration is now
+    published in *Statistics in Medicine*! The article is published with
+    Open Access, so anybody can freely download it [from the website of
+    Statistics in Medicine](https://doi.org/10.1002/sim.9178)
+-   Updated package description and citation info
+-   Updated vignette and help pages
+
 0.4.x
 =====
 

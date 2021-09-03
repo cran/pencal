@@ -57,7 +57,7 @@ predictors are simulated from linear mixed models (LMMs), and
 the survival outcome from a Weibull model where the time
 to event depends on the random effects from the LMMs.
 It is an implementation of the simulation method used in
-Signorelli et al. (2021, in review)
+Signorelli et al. (2021)
 }
 \examples{
 # generate example data
@@ -84,7 +84,8 @@ Signorelli, M., Spitali, P., Al-Khalili Szigyarto, C,
 The MARK-MD Consortium, Tsonaka, R. (2021). 
 Penalized regression calibration: a method for the prediction 
 of survival outcomes using complex longitudinal and 
-high-dimensional data. arXiv preprint: arXiv:2101.04426.
+high-dimensional data. Statistics in Medicine.
+DOI: 10.1002/sim.9178
 }
 \author{
 Mirko Signorelli

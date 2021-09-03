@@ -41,7 +41,7 @@ at the desired time points.
 This function computes the naive and optimism-corrected
 measures of performance (C index and time-dependent AUC) 
 for the PRC models proposed 
-in Signorelli et al. (2021, in review). The optimism
+in Signorelli et al. (2021). The optimism
 correction is computed based on a cluster bootstrap
 optimism correction procedure (CBOCP)
 }
@@ -73,7 +73,8 @@ Signorelli, M., Spitali, P., Al-Khalili Szigyarto, C,
 The MARK-MD Consortium, Tsonaka, R. (2021). 
 Penalized regression calibration: a method for the prediction 
 of survival outcomes using complex longitudinal and 
-high-dimensional data. arXiv preprint: arXiv:2101.04426.
+high-dimensional data. Statistics in Medicine.
+DOI: 10.1002/sim.9178
 }
 \seealso{
 for the PRC-LMM model: \code{\link{fit_lmms}} (step 1),
