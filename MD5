@@ -1,4 +1,4 @@
-9e298b0222c87b61721cd9b9f099ca86 *DESCRIPTION
+601f21b13a755205163f91bce761025b *DESCRIPTION
 9f5db94d9e2add12f71998a17600858f *NAMESPACE
 eb9f66aa4270670b255b2e7f4d96423d *R/datasets.R
 1b74b9ef823766aec23a2980fb671984 *R/draw_cluster_bootstrap.R
@@ -22,7 +22,7 @@ ec3b05632fc503687cec889923fa5161 *R/survpred_prcmlpmm.R
 658c59ddd5f7a37b91b2475425ea2594 *data/fitted_prclmm.RData
 0c5c03723bac7e8ae16a52bd1c259ca0 *data/fitted_prcmlpmm.RData
 9164c524ab18da3cd64176f0b9b20fa7 *inst/CITATION
-42edab0008f14992c7457f2d7c659a0f *inst/NEWS.md
+d0b13424a97a3a082513bd17c3e945f3 *inst/NEWS.md
 05eb1069764b600b46bf23170892fbf1 *inst/doc/pencal-vignette.Rmd
 2dcfe43ae9e4e8fe80f01a4a5dff0ae6 *inst/doc/pencal-vignette.html
 8e9567cc4897487f9950a60b916fc0cd *man/draw_cluster_bootstrap.Rd

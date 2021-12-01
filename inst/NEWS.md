@@ -18,6 +18,13 @@ Each subsection corresponds to a specific package version.
 1.0.x
 =====
 
+pencal 1.0.1
+------------
+
+-   Released: December 2021
+-   Minor correction to package description (it was still mentioning
+    arXiv instead of the *Statistics in Medicine* publication)
+
 pencal 1.0.0
 ------------
 

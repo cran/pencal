@@ -1,6 +1,6 @@
 Package: pencal
 Title: Penalized Regression Calibration (PRC)
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: 
     c(person(given = "Mirko",
              family = "Signorelli",
@@ -18,7 +18,7 @@ Authors@R:
 Description: Computes penalized regression calibration (PRC), a
     statistical method that allows to predict survival from
     high-dimensional longitudinal predictors. PRC is described in
-    Signorelli et al.  (2021, arXiv preprint: <doi:10.1002/sim.9178>)).
+    Signorelli et al.  (2021, <doi:10.1002/sim.9178>)).
 License: GPL-3
 URL: https://mirkosignorelli.github.io/r
 Depends: R (>= 4.0.0)
@@ -30,11 +30,11 @@ Imports: foreach, doParallel, glmnet, nlme, survival, MASS, stats,
         survcomp, survivalROC, dplyr, Matrix, magic, lcmm
 Suggests: ptmixed, survminer, knitr, rmarkdown
 NeedsCompilation: no
-Packaged: 2021-09-03 09:40:03 UTC; msignorelli
+Packaged: 2021-12-01 15:00:17 UTC; msignorelli
 Author: Mirko Signorelli [aut, cre, cph]
     (<https://orcid.org/0000-0002-8102-3356>),
   Pietro Spitali [ctb],
   Roula Tsonaka [ctb]
 Maintainer: Mirko Signorelli <msignorelli.rpackages@gmail.com>
 Repository: CRAN
-Date/Publication: 2021-09-03 11:10:02 UTC
+Date/Publication: 2021-12-01 15:20:01 UTC
