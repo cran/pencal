@@ -78,7 +78,7 @@ Signorelli, M., Spitali, P., Al-Khalili Szigyarto, C,
 The MARK-MD Consortium, Tsonaka, R. (2021). 
 Penalized regression calibration: a method for the prediction 
 of survival outcomes using complex longitudinal and 
-high-dimensional data. Statistics in Medicine.
+high-dimensional data. Statistics in Medicine, 40 (27), 6178-6196.
 DOI: 10.1002/sim.9178
 }
 \seealso{

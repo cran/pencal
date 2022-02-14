@@ -18,6 +18,13 @@ Each subsection corresponds to a specific package version.
 1.0.x
 =====
 
+pencal 1.0.2
+============
+
+-   Added volume, issue and page number to CITATION file, vignette and
+    help pages
+-   Updated vignette with more detailed installation instructions
+
 pencal 1.0.1
 ------------
 

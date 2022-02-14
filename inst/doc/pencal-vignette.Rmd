@@ -31,7 +31,7 @@ Penalized Regression Calibration (PRC) is a statistical method that has been dev
 
 PRC is described in detail in the following article:
 
-Signorelli, M., Spitali, P., Al-Khalili Sgyziarto, C., The Mark-MD Consortium, Tsonaka, R. (2021). Penalized regression calibration: A method for the prediction of survival outcomes using complex longitudinal and high-dimensional data. Statistics in Medicine. DOI:  [10.1002/sim.9178](https://doi.org/10.1002/sim.9178).
+Signorelli, M., Spitali, P., Al-Khalili Sgyziarto, C., The Mark-MD Consortium, Tsonaka, R. (2021). Penalized regression calibration: A method for the prediction of survival outcomes using complex longitudinal and high-dimensional data. Statistics in Medicine, 40 (27), 6178-6196. DOI:  [10.1002/sim.9178](https://doi.org/10.1002/sim.9178).
 
 ## How does PRC work?
 
@@ -57,13 +57,34 @@ knitr::include_graphics("PRC_diagram.jpg")
 
 ## Get started
 
-The `R` package `pencal` can be installed directly from CRAN using
+Even though `pencal` is available from `CRAN`, it includes a `Bioconductor` packages among its dependencies (`survcomp`). This can create problems in the installation phase, since the usual `install.packages( )` only fetches `CRAN` dependencies, and not `Bioconductor` ones. Below I explain two alternative ways to successfully install `pencal`.
+
+### Option 1: install Bioconductor dependencies directly
+
+The `R` package `pencal` and all of its dependencies can be installed all in one go using:
 
 ```{r, eval=FALSE, echo=TRUE, results='asis'}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install('pencal')
+```
+
+### Option 2: install Bioconductor dependencies manually
+
+Alternatively, you may choose to first install `survcomp` using `BiocManager::install( )`, and then to install `pencal` and all of its CRAN dependencies using `install.packages( )`. To do so, you need to use
+
+```{r, eval=FALSE, echo=TRUE, results='asis'}
+# step 1: install survcomp
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install('survcomp')
+# step 2: install pencal and CRAN dependencies
 install.packages('pencal')
 ```
 
-After installing `pencal`, you can load the package with
+## Loading the package
+
+After having installed `pencal`, you can load the package with
 
 ```{r, eval=TRUE, echo=TRUE, results='asis'}
 library('pencal')
@@ -263,7 +284,8 @@ After fitting the model, you will probably want to obtain **predicted survival p
 
 ```{r}
 preds = survpred_prclmm(step1, step2, step3, times = c(1, 2, 3))
-head(preds)
+ls(preds)
+head(preds$predicted_survival)
 ```
 
 ## Cluster bootstrap optimism correction and performance measures

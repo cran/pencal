@@ -336,7 +336,11 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <li><a href="#what-is-pencal">What is <code>pencal</code>?</a></li>
 <li><a href="#what-is-penalized-regression-calibration">What is Penalized Regression Calibration?</a></li>
 <li><a href="#how-does-prc-work">How does PRC work?</a></li>
-<li><a href="#get-started">Get started</a></li>
+<li><a href="#get-started">Get started</a><ul>
+<li><a href="#option-1-install-bioconductor-dependencies-directly">Option 1: install Bioconductor dependencies directly</a></li>
+<li><a href="#option-2-install-bioconductor-dependencies-manually">Option 2: install Bioconductor dependencies manually</a></li>
+</ul></li>
+<li><a href="#loading-the-package">Loading the package</a></li>
 </ul></li>
 <li><a href="#overview-of-the-functionalities-of-pencal">Overview of the functionalities of <code>pencal</code></a><ul>
 <li><a href="#model-estimation-and-prediction">Model estimation and prediction</a></li>
@@ -371,7 +375,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>Longitudinal and high-dimensional measurements have become increasingly common in biomedical research. However, methods to predict survival outcomes using covariates that are both longitudinal and high-dimensional are currently missing.</p>
 <p>Penalized Regression Calibration (PRC) is a statistical method that has been developed to fill this methodological gap, making it possible to <strong>predict survival using as predictors a set of covariates that are at the same time longitudinal and high-dimensional</strong>.</p>
 <p>PRC is described in detail in the following article:</p>
-<p>Signorelli, M., Spitali, P., Al-Khalili Sgyziarto, C., The Mark-MD Consortium, Tsonaka, R. (2021). Penalized regression calibration: A method for the prediction of survival outcomes using complex longitudinal and high-dimensional data. Statistics in Medicine. DOI: <a href="https://doi.org/10.1002/sim.9178">10.1002/sim.9178</a>.</p>
+<p>Signorelli, M., Spitali, P., Al-Khalili Sgyziarto, C., The Mark-MD Consortium, Tsonaka, R. (2021). Penalized regression calibration: A method for the prediction of survival outcomes using complex longitudinal and high-dimensional data. Statistics in Medicine, 40 (27), 6178-6196. DOI: <a href="https://doi.org/10.1002/sim.9178">10.1002/sim.9178</a>.</p>
 </div>
 <div id="how-does-prc-work" class="section level2">
 <h2>How does PRC work?</h2>
@@ -390,10 +394,29 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </div>
 <div id="get-started" class="section level2">
 <h2>Get started</h2>
-<p>The <code>R</code> package <code>pencal</code> can be installed directly from CRAN using</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">install.packages</span>(<span class="st">&#39;pencal&#39;</span>)</span></code></pre></div>
-<p>After installing <code>pencal</code>, you can load the package with</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">library</span>(<span class="st">&#39;pencal&#39;</span>)</span></code></pre></div>
+<p>Even though <code>pencal</code> is available from <code>CRAN</code>, it includes a <code>Bioconductor</code> packages among its dependencies (<code>survcomp</code>). This can create problems in the installation phase, since the usual <code>install.packages( )</code> only fetches <code>CRAN</code> dependencies, and not <code>Bioconductor</code> ones. Below I explain two alternative ways to successfully install <code>pencal</code>.</p>
+<div id="option-1-install-bioconductor-dependencies-directly" class="section level3">
+<h3>Option 1: install Bioconductor dependencies directly</h3>
+<p>The <code>R</code> package <code>pencal</code> and all of its dependencies can be installed all in one go using:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="cf">if</span> (<span class="op">!</span><span class="kw">require</span>(<span class="st">&quot;BiocManager&quot;</span>, <span class="dt">quietly =</span> <span class="ot">TRUE</span>))</span>
+<span id="cb1-2"><a href="#cb1-2"></a>    <span class="kw">install.packages</span>(<span class="st">&quot;BiocManager&quot;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3"></a>BiocManager<span class="op">::</span><span class="kw">install</span>(<span class="st">&#39;pencal&#39;</span>)</span></code></pre></div>
+</div>
+<div id="option-2-install-bioconductor-dependencies-manually" class="section level3">
+<h3>Option 2: install Bioconductor dependencies manually</h3>
+<p>Alternatively, you may choose to first install <code>survcomp</code> using <code>BiocManager::install( )</code>, and then to install <code>pencal</code> and all of its CRAN dependencies using <code>install.packages( )</code>. To do so, you need to use</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># step 1: install survcomp</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="cf">if</span> (<span class="op">!</span><span class="kw">require</span>(<span class="st">&quot;BiocManager&quot;</span>, <span class="dt">quietly =</span> <span class="ot">TRUE</span>))</span>
+<span id="cb2-3"><a href="#cb2-3"></a>    <span class="kw">install.packages</span>(<span class="st">&quot;BiocManager&quot;</span>)</span>
+<span id="cb2-4"><a href="#cb2-4"></a>BiocManager<span class="op">::</span><span class="kw">install</span>(<span class="st">&#39;survcomp&#39;</span>)</span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="co"># step 2: install pencal and CRAN dependencies</span></span>
+<span id="cb2-6"><a href="#cb2-6"></a><span class="kw">install.packages</span>(<span class="st">&#39;pencal&#39;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="loading-the-package" class="section level2">
+<h2>Loading the package</h2>
+<p>After having installed <code>pencal</code>, you can load the package with</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">library</span>(<span class="st">&#39;pencal&#39;</span>)</span></code></pre></div>
 </div>
 </div>
 <div id="overview-of-the-functionalities-of-pencal" class="section level1">
@@ -439,12 +462,12 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="a-step-by-step-example" class="section level1">
 <h1>A step by step example</h1>
 <p>To illustrate how <code>pencal</code> works, let us simulate an example dataset from the PRC-LMM model. Hereafter we generate a dataset that comprises <span class="math inline">\(n = 100\)</span> subjects, <span class="math inline">\(p = 10\)</span> longitudinal biomarkers that are measured at <span class="math inline">\(t = 0, 0.2, 0.5, 1, 1.5, 2\)</span> years from baseline, and a survival outcome that is associated with 5 (<code>p.relev</code>) of the 10 biomarkers:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">set.seed</span>(<span class="dv">1234</span>)</span>
-<span id="cb3-2"><a href="#cb3-2"></a>p =<span class="st"> </span><span class="dv">10</span></span>
-<span id="cb3-3"><a href="#cb3-3"></a>simdata =<span class="st"> </span><span class="kw">simulate_prclmm_data</span>(<span class="dt">n =</span> <span class="dv">100</span>, <span class="dt">p =</span> p, <span class="dt">p.relev =</span> <span class="dv">5</span>, </span>
-<span id="cb3-4"><a href="#cb3-4"></a>                               <span class="dt">lambda =</span> <span class="fl">0.2</span>, <span class="dt">nu =</span> <span class="fl">1.5</span>,</span>
-<span id="cb3-5"><a href="#cb3-5"></a>                               <span class="dt">seed =</span> <span class="dv">1234</span>, <span class="dt">t.values =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="dv">1</span>, <span class="fl">1.5</span>, <span class="dv">2</span>))</span>
-<span id="cb3-6"><a href="#cb3-6"></a><span class="kw">ls</span>(simdata)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb4-2"><a href="#cb4-2"></a>p =<span class="st"> </span><span class="dv">10</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a>simdata =<span class="st"> </span><span class="kw">simulate_prclmm_data</span>(<span class="dt">n =</span> <span class="dv">100</span>, <span class="dt">p =</span> p, <span class="dt">p.relev =</span> <span class="dv">5</span>, </span>
+<span id="cb4-4"><a href="#cb4-4"></a>                               <span class="dt">lambda =</span> <span class="fl">0.2</span>, <span class="dt">nu =</span> <span class="fl">1.5</span>,</span>
+<span id="cb4-5"><a href="#cb4-5"></a>                               <span class="dt">seed =</span> <span class="dv">1234</span>, <span class="dt">t.values =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="dv">1</span>, <span class="fl">1.5</span>, <span class="dv">2</span>))</span>
+<span id="cb4-6"><a href="#cb4-6"></a><span class="kw">ls</span>(simdata)</span></code></pre></div>
 <pre><code>## [1] &quot;censoring.prop&quot; &quot;long.data&quot;      &quot;surv.data&quot;</code></pre>
 <p>Note that in this example we are setting <span class="math inline">\(n &gt; p\)</span>, but <code>pencal</code> can handle both low-dimensional (<span class="math inline">\(n &gt; p\)</span>) and high-dimensional (<span class="math inline">\(n \leq p\)</span>) datasets.</p>
 <div id="input-data" class="section level2">
@@ -453,8 +476,8 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <ol style="list-style-type: decimal">
 <li><strong>a dataset in long format</strong>, which should contain (at least) the following variables: a subject identifier that should be named <code>id</code>, the longitudinal biomarkers (here called <code>marker1</code>, …, <code>marker10</code>), and the relevant time variables (in this example we will use <code>age</code> as covariate in the LMMs estimated in step 1, and <code>baseline.age</code> as covariate in the penalized Cox model estimated in step 3):</li>
 </ol>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># view the dataset in long format</span></span>
-<span id="cb5-2"><a href="#cb5-2"></a><span class="kw">head</span>(simdata<span class="op">$</span>long.data)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="co"># view the dataset in long format</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="kw">head</span>(simdata<span class="op">$</span>long.data)</span></code></pre></div>
 <pre><code>##   id base.age t.from.base      age   marker1  marker2  marker3  marker4
 ## 1  1 4.269437         0.0 4.269437 1.5417408 4.452282 15.13419 5.809207
 ## 2  1 4.269437         0.2 4.469437 1.2346437 5.252873 15.98066 5.896591
@@ -469,19 +492,19 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 ## 4 16.48330  -8.994558 18.44549 11.91967  1.5949944 15.50285
 ## 5 16.38560  -9.034169 19.61104 12.59247  1.3730259 15.86172
 ## 6 17.23651 -10.220797 19.71013 12.79891 -0.2164965 15.89041</code></pre>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="co"># visualize the trajectories for a randomly picked biomarker</span></span>
-<span id="cb7-2"><a href="#cb7-2"></a><span class="kw">library</span>(ptmixed)</span>
-<span id="cb7-3"><a href="#cb7-3"></a>ptmixed<span class="op">::</span><span class="kw">make.spaghetti</span>(<span class="dt">x =</span> age, <span class="dt">y =</span> marker5, </span>
-<span id="cb7-4"><a href="#cb7-4"></a>               <span class="dt">id =</span> id, <span class="dt">group =</span> id,</span>
-<span id="cb7-5"><a href="#cb7-5"></a>               <span class="dt">data =</span> simdata<span class="op">$</span>long.data, </span>
-<span id="cb7-6"><a href="#cb7-6"></a>               <span class="dt">margins =</span> <span class="kw">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">2</span>),</span>
-<span id="cb7-7"><a href="#cb7-7"></a>               <span class="dt">legend.inset =</span> <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="co"># visualize the trajectories for a randomly picked biomarker</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a><span class="kw">library</span>(ptmixed)</span>
+<span id="cb8-3"><a href="#cb8-3"></a>ptmixed<span class="op">::</span><span class="kw">make.spaghetti</span>(<span class="dt">x =</span> age, <span class="dt">y =</span> marker5, </span>
+<span id="cb8-4"><a href="#cb8-4"></a>               <span class="dt">id =</span> id, <span class="dt">group =</span> id,</span>
+<span id="cb8-5"><a href="#cb8-5"></a>               <span class="dt">data =</span> simdata<span class="op">$</span>long.data, </span>
+<span id="cb8-6"><a href="#cb8-6"></a>               <span class="dt">margins =</span> <span class="kw">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">2</span>),</span>
+<span id="cb8-7"><a href="#cb8-7"></a>               <span class="dt">legend.inset =</span> <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)</span></code></pre></div>
 <p><img src="data:image/png;base64,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" /><!-- --></p>
 <ol start="2" style="list-style-type: decimal">
 <li><strong>a dataset with information on the survival outcome</strong>, which should contain (at least) the following variables: a subject identifier that should be named <code>id</code>, the time to event outcome called <code>time</code>, and the binary event indicator called <code>event</code> (NB: make sure that the variable names associated to these three variables are indeed <code>id</code>, <code>time</code> and <code>event</code>!)</li>
 </ol>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="co"># view the dataset with the survival data</span></span>
-<span id="cb8-2"><a href="#cb8-2"></a><span class="kw">head</span>(simdata<span class="op">$</span>surv.data)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="co"># view the dataset with the survival data</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a><span class="kw">head</span>(simdata<span class="op">$</span>surv.data)</span></code></pre></div>
 <pre><code>##   id baseline.age      time event
 ## 1  1     4.269437 0.8368389     0
 ## 2  2     4.705434 1.4288656     1
@@ -489,27 +512,27 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 ## 4  4     4.379400 0.5809532     1
 ## 5  5     4.800329 0.2441706     1
 ## 6  6     3.394879 0.4901404     1</code></pre>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="co"># what is the proportion of censoring in this dataset?</span></span>
-<span id="cb10-2"><a href="#cb10-2"></a>simdata<span class="op">$</span>censoring.prop</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="co"># what is the proportion of censoring in this dataset?</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a>simdata<span class="op">$</span>censoring.prop</span></code></pre></div>
 <pre><code>## [1] 0.22</code></pre>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a><span class="co"># visualize an estimate of the survival function</span></span>
-<span id="cb12-2"><a href="#cb12-2"></a><span class="kw">library</span>(survival)</span>
-<span id="cb12-3"><a href="#cb12-3"></a><span class="kw">library</span>(survminer)</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="co"># visualize an estimate of the survival function</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a><span class="kw">library</span>(survival)</span>
+<span id="cb13-3"><a href="#cb13-3"></a><span class="kw">library</span>(survminer)</span></code></pre></div>
 <pre><code>## Loading required package: ggplot2</code></pre>
 <pre><code>## Loading required package: ggpubr</code></pre>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>surv.obj =<span class="st"> </span>survival<span class="op">::</span><span class="kw">Surv</span>(<span class="dt">time =</span> simdata<span class="op">$</span>surv.data<span class="op">$</span>time, </span>
-<span id="cb15-2"><a href="#cb15-2"></a>                <span class="dt">event =</span> simdata<span class="op">$</span>surv.data<span class="op">$</span>event)</span>
-<span id="cb15-3"><a href="#cb15-3"></a>kaplan =<span class="st"> </span>survival<span class="op">::</span><span class="kw">survfit</span>(surv.obj <span class="op">~</span><span class="st"> </span><span class="dv">1</span>,  </span>
-<span id="cb15-4"><a href="#cb15-4"></a>                  <span class="dt">type=</span><span class="st">&quot;kaplan-meier&quot;</span>)</span>
-<span id="cb15-5"><a href="#cb15-5"></a>survminer<span class="op">::</span><span class="kw">ggsurvplot</span>(kaplan, <span class="dt">data =</span> simdata<span class="op">$</span>surv.data)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>surv.obj =<span class="st"> </span>survival<span class="op">::</span><span class="kw">Surv</span>(<span class="dt">time =</span> simdata<span class="op">$</span>surv.data<span class="op">$</span>time, </span>
+<span id="cb16-2"><a href="#cb16-2"></a>                <span class="dt">event =</span> simdata<span class="op">$</span>surv.data<span class="op">$</span>event)</span>
+<span id="cb16-3"><a href="#cb16-3"></a>kaplan =<span class="st"> </span>survival<span class="op">::</span><span class="kw">survfit</span>(surv.obj <span class="op">~</span><span class="st"> </span><span class="dv">1</span>,  </span>
+<span id="cb16-4"><a href="#cb16-4"></a>                  <span class="dt">type=</span><span class="st">&quot;kaplan-meier&quot;</span>)</span>
+<span id="cb16-5"><a href="#cb16-5"></a>survminer<span class="op">::</span><span class="kw">ggsurvplot</span>(kaplan, <span class="dt">data =</span> simdata<span class="op">$</span>surv.data)</span></code></pre></div>
 <p><img src="data:image/png;base64,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" /><!-- --></p>
 </div>
 <div id="some-remarks-on-parallel-computing-with-pencal" class="section level2">
 <h2>Some remarks on parallel computing with <code>pencal</code></h2>
 <p>Before we begin to estimate the PRC-LMM, let’s determine the number of cores that will be used for the computation of the CBOCP. In general you can use as many cores as available to you; to do this, you can set</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>n.cores =<span class="st"> </span>parallel<span class="op">::</span><span class="kw">detectCores</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>n.cores =<span class="st"> </span>parallel<span class="op">::</span><span class="kw">detectCores</span>()</span></code></pre></div>
 <p>Since the <a href="https://cran.r-project.org/web/packages/policies.html">CRAN Repository Policy</a> allow us to use at most 2 cores when building the vignettes, in this example we will limit the number of cores used to 2:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>n.cores =<span class="st"> </span><span class="dv">2</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a>n.cores =<span class="st"> </span><span class="dv">2</span></span></code></pre></div>
 <p>Be aware, however, that <strong>using more than 2 cores will speed computations up, and it is thus recommended</strong>. Several functions in <code>pencal</code> will actually return a warning when you perform computations using less cores than available: the goal of such warnings is to remind you that you could use more cores to speed computations up; however, if you are purposedly using a smaller number of cores you can ignore the warning.</p>
 </div>
 <div id="estimation-of-the-prc-lmm" class="section level2">
@@ -520,13 +543,13 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>In the first step, for each biomarker we estimate a <strong>linear mixed model</strong> (LMM) where the longitudinal biomarker levels <span class="math inline">\(y_{ij}\)</span> depend on two fixed effects (one intercept, <span class="math inline">\(\beta_0\)</span> and one slope for age, <span class="math inline">\(\beta_1\)</span>), on a subject-specific random intercept <span class="math inline">\(u_{0i}\)</span> and on a random slope for age <span class="math inline">\(u_{1i}\)</span>:</p>
 <p><span class="math display">\[y_{ij} = \beta_0 + u_{0i} + \beta_1 a_{ij} + u_{1i} a_{ij} + \varepsilon_{ij}.\]</span></p>
 <p>To do this in <code>R</code> we use the <code>fit_lmms</code> function:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a>y.names =<span class="st"> </span><span class="kw">paste</span>(<span class="st">&#39;marker&#39;</span>, <span class="dv">1</span><span class="op">:</span>p, <span class="dt">sep =</span> <span class="st">&#39;&#39;</span>)</span>
-<span id="cb18-2"><a href="#cb18-2"></a>step1 =<span class="st"> </span><span class="kw">fit_lmms</span>(<span class="dt">y.names =</span> y.names, </span>
-<span id="cb18-3"><a href="#cb18-3"></a>                 <span class="dt">fixefs =</span> <span class="op">~</span><span class="st"> </span>age, <span class="dt">ranefs =</span> <span class="op">~</span><span class="st"> </span>age <span class="op">|</span><span class="st"> </span>id, </span>
-<span id="cb18-4"><a href="#cb18-4"></a>                 <span class="dt">long.data =</span> simdata<span class="op">$</span>long.data, </span>
-<span id="cb18-5"><a href="#cb18-5"></a>                 <span class="dt">surv.data =</span> simdata<span class="op">$</span>surv.data,</span>
-<span id="cb18-6"><a href="#cb18-6"></a>                 <span class="dt">t.from.base =</span> t.from.base,</span>
-<span id="cb18-7"><a href="#cb18-7"></a>                 <span class="dt">n.boots =</span> <span class="dv">10</span>, <span class="dt">n.cores =</span> n.cores)</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a>y.names =<span class="st"> </span><span class="kw">paste</span>(<span class="st">&#39;marker&#39;</span>, <span class="dv">1</span><span class="op">:</span>p, <span class="dt">sep =</span> <span class="st">&#39;&#39;</span>)</span>
+<span id="cb19-2"><a href="#cb19-2"></a>step1 =<span class="st"> </span><span class="kw">fit_lmms</span>(<span class="dt">y.names =</span> y.names, </span>
+<span id="cb19-3"><a href="#cb19-3"></a>                 <span class="dt">fixefs =</span> <span class="op">~</span><span class="st"> </span>age, <span class="dt">ranefs =</span> <span class="op">~</span><span class="st"> </span>age <span class="op">|</span><span class="st"> </span>id, </span>
+<span id="cb19-4"><a href="#cb19-4"></a>                 <span class="dt">long.data =</span> simdata<span class="op">$</span>long.data, </span>
+<span id="cb19-5"><a href="#cb19-5"></a>                 <span class="dt">surv.data =</span> simdata<span class="op">$</span>surv.data,</span>
+<span id="cb19-6"><a href="#cb19-6"></a>                 <span class="dt">t.from.base =</span> t.from.base,</span>
+<span id="cb19-7"><a href="#cb19-7"></a>                 <span class="dt">n.boots =</span> <span class="dv">10</span>, <span class="dt">n.cores =</span> n.cores)</span></code></pre></div>
 <pre><code>## Sorting long.data by subject id
 ## Sorting surv.data by subject id
 ## Preliminary step: remove measurements taken after event / censoring.
@@ -540,11 +563,11 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>The LMM fitted here is just an example of how to model longitudinal biomarker trajectories: depending on the data you are dealing with, you may choose to specify different fixed and random effects formulas, or even to consider the MLPMM instead of the LMM.</p>
 <p>Note that here I have set <code>n.boots = 10</code> to reduce computing time for the CBOCP, given that CRAN only allows me to use two cores when compiling the vignette. In general, it is recommended to set <code>n.boots = 0</code> if you do not wish to compute the CBOCP, or to set <code>n.boots</code> equal to a larger number (e.g., 50, 100 or 200) if you want to accurately compute the CBOCP. In the latter case, consider using as many cores as available to you to speed computations up.</p>
 <p><code>fit_lmms</code> returns as output a list with several elements; among them is <code>lmm.fits.orig</code>, which contains the LMMs fitted to each biomarker:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a><span class="kw">ls</span>(step1)</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="kw">ls</span>(step1)</span></code></pre></div>
 <pre><code>## [1] &quot;boot.ids&quot;      &quot;call.info&quot;     &quot;df.sanitized&quot;  &quot;lmm.fits.boot&quot;
 ## [5] &quot;lmm.fits.orig&quot; &quot;n.boots&quot;</code></pre>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a><span class="co"># estimated LMM for marker1:</span></span>
-<span id="cb22-2"><a href="#cb22-2"></a>step1<span class="op">$</span>lmm.fits.orig[<span class="dv">1</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a><span class="co"># estimated LMM for marker1:</span></span>
+<span id="cb23-2"><a href="#cb23-2"></a>step1<span class="op">$</span>lmm.fits.orig[<span class="dv">1</span>]</span></code></pre></div>
 <pre><code>## $marker1
 ## Linear mixed-effects model fit by REML
 ##   Data: df.sub 
@@ -568,7 +591,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="step-2" class="section level3">
 <h3>Step 2</h3>
 <p>In the second step we <strong>compute the predicted random intercepts and random slopes</strong> for the LMMs fitted in step 1:</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a>step2 =<span class="st"> </span><span class="kw">summarize_lmms</span>(<span class="dt">object =</span> step1, <span class="dt">n.cores =</span> n.cores)</span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a>step2 =<span class="st"> </span><span class="kw">summarize_lmms</span>(<span class="dt">object =</span> step1, <span class="dt">n.cores =</span> n.cores)</span></code></pre></div>
 <pre><code>## Computing the predicted random effects on the original dataset...
 ## ...done
 ## Bootstrap procedure started
@@ -576,11 +599,11 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 ## Bootstrap procedure finished
 ## Computation of step 2: finished :)</code></pre>
 <p><code>summarize_lmms</code> returns as output a list that contains, among other elements, a matrix <code>ranef.orig</code> with the predicted random effects for the LMMs fitted in step 1:</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a><span class="kw">ls</span>(step2)</span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a><span class="kw">ls</span>(step2)</span></code></pre></div>
 <pre><code>## [1] &quot;boot.ids&quot;         &quot;call&quot;             &quot;n.boots&quot;          &quot;ranef.boot.train&quot;
 ## [5] &quot;ranef.boot.valid&quot; &quot;ranef.orig&quot;</code></pre>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a><span class="co"># view predicted random effects for the first two markers</span></span>
-<span id="cb28-2"><a href="#cb28-2"></a>step2<span class="op">$</span>ranef.orig[<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1"></a><span class="co"># view predicted random effects for the first two markers</span></span>
+<span id="cb29-2"><a href="#cb29-2"></a>step2<span class="op">$</span>ranef.orig[<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]</span></code></pre></div>
 <pre><code>##   marker1_b_int marker1_b_age marker2_b_int marker2_b_age
 ## 1   0.468791151    0.50257974     0.4806176     0.9897538
 ## 2  -0.651187418   -1.18949489     0.3094290    -1.2798246
@@ -592,9 +615,9 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="step-3" class="section level3">
 <h3>Step 3</h3>
 <p>Lastly, in the third step of PRC-LMM we estimate a <strong>penalized Cox model</strong> where we employ as predictors baseline age and all the summaries (predicted random effects) computed in step 2:</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1"></a>step3 =<span class="st"> </span><span class="kw">fit_prclmm</span>(<span class="dt">object =</span> step2, <span class="dt">surv.data =</span> simdata<span class="op">$</span>surv.data,</span>
-<span id="cb30-2"><a href="#cb30-2"></a>                   <span class="dt">baseline.covs =</span> <span class="op">~</span><span class="st"> </span>baseline.age,</span>
-<span id="cb30-3"><a href="#cb30-3"></a>                   <span class="dt">penalty =</span> <span class="st">&#39;ridge&#39;</span>, <span class="dt">n.cores =</span> n.cores)</span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1"></a>step3 =<span class="st"> </span><span class="kw">fit_prclmm</span>(<span class="dt">object =</span> step2, <span class="dt">surv.data =</span> simdata<span class="op">$</span>surv.data,</span>
+<span id="cb31-2"><a href="#cb31-2"></a>                   <span class="dt">baseline.covs =</span> <span class="op">~</span><span class="st"> </span>baseline.age,</span>
+<span id="cb31-3"><a href="#cb31-3"></a>                   <span class="dt">penalty =</span> <span class="st">&#39;ridge&#39;</span>, <span class="dt">n.cores =</span> n.cores)</span></code></pre></div>
 <pre><code>## Estimated penalized Cox model on the original dataset...
 ## ...done
 ## Bootstrap procedure started
@@ -603,14 +626,14 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 ## Computation of step 3: finished :)</code></pre>
 <p>In this example I have set <code>penalty = &#39;ridge&#39;</code>, but you may also use elasticnet or lasso as alternatives. Moreover, by default the predicted random effects are standardized when included in the penalized Cox model (if you don’t want to perform such standardization, set <code>standardize = F</code>).</p>
 <p><code>fit_prclmm</code> returns as output a list that contains, among other elements, the fitted penalized Cox model <code>pcox.orig</code>, which is a <code>glmnet</code> object:</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1"></a><span class="kw">ls</span>(step3)</span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1"></a><span class="kw">ls</span>(step3)</span></code></pre></div>
 <pre><code>## [1] &quot;boot.ids&quot;  &quot;call&quot;      &quot;n.boots&quot;   &quot;pcox.boot&quot; &quot;pcox.orig&quot; &quot;surv.data&quot;</code></pre>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1"></a><span class="kw">class</span>(step3<span class="op">$</span>pcox.orig)</span></code></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a><span class="kw">class</span>(step3<span class="op">$</span>pcox.orig)</span></code></pre></div>
 <pre><code>## [1] &quot;cv.glmnet&quot;</code></pre>
-<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1"></a><span class="kw">library</span>(glmnet)</span></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1"></a><span class="kw">library</span>(glmnet)</span></code></pre></div>
 <pre><code>## Loading required package: Matrix</code></pre>
 <pre><code>## Loaded glmnet 4.0-2</code></pre>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1"></a><span class="kw">t</span>(<span class="kw">as.matrix</span>(<span class="kw">coef</span>(step3<span class="op">$</span>pcox.orig)))</span></code></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1"></a><span class="kw">t</span>(<span class="kw">as.matrix</span>(<span class="kw">coef</span>(step3<span class="op">$</span>pcox.orig)))</span></code></pre></div>
 <pre><code>##   baseline.age marker1_b_int marker1_b_age marker2_b_int marker2_b_age
 ## 1  0.001253804   -0.02091294  -0.005629194    0.05632732     0.1530983
 ##   marker3_b_int marker3_b_age marker4_b_int marker4_b_age marker5_b_int
@@ -631,114 +654,17 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="predicted-survival-probabilities-1" class="section level2">
 <h2>Predicted survival probabilities</h2>
 <p>After fitting the model, you will probably want to obtain <strong>predicted survival probabilities</strong> for each individual at several time points. This can be done through the function <code>survpred_prclmm</code>, which takes as inputs the outputs of step1, step 2 and step 3, alongside with the time points at which to compute the survival probabilities:</p>
-<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a>preds =<span class="st"> </span><span class="kw">survpred_prclmm</span>(step1, step2, step3, <span class="dt">times =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>))</span>
-<span id="cb41-2"><a href="#cb41-2"></a><span class="kw">head</span>(preds)</span></code></pre></div>
-<pre><code>## $call
-## survpred_prclmm(step1 = step1, step2 = step2, step3 = step3, 
-##     times = c(1, 2, 3))
-## 
-## $predicted_survival
-##      id      S(1)        S(2)        S(3)
-## 1     1 0.4685893 0.166652764 0.081512378
-## 2     2 0.7506514 0.507643162 0.387294678
-## 3     3 0.7088022 0.443269876 0.320366425
-## 4     4 0.5153831 0.208702527 0.111670556
-## 5     5 0.6207733 0.323989577 0.206621238
-## 6     6 0.5630938 0.257286990 0.149659648
-## 7     7 0.5609297 0.254955812 0.147765868
-## 8     8 0.7795296 0.555024037 0.438795250
-## 9     9 0.6788175 0.400216048 0.277691705
-## 10   10 0.7135979 0.450391956 0.327591227
-## 11   11 0.3018944 0.058948274 0.019043355
-## 12   12 0.7695261 0.538334972 0.420446488
-## 13   13 0.7286212 0.473128494 0.350959721
-## 14   14 0.7766883 0.550253948 0.433527996
-## 15   15 0.2875713 0.052549907 0.016215437
-## 16   16 0.6549235 0.367711900 0.246657201
-## 17   17 0.8236114 0.632095764 0.526346400
-## 18   18 0.7135237 0.450281347 0.327478671
-## 19   19 0.7261976 0.469416730 0.347113525
-## 20   20 0.6212937 0.324631930 0.207194620
-## 21   21 0.7804104 0.556507660 0.440437199
-## 22   22 0.8757447 0.730786991 0.644803238
-## 23   23 0.7342705 0.481845679 0.360039954
-## 24   24 0.5357598 0.228735872 0.126950024
-## 25   25 0.6677481 0.384960367 0.262995257
-## 26   26 0.4349778 0.139765987 0.063725828
-## 27   27 0.4897810 0.185020741 0.094352755
-## 28   28 0.4555019 0.155859224 0.074222774
-## 29   29 0.5910285 0.288485192 0.175650293
-## 30   30 0.8836914 0.746559465 0.664357851
-## 31   31 0.6939248 0.421590774 0.298660801
-## 32   32 0.7294177 0.474351914 0.352230097
-## 33   33 0.5717768 0.266764010 0.157428749
-## 34   34 0.4970991 0.191622249 0.099096174
-## 35   35 0.3296104 0.072550594 0.025462544
-## 36   36 0.4036116 0.117103271 0.049752828
-## 37   37 0.8068504 0.602109553 0.491745006
-## 38   38 0.5860879 0.282817223 0.170840855
-## 39   39 0.5277030 0.220688142 0.120744987
-## 40   40 0.7100518 0.445119294 0.322238096
-## 41   41 0.7622675 0.526408802 0.407472284
-## 42   42 0.6104232 0.311365478 0.195445360
-## 43   43 0.2564489 0.040085245 0.011102223
-## 44   44 0.7102389 0.445396707 0.322519114
-## 45   45 0.6825948 0.405500267 0.282835024
-## 46   46 0.7293954 0.474317716 0.352194568
-## 47   47 0.3897014 0.107786470 0.044303988
-## 48   48 0.6197816 0.322767449 0.205531586
-## 49   49 0.2796043 0.049173299 0.014776597
-## 50   50 0.7538625 0.512791451 0.392801192
-## 51   51 0.6072944 0.307606154 0.192151774
-## 52   52 0.8387284 0.659864352 0.558979265
-## 53   53 0.8712684 0.721988090 0.633967163
-## 54   54 0.6880572 0.413212693 0.290389887
-## 55   55 0.4820958 0.178231504 0.089544430
-## 56   56 0.3582817 0.088362385 0.033550836
-## 57   57 0.8172524 0.620620189 0.513025436
-## 58   58 0.1826324 0.017968139 0.003612794
-## 59   59 0.2593642 0.041170783 0.011525138
-## 60   60 0.5298865 0.222852801 0.122405268
-## 61   61 0.4112892 0.122437331 0.052952135
-## 62   62 0.8317470 0.646954444 0.543738281
-## 63   63 0.3619861 0.090537218 0.034711840
-## 64   64 0.9288615 0.839927685 0.783439459
-## 65   65 0.6360424 0.343144127 0.223911661
-## 66   66 0.2369778 0.033259957 0.008550537
-## 67   67 0.1628656 0.013705883 0.002473502
-## 68   68 0.5346720 0.227639589 0.126099553
-## 69   69 0.7780045 0.552460626 0.435962410
-## 70   70 0.4758134 0.172789984 0.085742901
-## 71   71 0.3048189 0.060307037 0.019660311
-## 72   72 0.5337322 0.226694864 0.125367967
-## 73   73 0.6421054 0.350926443 0.231048663
-## 74   74 0.5298084 0.222775086 0.122345549
-## 75   75 0.6615420 0.376556487 0.254997619
-## 76   76 0.5246160 0.217648579 0.118424618
-## 77   77 0.6500893 0.361328263 0.240686898
-## 78   78 0.4398578 0.143500888 0.066121047
-## 79   79 0.7587311 0.520654226 0.401253691
-## 80   80 0.5840445 0.280491925 0.168878829
-## 81   81 0.8800870 0.739381405 0.655437878
-## 82   82 0.6382305 0.345941071 0.226469323
-## 83   83 0.5805367 0.276525962 0.165547425
-## 84   84 0.8260257 0.636484312 0.531466337
-## 85   85 0.6208574 0.324093378 0.206713863
-## 86   86 0.7663670 0.533125416 0.414764868
-## 87   87 0.4611324 0.160451753 0.077300589
-## 88   88 0.5940981 0.292039484 0.178685560
-## 89   89 0.9043709 0.788517324 0.717177579
-## 90   90 0.5737243 0.268916815 0.159209134
-## 91   91 0.2652522 0.043414417 0.012413338
-## 92   92 0.1155001 0.006082949 0.000793804
-## 93   93 0.4607822 0.160163875 0.077106614
-## 94   94 0.6371249 0.344526231 0.225174488
-## 95   95 0.2064206 0.023999380 0.005416366
-## 96   96 0.7348284 0.482711569 0.360945510
-## 97   97 0.6421368 0.350967009 0.231086032
-## 98   98 0.5807598 0.276777259 0.165757952
-## 99   99 0.4946143 0.189365826 0.097467396
-## 100 100 0.5963680 0.294683903 0.180953414</code></pre>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1"></a>preds =<span class="st"> </span><span class="kw">survpred_prclmm</span>(step1, step2, step3, <span class="dt">times =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>))</span>
+<span id="cb42-2"><a href="#cb42-2"></a><span class="kw">ls</span>(preds)</span></code></pre></div>
+<pre><code>## [1] &quot;call&quot;               &quot;predicted_survival&quot;</code></pre>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1"></a><span class="kw">head</span>(preds<span class="op">$</span>predicted_survival)</span></code></pre></div>
+<pre><code>##   id      S(1)      S(2)       S(3)
+## 1  1 0.4685893 0.1666528 0.08151238
+## 2  2 0.7506514 0.5076432 0.38729468
+## 3  3 0.7088022 0.4432699 0.32036642
+## 4  4 0.5153831 0.2087025 0.11167056
+## 5  5 0.6207733 0.3239896 0.20662124
+## 6  6 0.5630938 0.2572870 0.14965965</code></pre>
 </div>
 <div id="cluster-bootstrap-optimism-correction-and-performance-measures" class="section level2">
 <h2>Cluster bootstrap optimism correction and performance measures</h2>
@@ -746,17 +672,17 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>In <code>pencal</code> the internal validation is performed through a Cluster Bootstrap Optimism Correction Procedure (CBOCP) that allows to compute <strong>optimism-corrected estimates of the concordance (C) index and of the time-dependent AUC</strong>.</p>
 <p>Most of the steps that the CBOCP requires are directly computed by the functions <code>fit_lmms</code>, <code>summarize_lmms</code> and <code>fit_prclmm</code> whenever the argument <code>n.boots</code> of <code>fit_lmms</code> is set equal to an integer &gt; 0 (in other words: most of the computations needed for the CBOCP have already been performed in the code chunks executed above, so we are almost done!).</p>
 <p>To gather the results of the CBOCP we can use the function <code>performance_prc</code>:</p>
-<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1"></a>cbocp =<span class="st"> </span><span class="kw">performance_prc</span>(step2, step3, <span class="dt">times =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>), </span>
-<span id="cb43-2"><a href="#cb43-2"></a>                   <span class="dt">n.cores =</span> n.cores)</span></code></pre></div>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1"></a>cbocp =<span class="st"> </span><span class="kw">performance_prc</span>(step2, step3, <span class="dt">times =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>), </span>
+<span id="cb46-2"><a href="#cb46-2"></a>                   <span class="dt">n.cores =</span> n.cores)</span></code></pre></div>
 <pre><code>## Computation of optimism correction started
 ## This computation will be run in parallel, using 2 cores 
 ## Computation of the optimism correction: finished :)</code></pre>
-<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1"></a><span class="co"># C index estimates:</span></span>
-<span id="cb45-2"><a href="#cb45-2"></a>cbocp<span class="op">$</span>concordance</span></code></pre></div>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1"></a><span class="co"># C index estimates:</span></span>
+<span id="cb48-2"><a href="#cb48-2"></a>cbocp<span class="op">$</span>concordance</span></code></pre></div>
 <pre><code>##   n.boots C.naive cb.opt.corr C.adjusted
 ## 1      10  0.7855     -0.0397     0.7458</code></pre>
-<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1"></a><span class="co"># time-dependent AUC estimates:</span></span>
-<span id="cb47-2"><a href="#cb47-2"></a>cbocp<span class="op">$</span>tdAUC</span></code></pre></div>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1"></a><span class="co"># time-dependent AUC estimates:</span></span>
+<span id="cb50-2"><a href="#cb50-2"></a>cbocp<span class="op">$</span>tdAUC</span></code></pre></div>
 <pre><code>##   pred.time tdAUC.naive cb.opt.corr tdAUC.adjusted
 ## 1         1      0.8874     -0.0386         0.8488
 ## 2         2      0.8337     -0.0442         0.7895
