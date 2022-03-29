@@ -15,11 +15,13 @@
 #' to estimate the time-dependent AUC
 #' @param new.longdata longitudinal data if you want to compute 
 #' predictions for new subjects on which the model was not trained.
-#' Default is \code{NULL}
+#' It should comprise an identifier variable called `id`.
+#' Default is \code{new.longdata = NULL}
 #' @param new.basecovs a dataframe with baseline covariates for the
-#' new subjects for which predictions are to be computed. Only needed 
-#' if baseline covariates where included in step 3 and 
-#' \code{new.longdata} is specified. Default is \code{NULL}
+#' new subjects for which predictions are to be computed. 
+#' It should comprise an identifier variable called `id`.
+#'  Only needed if baseline covariates were included in step 3 and 
+#' \code{new.longdata} is specified. Default is \code{new.basecovs = NULL}
 #' @param keep.ranef should a data frame with the predicted random 
 #' effects be included in the output? Default is \code{FALSE}
 #' 
@@ -111,6 +113,7 @@ survpred_prclmm = function(step1, step2, step3,
                paste(temp, collapse = ', '))
   if (!all(check1, TRUE)) stop(mess)
   if (!is.null(new.longdata)) {
+    new.longdata = new.longdata[order(new.longdata$id), ]
     vars = c(step1$call.info$y.names, 
              all.vars(step1$call.info$fixes),
              all.vars(step1$call.info$ranefs))
@@ -118,6 +121,9 @@ survpred_prclmm = function(step1, step2, step3,
     if (!check) {
       mess = 'new.longdata does not contain all variables employed in step 1'
       stop(mess)
+    }
+    if (!is.null(new.basecovs)) {
+      new.basecovs = new.basecovs[order(new.basecovs$id), ]
     }
   }
   
@@ -142,6 +148,7 @@ survpred_prclmm = function(step1, step2, step3,
   ### PRED RANEF WITH newdata ###
   ###############################
   if (!is.null(new.longdata)) {
+    requireNamespace('nlme')
     # create matrix with predicted random effects computed on new dataset
     lmms = step1$lmm.fits.orig
     y.names = step1$call.info$y.names
@@ -199,14 +206,19 @@ survpred_prclmm = function(step1, step2, step3,
   # reconstruct pieces  
   if (is.null(baseline.covs)) {
     X.orig = as.matrix(ranef.orig)
-    if (!is.null(new.longdata)) X.new = as.matrix(ranef.new)
+    rownames(X.orig) = rownames(ranef.orig) # fixed in v 1.0.3
+    if (!is.null(new.longdata)) {
+      X.new = as.matrix(ranef.new)
+      rownames(X.new) = ids # fixed in v 1.0.3
+    }
   }
   if (!is.null(baseline.covs)) {
     X0 = model.matrix(as.formula(baseline.covs), data = surv.data)
     X.orig = as.matrix(cbind(X0, ranef.orig))
+    rownames(X.orig) = rownames(ranef.orig) # fixed in v 1.0.3
     contains.int = '(Intercept)' %in% colnames(X.orig)
     if (contains.int) {
-      X.orig = X.orig[ , -1] 
+      X.orig = X.orig[ , -1, drop = FALSE] 
     }
     if (!is.null(new.longdata)) {
       if (is.null(new.basecovs)) {
@@ -215,9 +227,10 @@ survpred_prclmm = function(step1, step2, step3,
       X0 = model.matrix(as.formula(baseline.covs), 
                         data = new.basecovs)
       X.new = as.matrix(cbind(X0, ranef.new))
+      rownames(X.new) = ids # fixed in v 1.0.3
       contains.int = '(Intercept)' %in% colnames(X.new)
       if (contains.int) {
-        X.new = X.new[ , -1] 
+        X.new = X.new[ , -1, drop = FALSE]
       }
     }
   }
@@ -232,7 +245,8 @@ survpred_prclmm = function(step1, step2, step3,
   # convert glmnet Cox model to equivalent with survival package
   df.orig = data.frame(time = surv.data$time,
                        event = surv.data$event,
-                       linpred = X.orig %*% beta.hat)
+                       linpred = X.orig %*% beta.hat,
+                       id = surv.data$id)
   cox.survival = coxph(Surv(time = time, 
                             event = event) ~ linpred, 
                        data = df.orig, init = 1, 

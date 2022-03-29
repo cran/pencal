@@ -1,5 +1,4 @@
-Introduction
-============
+# Introduction
 
 The aim of this document is to keep track of the changes made to the
 different versions of the `R` package `pencal`.
@@ -15,25 +14,32 @@ package - in other words, within a section you will find all those
 package versions a.b.x where a and b are fixed whereas x = 1, 2, 3, …
 Each subsection corresponds to a specific package version.
 
-1.0.x
-=====
+# 1.1.x
 
-pencal 1.0.2
-============
+# pencal 1.1.0
 
+-   Released: March 2022
+-   Fixed subject ids displayed in the output of `survpred_prclmm`
+-   Fixed bug that made `survpred_prclmm` fail when new data for just 1
+    subject were supplied (added missing `drop = FALSE`)
+-   Added function call to the output of `survpred_prcmlpmm`
+
+# 1.0.x
+
+# pencal 1.0.2
+
+-   Released: February 2022
 -   Added volume, issue and page number to CITATION file, vignette and
     help pages
 -   Updated vignette with more detailed installation instructions
 
-pencal 1.0.1
-------------
+## pencal 1.0.1
 
 -   Released: December 2021
 -   Minor correction to package description (it was still mentioning
     arXiv instead of the *Statistics in Medicine* publication)
 
-pencal 1.0.0
-------------
+## pencal 1.0.0
 
 -   Released: September 2021
 -   The article describing Penalized Regression Calibration is now
@@ -43,11 +49,9 @@ pencal 1.0.0
 -   Updated package description and citation info
 -   Updated vignette and help pages
 
-0.4.x
-=====
+# 0.4.x
 
-pencal 0.4.2
-------------
+## pencal 0.4.2
 
 -   Released: May 2021
 -   Function `survpred_prc` replaced by two distinct functions:
@@ -55,8 +59,7 @@ pencal 0.4.2
     the PRC-MLPMM model
 -   Documentation and vignette updated accordingly
 
-pencal 0.4.1
-------------
+## pencal 0.4.1
 
 -   Released: April 2021
 -   `fit_lmms` is now more memory efficient (`keep.data = F` when
@@ -66,18 +69,15 @@ pencal 0.4.1
 -   Added functions `pencox_baseline` and `performance_pencox_baseline`
 -   Minor updates to the vignette
 
-0.3.x
-=====
+# 0.3.x
 
-pencal 0.3.2
-------------
+## pencal 0.3.2
 
 -   Released: March 2021
 -   Fixed CRAN error in PRC MLPMM examples (replaced `T` with `TRUE`)
 -   Corrected typos in vignette
 
-pencal 0.3.1
-------------
+## pencal 0.3.1
 
 -   Released: March 2021
 -   Added a set of functions that can be used to fit the PRC-MLPMM
@@ -88,11 +88,9 @@ pencal 0.3.1
     PRC-LMM, and the PRC-MLPMM)
 -   Vignettes and documentation updated to reflect the changes
 
-0.2.x
-=====
+# 0.2.x
 
-pencal 0.2.2
-------------
+## pencal 0.2.2
 
 -   Released: January 2021
 -   Fixed CRAN error caused by parallel::detectCores()
@@ -101,18 +99,15 @@ pencal 0.2.2
 -   Vignettes updated and revised
 -   Updated references in help pages
 
-pencal 0.2.1
-------------
+## pencal 0.2.1
 
 -   Released: January 2021
 -   Added the vignette “[An introduction to the R package
     pencal](https://cran.r-project.org/package=pencal/vignettes/pencal-vignette.html)”
 
-0.1.x
-=====
+# 0.1.x
 
-pencal 0.1.2
-------------
+## pencal 0.1.2
 
 -   Released: December 2020
 -   Added the function `survpred_prclmm`, which computes predicted
@@ -122,8 +117,7 @@ pencal 0.1.2
 -   Several corrections and clarifications added to the documentation
 -   Changed displaying style for function arguments in the documentation
 
-pencal 0.1.1
-------------
+## pencal 0.1.1
 
 -   Released: November 2020
 -   This is the first public release of the `pencal` package. It

@@ -23,12 +23,14 @@ to estimate the time-dependent AUC}
 
 \item{new.longdata}{longitudinal data if you want to compute 
 predictions for new subjects on which the model was not trained.
-Default is \code{NULL}}
+It should comprise an identifier variable called `id`.
+Default is \code{new.longdata = NULL}}
 
 \item{new.basecovs}{a dataframe with baseline covariates for the
-new subjects for which predictions are to be computed. Only needed 
-if baseline covariates where included in step 3 and 
-\code{new.longdata} is specified. Default is \code{NULL}}
+new subjects for which predictions are to be computed. 
+It should comprise an identifier variable called `id`.
+ Only needed if baseline covariates were included in step 3 and 
+\code{new.longdata} is specified. Default is \code{new.basecovs = NULL}}
 
 \item{keep.ranef}{should a data frame with the predicted random 
 effects be included in the output? Default is \code{FALSE}}

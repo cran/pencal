@@ -37,7 +37,8 @@
 #' # predict survival probabilities at times 1, 2, 3
 #' surv.probs = survpred_prcmlpmm(fitted_prcmlpmm$step2, 
 #'                  fitted_prcmlpmm$step3, times = 1:3)
-#' head(surv.probs)
+#' ls(surv.probs)
+#' head(surv.probs$predicted_survival)
 
 survpred_prcmlpmm = function(step2, step3, times = 1) {
   call = match.call()
@@ -101,8 +102,10 @@ survpred_prcmlpmm = function(step2, step3, times = 1) {
                       se.fit = F, conf.int = F)
   shat.orig = t(summary(temp.sfit, 
                        times = times)$surv)
-  out = data.frame(rownames(ranef.orig),
+  preds = data.frame(rownames(ranef.orig),
                    shat.orig)
-  names(out) = c('id', paste('S(', times, ')', sep = '') )
+  names(preds) = c('id', paste('S(', times, ')', sep = '') )
+  out = list('call' = call, 
+             'predicted_survival' = preds)
   return(out)
 }

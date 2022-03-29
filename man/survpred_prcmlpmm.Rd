@@ -32,7 +32,8 @@ data(fitted_prcmlpmm)
 # predict survival probabilities at times 1, 2, 3
 surv.probs = survpred_prcmlpmm(fitted_prcmlpmm$step2, 
                  fitted_prcmlpmm$step3, times = 1:3)
-head(surv.probs)
+ls(surv.probs)
+head(surv.probs$predicted_survival)
 }
 \references{
 Signorelli, M., Spitali, P., Al-Khalili Szigyarto, C, 
