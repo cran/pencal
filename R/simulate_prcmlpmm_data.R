@@ -27,6 +27,9 @@
 #' @param base.age.range range for age at baseline (set it
 #' equal to c(0, 0) if you want all subjects to enter
 #' the study at the same age)
+#' @param tau.age the coefficient that multiplies baseline age
+#' in the linear predictor (like in formulas (7) and (8) from  
+#' Signorelli et al. (2021))
 #' @param cens.range range for censoring times
 #' @param t.values vector specifying the time points 
 #' at which longitudinal measurements are collected
@@ -94,7 +97,7 @@
 simulate_prcmlpmm_data = function(n = 100, p = 5, p.relev = 2,
               n.items = c(3, 2, 3, 4, 1), type = 'u',
               lambda = 0.2, nu = 2, seed = 1,
-              base.age.range = c(3, 5),
+              base.age.range = c(3, 5), tau.age = 0.2,
               cens.range = c(0.5, 10), t.values = c(0, 0.5, 1, 2)) {
   if (n < 1) stop('n should be a positive integer')
   if (p < 1 | p.relev < 1) stop('p and p.relev should be a positive integer')
@@ -133,10 +136,8 @@ simulate_prcmlpmm_data = function(n = 100, p = 5, p.relev = 2,
                           seed = seed+3), 
            rep(0, n.total.items - n.relev.items))
   }
-  
   baseline.age = runif(n, base.age.range[1], base.age.range[2])
-  tau.age = 0.2
-  
+
   # generate random effects
   sigma.b0 = diag(0.7, n.total.items)
   b0 = MASS::mvrnorm(n = n, mu = rep(0, n.total.items), Sigma = sigma.b0)

@@ -16,6 +16,13 @@ Each subsection corresponds to a specific package version.
 
 # 1.1.x
 
+# pencal 1.1.1
+
+-   Released: May 2022
+-   Added `tau.age` argument to `simulate_prclmm_data` and
+    `simulate_prclmm_data`
+-   Minor fix of an error message inside `fit_lmms` (row 181)
+
 # pencal 1.1.0
 
 -   Released: March 2022

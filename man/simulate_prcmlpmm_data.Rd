@@ -6,8 +6,8 @@
 \usage{
 simulate_prcmlpmm_data(n = 100, p = 5, p.relev = 2, n.items = c(3, 2,
   3, 4, 1), type = "u", lambda = 0.2, nu = 2, seed = 1,
-  base.age.range = c(3, 5), cens.range = c(0.5, 10), t.values = c(0, 0.5,
-  1, 2))
+  base.age.range = c(3, 5), tau.age = 0.2, cens.range = c(0.5, 10),
+  t.values = c(0, 0.5, 1, 2))
 }
 \arguments{
 \item{n}{sample size}
@@ -36,6 +36,10 @@ See the article for the mathematical details}
 \item{base.age.range}{range for age at baseline (set it
 equal to c(0, 0) if you want all subjects to enter
 the study at the same age)}
+
+\item{tau.age}{the coefficient that multiplies baseline age
+in the linear predictor (like in formulas (7) and (8) from  
+Signorelli et al. (2021))}
 
 \item{cens.range}{range for censoring times}
 

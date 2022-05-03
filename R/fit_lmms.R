@@ -178,7 +178,7 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
     if (n1 != n2) {
       mess = paste('There is at least one subject without any information available for variable',
                    y.names[i], '- double-check your input long.data!')
-      stop()
+      stop(mess)
     }
     # fit LMM
     fixef.formula = as.formula(paste(y.names[i], deparse(fixefs)))

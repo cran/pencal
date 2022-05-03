@@ -4,7 +4,8 @@
 #' from longitudinal predictors. Specifically, the longitudinal
 #' predictors are simulated from linear mixed models (LMMs), and 
 #' the survival outcome from a Weibull model where the time
-#' to event depends on the random effects from the LMMs.
+#' to event depends linearly on the baseline age and on the 
+#' random effects from the LMMs.
 #' It is an implementation of the simulation method used in
 #' Signorelli et al. (2021)
 #' 
@@ -18,6 +19,9 @@
 #' @param base.age.range range for age at baseline (set it
 #' equal to c(0, 0) if you want all subjects to enter
 #' the study at the same age)
+#' @param tau.age the coefficient that multiplies baseline age
+#' in the linear predictor (like in formula (6) from Signorelli 
+#' et al. (2021))
 #' @param cens.range range for censoring times
 #' @param t.values vector specifying the time points 
 #' at which longitudinal measurements are collected
@@ -74,7 +78,7 @@
 
 simulate_prclmm_data = function(n = 100, p = 10, p.relev = 4, 
               lambda = 0.2, nu = 2, seed = 1,
-              base.age.range = c(3, 5),
+              base.age.range = c(3, 5), tau.age = 0.2,
               cens.range = c(0.5, 10), t.values = c(0, 0.5, 1, 2)) {
   if (n < 1) stop('n should be a positive integer')
   if (p < 1 | p.relev < 1) stop('p and p.relev should be a positive integer')
@@ -93,8 +97,7 @@ simulate_prclmm_data = function(n = 100, p = 10, p.relev = 4,
                           seed = seed+2), 
                     rep(0, p - p.relev))
   baseline.age = runif(n, base.age.range[1], base.age.range[2])
-  tau.age = 0.2
-  
+
   Sigma = diag(1, p)
   rand.int = MASS::mvrnorm(n = n, mu = rep(0, p), Sigma = Sigma)
   rand.slope = MASS::mvrnorm(n = n, mu = rep(0, p), Sigma = Sigma)

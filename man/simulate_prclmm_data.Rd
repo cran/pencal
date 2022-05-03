@@ -5,8 +5,8 @@
 \title{Simulate data that can be used to fit the PRC-LMM model}
 \usage{
 simulate_prclmm_data(n = 100, p = 10, p.relev = 4, lambda = 0.2,
-  nu = 2, seed = 1, base.age.range = c(3, 5), cens.range = c(0.5, 10),
-  t.values = c(0, 0.5, 1, 2))
+  nu = 2, seed = 1, base.age.range = c(3, 5), tau.age = 0.2,
+  cens.range = c(0.5, 10), t.values = c(0, 0.5, 1, 2))
 }
 \arguments{
 \item{n}{sample size}
@@ -25,6 +25,10 @@ are associated with the survival outcome (min: 1, max: p)}
 \item{base.age.range}{range for age at baseline (set it
 equal to c(0, 0) if you want all subjects to enter
 the study at the same age)}
+
+\item{tau.age}{the coefficient that multiplies baseline age
+in the linear predictor (like in formula (6) from Signorelli 
+et al. (2021))}
 
 \item{cens.range}{range for censoring times}
 
@@ -55,7 +59,8 @@ This function allows to simulate a survival outcome
 from longitudinal predictors. Specifically, the longitudinal
 predictors are simulated from linear mixed models (LMMs), and 
 the survival outcome from a Weibull model where the time
-to event depends on the random effects from the LMMs.
+to event depends linearly on the baseline age and on the 
+random effects from the LMMs.
 It is an implementation of the simulation method used in
 Signorelli et al. (2021)
 }
