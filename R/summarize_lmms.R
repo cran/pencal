@@ -56,13 +56,13 @@
 #' do.bootstrap = FALSE
 #' # IMPORTANT: set do.bootstrap = TRUE to compute the optimism correction!
 #' n.boots = ifelse(do.bootstrap, 100, 0)
-#' parallelize = FALSE
-#' # IMPORTANT: set parallelize = TRUE to speed computations up!
-#' if (!parallelize) n.cores = 1
-#' if (parallelize) {
+#' more.cores = FALSE
+#' # IMPORTANT: set more.cores = TRUE to speed computations up!
+#' if (!more.cores) n.cores = 2
+#' if (more.cores) {
 #'    # identify number of available cores on your machine
 #'    n.cores = parallel::detectCores()
-#'    if (is.na(n.cores)) n.cores = 1
+#'    if (is.na(n.cores)) n.cores = 2
 #' }
 #' 
 #' # step 1 of PRC-LMM: estimate the LMMs
@@ -137,14 +137,30 @@ summarize_lmms = function(object, n.cores = 1, verbose = TRUE) {
   if (verbose) cat('Computing the predicted random effects on the original dataset...\n')
   # create matrix with predicted random effects computed on original dataset
   lmms = object$lmm.fits.orig
-  ranef.orig = foreach(j = 1:p, .combine = 'cbind') %do% {
+  ranef.orig = foreach(j = 1:p) %do% {
     x = ranef(lmms[[j]])
     # fix column names
     is.inter = (names(x) == '(Intercept)')
     if (sum(is.inter) > 0) names(x)[which(is.inter == 1)] = 'int'
     names(x) = paste(y.names[j], 'b', names(x), sep = '_')
     # return
-    x
+    data.frame(idv = rownames(x), x)
+  }
+  ranef.orig = purrr::reduce(ranef.orig, dplyr::full_join, by = 'idv')
+  # replace NAs with 0s (added from v1.2.0)
+  if (any(is.na(ranef.orig))) {
+    ranef.orig[is.na(ranef.orig)] = 0
+  }
+  rownames(ranef.orig) = ranef.orig$idv
+  ranef.orig = as.matrix(ranef.orig[ , -1])
+  # check that you didn't lose subjects along the way
+  n = length(unique(object$df.sanitized$numeric.id))
+  if (nrow(ranef.orig) != n) {
+    mess = paste('It appears that there are', n-nrow(ranef.orig), 
+                 'subjects without ANY measurement of ANY of',
+                 'the longitudinal variables you included in step1!',
+                 'It may be worth it to double-check your input data')
+    warning(mess, immediate. = TRUE)
   }
   if (verbose) cat('...done\n')
   
@@ -168,16 +184,21 @@ summarize_lmms = function(object, n.cores = 1, verbose = TRUE) {
     
     # training set
     ranef.boot.train = foreach(b = 1:n.boots,
-        .packages = c('foreach', 'pencal', 'nlme')) %dopar% {
-      ranef.train = foreach(j = 1:p, .combine = 'cbind') %do% {
+        .packages = c('foreach', 'pencal', 'nlme', 'purrr', 'dplyr')) %dopar% {
+      ranef.train = foreach(j = 1:p) %do% {
         x = ranef(object$lmm.fits.boot[[b]][[j]])
         # fix column names
         is.inter = (names(x) == '(Intercept)')
         if (sum(is.inter) > 0) names(x)[which(is.inter == 1)] = 'int'
         names(x) = paste(y.names[j], 'b', names(x), sep = '_')
         # return
-        x
+        data.frame(idv = rownames(x), x)
       }
+      ranef.train = purrr::reduce(ranef.train, dplyr::full_join, by = 'idv')
+      if (any(is.na(ranef.train))) {
+        ranef.train[is.na(ranef.train)] = 0
+      }
+      ranef.train = as.matrix(ranef.train[ , -1])
       # return
       ranef.train
     }
@@ -193,11 +214,6 @@ summarize_lmms = function(object, n.cores = 1, verbose = TRUE) {
         # check if NAs on response
         new.df = data
         y = new.df[ , y.names[j]]
-        nas = which(is.na(y))
-        if (length(nas) > 0) {
-          new.df = new.df[-nas, ]
-          y = new.df[ , y.names[j]]
-        }
         # retrieve the right pieces from lmm
         lmms = object$lmm.fits.boot[[b]]
         D.hat = getVarCov(lmms[[j]], type = 'random.effects')
@@ -211,14 +227,28 @@ summarize_lmms = function(object, n.cores = 1, verbose = TRUE) {
         #####
         current = foreach(i = 1:n, .combine = 'rbind') %do% {
           rows = which(new.df$id == ids[i])
-          Xi = X[rows, , drop = FALSE] 
-          # drop = F prevents conversion to vector when rows has length 1
           yi = y[rows]
-          Zi = Z[rows, , drop = FALSE]
-          I.matr = diag(1, length(rows), length(rows))
-          Vi = Zi %*% D.hat %*% t(Zi) + sigma2.hat * I.matr
-          temp = yi - Xi %*% beta.hat
-          t(D.hat %*% t(Zi) %*% solve(Vi) %*% temp)
+          # only use rows with non-missing y:
+          check.nas = any(!is.na(yi))
+          if (check.nas) {
+            keep = which(!is.na(yi))
+            rows = rows[keep]
+            yi = y[rows]
+            Xi = X[rows, , drop = FALSE] 
+            # drop = F prevents conversion to vector when rows has length 1
+            Zi = Z[rows, , drop = FALSE]
+            I.matr = diag(1, length(rows), length(rows))
+            Vi = Zi %*% D.hat %*% t(Zi) + sigma2.hat * I.matr
+            temp = yi - Xi %*% beta.hat
+            out = t(D.hat %*% t(Zi) %*% solve(Vi) %*% temp)
+          }
+          else { # from v 1.2.0
+            # if no measurements of y_j available for i, set its
+            # predicted random effects equal to the population average (0)
+            out = c(0, 0)
+          }
+          # return
+          out
         }
         # return
         current

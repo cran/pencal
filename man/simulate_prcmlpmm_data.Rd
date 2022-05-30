@@ -88,12 +88,12 @@ names(simdata$long.data)
 # we measure 3 items, for LP2 4, for LP3 2 items, and so on
 
 # visualize trajectories of marker1_1
-library(ptmixed)
-make.spaghetti(x = age, y = marker1_1, 
-               id = id, group = id,
-               data = simdata$long.data, 
-               legend.inset = - 1)
-
+if(requireNamespace("ptmixed")) {
+  ptmixed::make.spaghetti(x = age, y = marker1_1, 
+                 id = id, group = id,
+                 data = simdata$long.data, 
+                 legend.inset = - 1)
+ }
 # proportion of censored subjects
 simdata$censoring.prop
 # visualize KM estimate of survival

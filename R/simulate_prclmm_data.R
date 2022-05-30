@@ -61,11 +61,12 @@
 #' simdata = simulate_prclmm_data(n = 20, p = 10, 
 #'                         p.relev = 4, seed = 1)
 #' # view the longitudinal markers:
-#' library(ptmixed)
-#' make.spaghetti(x = age, y = marker1, 
-#'                id = id, group = id,
-#'                data = simdata$long.data, 
-#'                legend.inset = - 1)
+#' if(requireNamespace("ptmixed")) {
+#'   ptmixed::make.spaghetti(x = age, y = marker1, 
+#'                  id = id, group = id,
+#'                  data = simdata$long.data, 
+#'                  legend.inset = - 1)
+#'  }
 #' # proportion of censored subjects
 #' simdata$censoring.prop
 #' # visualize KM estimate of survival

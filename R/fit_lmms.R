@@ -27,6 +27,8 @@
 #' no parallelization is done. Pro tip: you can use 
 #' \code{parallel::detectCores()} to check how many 
 #' cores are available on your computer
+#' @param max.ymissing maximum proportion of subjects allowed to not have any
+#' measurement of a longitudinal response variable. Default is 0.2
 #' @param verbose if \code{TRUE} (default and recommended value), information
 #' on the ongoing computations is printed in the console
 #' 
@@ -79,13 +81,13 @@
 #' do.bootstrap = FALSE
 #' # IMPORTANT: set do.bootstrap = TRUE to compute the optimism correction!
 #' n.boots = ifelse(do.bootstrap, 100, 0)
-#' parallelize = FALSE
-#' # IMPORTANT: set parallelize = TRUE to speed computations up!
-#' if (!parallelize) n.cores = 1
-#' if (parallelize) {
+#' more.cores = FALSE
+#' # IMPORTANT: set more.cores = TRUE to speed computations up!
+#' if (!more.cores) n.cores = 2
+#' if (more.cores) {
 #'    # identify number of available cores on your machine
 #'    n.cores = parallel::detectCores()
-#'    if (is.na(n.cores)) n.cores = 1
+#'    if (is.na(n.cores)) n.cores = 2
 #' }
 #' 
 #' # step 1 of PRC-LMM: estimate the LMMs
@@ -99,7 +101,8 @@
 
 fit_lmms = function(y.names, fixefs, ranefs, long.data, 
                     surv.data, t.from.base, n.boots = 0, 
-                    n.cores = 1, verbose = TRUE) {
+                    n.cores = 1, max.ymissing = 0.2, 
+                    verbose = TRUE) {
   call = match.call()
   # load namespaces
   requireNamespace('nlme')
@@ -113,12 +116,19 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
     warning('Input n.boots < 0, so we set n.boots = 0', immediate. = TRUE)
     n.boots = 0
   }
+  if (max.ymissing < 0 | max.ymissing >= 1) {
+    stop('max.ymissing should be in [0, 1)')
+  }
+  if (max.ymissing > 0.4) {
+    warning(paste('You have set ymissing = ', max.ymissing,
+               '. Are you sure about that?', sep = ''), immediate. = TRUE)
+  }
   if (n.cores < 1) {
     warning('Input n.cores < 1, so we set n.cores = 1', immediate. = TRUE)
     n.cores = 1
   }
   # check how many cores are actually available for this computation
-  if (n.boots > 0) {
+  if (n.cores > 1) {
     max.cores = parallel::detectCores()
     if (!is.na(max.cores)) {
       diff = max.cores - n.cores
@@ -163,12 +173,17 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
   # add to df a numeric.id variable to simplify the bootstrapping
   df$numeric.id = as.numeric(as.factor(df$id))
   
+  # set up environment for parallel computing
+  cl = parallel::makeCluster(n.cores)
+  doParallel::registerDoParallel(cl)
+ 
   ########################
   ### original dataset ###
   ########################
   # fit the LMMs
   if (verbose) cat('Estimating the LMMs on the original dataset...\n')
-  fit.orig = foreach (i = 1:p) %do% {
+  fit.orig = foreach(i = 1:p,
+    .packages = c('foreach', 'pencal', 'nlme')) %dopar% {
     # check if NAs on response
     n1 = length(unique(df$numeric.id))
     nas = which(is.na(df[ , y.names[i]]))
@@ -176,21 +191,32 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
     if (length(nas) > 0) df.sub = df[-nas, ]
     n2 = length(unique(df.sub$numeric.id))
     if (n1 != n2) {
-      mess = paste('There is at least one subject without any information available for variable',
-                   y.names[i], '- double-check your input long.data!')
-      stop(mess)
+      if (max.ymissing == 0) {
+        mess = paste('There is at least one subject without any information available for variable ',
+                     y.names[i], '. Consider increasing the value of max.ymissing', sep = '')
+        stop(mess)
+      }
+      prop.na = 1 - n2/n1
+      if (max.ymissing < prop.na) {
+        mess = paste('The proportion of subject with missing ', y.names[i],
+                     ' is above ', max.ymissing, '. Either increase max.ymissing',
+                     ' or remove ', y.names[i], ' from the longitudinal modelling', sep = '')
+        stop(mess)
+      }
     }
     # fit LMM
     fixef.formula = as.formula(paste(y.names[i], deparse(fixefs)))
     ranef.formula = as.formula(deparse(ranefs))
     lmm = try( nlme::lme(fixed = fixef.formula, 
                     random = ranef.formula, 
-                    data = df.sub, keep.data = FALSE),
+                    data = df, na.action = na.exclude,
+                    keep.data = FALSE),
                 silent = TRUE)
     if (inherits(lmm, 'try-error')) { # retry with increased max number of iterations
       lmm = try( nlme::lme(fixed = fixef.formula, 
                      random = ranef.formula, 
-                     data = df.sub, keep.data = FALSE,
+                     data = df, na.action = na.exclude,
+                     keep.data = FALSE,
                      control = list(maxIter = 1e4, msMaxIter = 1e3,
                                     niterEM = 1e3, msMaxEval = 1e3)),
                  silent = TRUE)
@@ -202,7 +228,8 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
       warning(mess, immediate. = TRUE)
       lmm = try( nlme::lme(fixed = fixef.formula, 
                            random = ~ 1 | id, 
-                           data = df.sub, keep.data = FALSE,
+                           data = df, na.action = na.exclude,
+                           keep.data = FALSE,
                            control = list(maxIter = 1e4, msMaxIter = 1e3,
                                           niterEM = 1e3, msMaxEval = 1e3)),
                  silent = TRUE)
@@ -230,13 +257,10 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
       set.seed(i)
       sort(sample(ids, n, TRUE))
     }
-    # set up environment for parallel computing
-    cl = parallel::makeCluster(n.cores)
-    doParallel::registerDoParallel(cl)
     
     # compute fitted LMMS for each bootstrap sample (in parallel)
     fit.boots = foreach(b = 1:n.boots,
-    .packages = c('foreach', 'pencal', 'nlme')) %dopar% {
+      .packages = c('foreach', 'pencal', 'nlme')) %dopar% {
       
       # bootstrap the longitudinal dataset for variable j
       boot.df = draw_cluster_bootstrap(df = df,
@@ -246,21 +270,19 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
       
       # for each response, derive predicted ranefs for that given bootstrap sample
       this.fit = foreach(i = 1:p) %do% {
-        # check if NAs on response
-        nas = which(is.na(boot.df[ , y.names[i]]))
-        df.sub = boot.df
-        if (length(nas) > 0) df.sub = boot.df[-nas, ]
         # fit LMM
         fixef.formula = as.formula(paste(y.names[i], deparse(fixefs)))
         ranef.formula = as.formula(deparse(ranefs))
         lmm = try( nlme::lme(fixed = fixef.formula, 
                               random = ranef.formula, 
-                              data = df.sub, keep.data = FALSE),
+                              data = boot.df, na.action = na.exclude,
+                              keep.data = FALSE),
                     silent = TRUE)
         if (inherits(lmm, 'try-error')) { # retry with increased max number of iterations
           lmm = try( nlme::lme(fixed = fixef.formula, 
                                random = ranef.formula, 
-                               data = df.sub, keep.data = FALSE,
+                               data = boot.df, na.action = na.exclude,
+                               keep.data = FALSE,
                                control = list(maxIter = 1e4, msMaxIter = 1e3,
                                             niterEM = 1e3, msMaxEval = 1e3)),
                      silent = TRUE)
@@ -268,7 +290,8 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
         if (inherits(lmm, 'try-error')) {
           lmm = try( nlme::lme(fixed = fixef.formula, 
                                random = ~ 1 | id, 
-                               data = df.sub, keep.data = FALSE,
+                               data = boot.df, na.action = na.exclude,
+                               keep.data = FALSE,
                                control = list(maxIter = 1e4, msMaxIter = 1e3,
                                             niterEM = 1e3, msMaxEval = 1e3)),
                      silent = TRUE)
@@ -280,19 +303,19 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
         }
         lmm
       }
-      # all proteins done for each b
+      # all Ys done for each bootstrap sample
       names(this.fit) = y.names
       this.fit
     }
-    # close the cluster
-    parallel::stopCluster(cl)
     if (verbose) {
       cat('Bootstrap procedure finished\n')
       cat('Computation of step 1: finished :)\n')
     }
   }
+  # close the cluster
+  parallel::stopCluster(cl)
   
-  
+  # define exports
   call.info = list('call' = call, 'y.names' = y.names,
                    'fixefs' = fixefs, 'ranefs' = ranefs)
   out = list('call.info' = call.info, 'lmm.fits.orig' = fit.orig, 

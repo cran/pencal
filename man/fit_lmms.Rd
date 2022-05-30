@@ -5,7 +5,7 @@
 \title{Step 1 of PRC-LMM (estimation of the linear mixed models)}
 \usage{
 fit_lmms(y.names, fixefs, ranefs, long.data, surv.data, t.from.base,
-  n.boots = 0, n.cores = 1, verbose = TRUE)
+  n.boots = 0, n.cores = 1, max.ymissing = 0.2, verbose = TRUE)
 }
 \arguments{
 \item{y.names}{character vector with the names of the
@@ -39,6 +39,9 @@ of the CBOCP procedure. If \code{ncores = 1} (default),
 no parallelization is done. Pro tip: you can use 
 \code{parallel::detectCores()} to check how many 
 cores are available on your computer}
+
+\item{max.ymissing}{maximum proportion of subjects allowed to not have any
+measurement of a longitudinal response variable. Default is 0.2}
 
 \item{verbose}{if \code{TRUE} (default and recommended value), information
 on the ongoing computations is printed in the console}
@@ -79,13 +82,13 @@ simdata = simulate_prclmm_data(n = 100, p = p, p.relev = 2,
 do.bootstrap = FALSE
 # IMPORTANT: set do.bootstrap = TRUE to compute the optimism correction!
 n.boots = ifelse(do.bootstrap, 100, 0)
-parallelize = FALSE
-# IMPORTANT: set parallelize = TRUE to speed computations up!
-if (!parallelize) n.cores = 1
-if (parallelize) {
+more.cores = FALSE
+# IMPORTANT: set more.cores = TRUE to speed computations up!
+if (!more.cores) n.cores = 2
+if (more.cores) {
    # identify number of available cores on your machine
    n.cores = parallel::detectCores()
-   if (is.na(n.cores)) n.cores = 1
+   if (is.na(n.cores)) n.cores = 2
 }
 
 # step 1 of PRC-LMM: estimate the LMMs

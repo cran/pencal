@@ -14,16 +14,35 @@ package - in other words, within a section you will find all those
 package versions a.b.x where a and b are fixed whereas x = 1, 2, 3, …
 Each subsection corresponds to a specific package version.
 
+# 1.2.x
+
+## pencal 1.2.0
+
+-   Released: May 2022
+-   Added `max.ymissing` argument to `fit_lmms`: with this change, it is
+    now possible to estimate the LMMs within the PRC-LMM model even if
+    there are subjects with missing measurements for some (but not all)
+    of the longitudinal outcomes. Within `summarize_lmms`, the predicted
+    random effects when a longitudinal outcome is missing for a given
+    subject are set = 0 (marginal / population average). Setting
+    `max.ymissing = 0` disables such additional feature
+-   Added extra check to `summarize_lmms` on subjects without any
+    longitudinal information available (i.e., 100% missing on all
+    longitudinal variables used in step 1)
+-   Introduced dependency on `purrr` (now required by `summarize_lmms`)
+-   Fixed `CRAN` dependency issue with examples in
+    `simulate_prclmm_data` and `simulate_prcmlpmm_data`
+
 # 1.1.x
 
-# pencal 1.1.1
+## pencal 1.1.1
 
 -   Released: May 2022
 -   Added `tau.age` argument to `simulate_prclmm_data` and
     `simulate_prclmm_data`
 -   Minor fix of an error message inside `fit_lmms` (row 181)
 
-# pencal 1.1.0
+## pencal 1.1.0
 
 -   Released: March 2022
 -   Fixed subject ids displayed in the output of `survpred_prclmm`
@@ -33,7 +52,7 @@ Each subsection corresponds to a specific package version.
 
 # 1.0.x
 
-# pencal 1.0.2
+## pencal 1.0.2
 
 -   Released: February 2022
 -   Added volume, issue and page number to CITATION file, vignette and
@@ -109,8 +128,7 @@ Each subsection corresponds to a specific package version.
 ## pencal 0.2.1
 
 -   Released: January 2021
--   Added the vignette “[An introduction to the R package
-    pencal](https://cran.r-project.org/package=pencal/vignettes/pencal-vignette.html)”
+-   Added vignette: “An introduction to the R package pencal”
 
 # 0.1.x
 
