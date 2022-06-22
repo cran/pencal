@@ -1,7 +1,7 @@
 #' Compute the predicted survival probabilities obtained
 #' from the PRC models
 #'
-#' This function computes the predictive survival probabilities 
+#' This function computes the predicted survival probabilities 
 #' for the for the PRC-MLPMM(U) and PRC-MLPMM(U+B) models proposed 
 #' in Signorelli et al. (2021)
 #' 

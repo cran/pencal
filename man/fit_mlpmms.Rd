@@ -43,8 +43,8 @@ baseline in \code{long.data}}
 cluster bootstrap optimism correction procedure (CBOCP). If 0, no
 bootstrapping is performed}
 
-\item{n.cores}{number of cores to use to parallelize the computation
-of the CBOCP procedure. If \code{ncores = 1} (default), 
+\item{n.cores}{number of cores to use to parallelize part of
+the computations. If \code{ncores = 1} (default), 
 no parallelization is done. Pro tip: you can use 
 \code{parallel::detectCores()} to check how many 
 cores are available on your computer}

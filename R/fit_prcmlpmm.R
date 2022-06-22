@@ -31,9 +31,8 @@
 #' @param n.folds.elnet number of folds to be used for the selection
 #' of the tuning parameter in elasticnet. Only relevant if 
 #' \code{penalty = 'elasticnet'}. Default is 5
-#' @param n.cores number of cores to use to parallelize the computation
-#' of the cluster bootstrap optimism correction procedure. If 
-#' \code{ncores = 1} (default), no parallelization is done. 
+#' @param n.cores number of cores to use to parallelize part of
+#' the computations. If \code{ncores = 1} (default), no parallelization is done. 
 #' Pro tip: you can use \code{parallel::detectCores()} to check 
 #' how many cores are available on your computer
 #' @param verbose if \code{TRUE} (default and recommended value), information

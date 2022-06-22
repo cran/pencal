@@ -42,9 +42,8 @@ so that the resulting alpha grid is c(1, 0.9, 0.8, ..., 0.1, 0)}
 of the tuning parameter in elasticnet. Only relevant if 
 \code{penalty = 'elasticnet'}. Default is 5}
 
-\item{n.cores}{number of cores to use to parallelize the computation
-of the cluster bootstrap optimism correction procedure. If 
-\code{ncores = 1} (default), no parallelization is done. 
+\item{n.cores}{number of cores to use to parallelize part of
+the computations. If \code{ncores = 1} (default), no parallelization is done. 
 Pro tip: you can use \code{parallel::detectCores()} to check 
 how many cores are available on your computer}
 

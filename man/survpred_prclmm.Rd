@@ -43,7 +43,7 @@ and if \code{keep.ranef = TRUE} also the predicted random effects
 \code{predicted_ranefs}.
 }
 \description{
-This function computes the predictive survival probabilities 
+This function computes the predicted survival probabilities 
 for the for the PRC-LMM model proposed 
 in Signorelli et al. (2021)
 }

@@ -14,8 +14,8 @@ performance_pencox_baseline(fitted_pencox, times = 1, n.cores = 1,
 \item{times}{numeric vector with the time points at which
 to estimate the time-dependent AUC}
 
-\item{n.cores}{number of cores to use to parallelize the computation
-of the CBOCP procedure. If \code{ncores = 1} (default), 
+\item{n.cores}{number of cores to use to parallelize part of
+the computations. If \code{ncores = 1} (default), 
 no parallelization is done. Pro tip: you can use 
 \code{parallel::detectCores()} to check how many 
 cores are available on your computer}

@@ -22,7 +22,7 @@ A data frame with the predicted survival probabilities
 computed at the supplied time points
 }
 \description{
-This function computes the predictive survival probabilities 
+This function computes the predicted survival probabilities 
 for the for the PRC-MLPMM(U) and PRC-MLPMM(U+B) models proposed 
 in Signorelli et al. (2021)
 }

@@ -9,9 +9,8 @@ summarize_mlpmms(object, n.cores = 1, verbose = TRUE)
 \arguments{
 \item{object}{a list of objects as produced by \code{\link{fit_mlpmms}}}
 
-\item{n.cores}{number of cores to use to parallelize the computation
-of the cluster bootstrap optimism correction procedure. If 
-\code{ncores = 1} (default), no parallelization is done. 
+\item{n.cores}{number of cores to use to parallelize part of
+the computations. If \code{ncores = 1} (default), no parallelization is done. 
 Pro tip: you can use \code{parallel::detectCores()} to check 
 how many cores are available on your computer}
 

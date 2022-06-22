@@ -713,10 +713,10 @@ function:</p>
 ## Sorting surv.data by subject id
 ## Preliminary step: remove measurements taken after event / censoring.
 ## Removed: 209 measurements. Retained: 391 measurements.
+## This computation will be run in parallel 
 ## Estimating the LMMs on the original dataset...
 ## ...done
 ## Bootstrap procedure started
-## This computation will be run in parallel, using 2 cores 
 ## Bootstrap procedure finished
 ## Computation of step 1: finished :)</code></pre>
 <p>The LMM fitted here is just an example of how to model longitudinal
@@ -768,7 +768,7 @@ and random slopes</strong> for the LMMs fitted in step 1:</p>
 <pre><code>## Computing the predicted random effects on the original dataset...
 ## ...done
 ## Bootstrap procedure started
-## This computation will be run in parallel, using 2 cores 
+## This computation will be run in parallel 
 ## Bootstrap procedure finished
 ## Computation of step 2: finished :)</code></pre>
 <p><code>summarize_lmms</code> returns as output a list that contains,
@@ -799,7 +799,7 @@ the summaries (predicted random effects) computed in step 2:</p>
 <pre><code>## Estimating penalized Cox model on the original dataset...
 ## ...done
 ## Bootstrap procedure started
-## This computation will be run in parallel, using 2 cores 
+## This computation will be run in parallel 
 ## Bootstrap procedure finished
 ## Computation of step 3: finished :)</code></pre>
 <p>In this example I have set <code>penalty = &#39;ridge&#39;</code>, but you
@@ -881,19 +881,19 @@ done!).</p>
 <code>performance_prc</code>:</p>
 <div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>cbocp <span class="ot">=</span> <span class="fu">performance_prc</span>(step2, step3, <span class="at">times =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>), </span>
 <span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>                   <span class="at">n.cores =</span> n.cores)</span></code></pre></div>
-<pre><code>## Computation of optimism correction started
-## This computation will be run in parallel, using 2 cores 
+<pre><code>## This computation will be run in parallel 
+## Computation of optimism correction started
 ## Computation of the optimism correction: finished :)</code></pre>
 <div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># C index estimates:</span></span>
 <span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>cbocp<span class="sc">$</span>concordance</span></code></pre></div>
 <pre><code>##   n.boots C.naive cb.opt.corr C.adjusted
-## 1      10  0.7855     -0.0399     0.7456</code></pre>
+## 1      10  0.7855     -0.0401     0.7454</code></pre>
 <div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># time-dependent AUC estimates:</span></span>
 <span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>cbocp<span class="sc">$</span>tdAUC</span></code></pre></div>
 <pre><code>##   pred.time tdAUC.naive cb.opt.corr tdAUC.adjusted
-## 1         1      0.8874     -0.0403         0.8471
-## 2         2      0.8337     -0.0432         0.7905
-## 3         3      0.8303     -0.0665         0.7638</code></pre>
+## 1         1      0.8874     -0.0430         0.8444
+## 2         2      0.8337     -0.0443         0.7894
+## 3         3      0.8303     -0.0668         0.7635</code></pre>
 <p>From the results above we can see that:</p>
 <ul>
 <li>the naive C index is estimated = 0.786, and the optimism-corrected C

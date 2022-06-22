@@ -23,7 +23,7 @@ the penalized Cox model}
 Default is \code{'ridge'}, other possible values are \code{'elasticnet'} 
 and \code{'lasso'}}
 
-\item{standardize}{logical argument: should the predicted random effects
+\item{standardize}{logical argument: should the covariates
 be standardized when included in the penalized Cox model? Default is \code{TRUE}}
 
 \item{penalty.factor}{a single value, or a vector of values, indicating
@@ -44,8 +44,7 @@ in the bootstrap optimism correction procedure. If 0, no
 bootstrapping is performed}
 
 \item{n.cores}{number of cores to use to parallelize the computation
-of the bootstrap optimism correction procedure. If 
-\code{ncores = 1} (default), no parallelization is done. 
+of the CBOCP. If \code{ncores = 1} (default), no parallelization is done. 
 Pro tip: you can use \code{parallel::detectCores()} to check 
 how many cores are available on your computer}
 

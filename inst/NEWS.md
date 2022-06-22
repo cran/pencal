@@ -16,6 +16,23 @@ Each subsection corresponds to a specific package version.
 
 # 1.2.x
 
+## pencal 1.2.1
+
+-   Released: June 2022
+-   Improved behaviour of `survpred_prclmm` when `new.longdata` is
+    provided. From this version, when all observations of a longitudinal
+    predictor for a given subject are missing, a warning is produced and
+    the corresponding random effects are set equal to 0 (population
+    average). Previously, the function returned an error due to the
+    `NA`s
+-   Fixed description of `standardize` argument in documentation of
+    `pencox_baseline`
+-   Parallelization within `performance_prc` and
+    `performance_pencox_baseline` extended to computations of naive
+    tdAUC performance
+-   Streamlined information messages and warnings about parallelization
+    and number of cores used
+
 ## pencal 1.2.0
 
 -   Released: May 2022

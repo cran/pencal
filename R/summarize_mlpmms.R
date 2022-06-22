@@ -4,9 +4,8 @@
 #' of the PRC-MLPMM model proposed in Signorelli et al. (2021)
 #' 
 #' @param object a list of objects as produced by \code{\link{fit_mlpmms}}
-#' @param n.cores number of cores to use to parallelize the computation
-#' of the cluster bootstrap optimism correction procedure. If 
-#' \code{ncores = 1} (default), no parallelization is done. 
+#' @param n.cores number of cores to use to parallelize part of
+#' the computations. If \code{ncores = 1} (default), no parallelization is done. 
 #' Pro tip: you can use \code{parallel::detectCores()} to check 
 #' how many cores are available on your computer
 #' @param verbose if \code{TRUE} (default and recommended value), information
@@ -126,17 +125,7 @@ summarize_mlpmms = function(object, n.cores = 1, verbose = TRUE) {
   if (n.boots > 0) {
     max.cores = parallel::detectCores()
     if (!is.na(max.cores)) {
-      diff = max.cores - n.cores
-      mess0 = paste('You requested', n.cores, 'cores for this computation.')
-      mess1 = paste(mess0, 'It seems that your computer actually has',
-                    max.cores, 'cores available.',
-                    'Consider increasing n.cores accordingly to speed computations up! =)')
-      if (diff > 0) warning(mess1, immediate. = TRUE)
-      mess2 = paste(mess0, 'However, seems that your computer only has',
-                    max.cores, 'cores available.',
-                    'Therefore, most likely computations will be performed using only', 
-                    max.cores, 'cores. =(')
-      if (diff < 0)  warning(mess2, immediate. = TRUE)
+      .check_ncores(avail = max.cores, requested = n.cores)
     }
   }
   
@@ -166,16 +155,13 @@ summarize_mlpmms = function(object, n.cores = 1, verbose = TRUE) {
   #######################
   if (n.boots >= 1) {
     if (verbose) cat('Bootstrap procedure started\n')
-    mess = ifelse(n.cores >=2, 
-                  paste('in parallel, using', n.cores, 'cores'),
-                  'using a single core')
-    if (verbose) cat(paste('This computation will be run', mess, '\n'))
     # retrieve bootstrap ids and fitted mlpmms
     boot.ids = object$boot.ids
     mlpmm.fits.boot = object$mlpmm.fits.boot
     # set up environment for parallel computing
     cl = parallel::makeCluster(n.cores)
     doParallel::registerDoParallel(cl)
+    .info_ncores(n.cores, verbose = verbose)
     
     # compute predicted ranefs for each bootstrap sample (training set)
     # and for the original dataset (validation set)

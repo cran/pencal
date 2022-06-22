@@ -1,7 +1,7 @@
 #' Compute the predicted survival probabilities obtained
 #' from the PRC models
 #'
-#' This function computes the predictive survival probabilities 
+#' This function computes the predicted survival probabilities 
 #' for the for the PRC-LMM model proposed 
 #' in Signorelli et al. (2021)
 #' 
@@ -169,9 +169,11 @@ survpred_prclmm = function(step1, step2, step3,
       # check that we didn't lose subjects
       check = (length(unique(new.df$id)) == n)
       if (!check) {
-        mess = paste('Variable ', y.names[j],
-                     ': all values are NA for at least 1 subject', sep = '')
-        stop(mess)
+        lost_ids = setdiff(new.longdata$id, new.df$id)
+        mess = paste('Variable ', y.names[j], ': all values are NA for at least 1 subject.', 
+                     'Predictions obtained by setting predicted random effects for such subjects = 0 (population average)',
+                     sep = '')
+        warning(mess)
       }
       # retrieve the right pieces from lmm
       D.hat = getVarCov(lmms[[j]], type = 'random.effects')
@@ -185,14 +187,19 @@ survpred_prclmm = function(step1, step2, step3,
       #####
       current = foreach(i = 1:n, .combine = 'rbind') %do% {
         rows = which(new.df$id == ids[i])
-        Xi = X[rows, , drop = FALSE] 
-        # drop = F prevents conversion to vector when rows has length 1
-        yi = y[rows]
-        Zi = Z[rows, , drop = FALSE]
-        I.matr = diag(1, length(rows), length(rows))
-        Vi = Zi %*% D.hat %*% t(Zi) + sigma2.hat * I.matr
-        temp = yi - Xi %*% beta.hat
-        t(D.hat %*% t(Zi) %*% solve(Vi) %*% temp)
+        if (length(rows) > 0) {
+          Xi = X[rows, , drop = FALSE] 
+          # drop = F prevents conversion to vector when rows has length 1
+          yi = y[rows]
+          Zi = Z[rows, , drop = FALSE]
+          I.matr = diag(1, length(rows), length(rows))
+          Vi = Zi %*% D.hat %*% t(Zi) + sigma2.hat * I.matr
+          temp = yi - Xi %*% beta.hat
+          t(D.hat %*% t(Zi) %*% solve(Vi) %*% temp)
+        }
+        else {
+          matrix(0, 1, ncol(Z))
+        }
       }
       # return
       current
@@ -268,7 +275,7 @@ survpred_prclmm = function(step1, step2, step3,
     pred.ranef = ranef.orig
     if (!is.null(new.longdata)) {
       pred.ranef = as.data.frame(ranef.new)
-      names(pred.ranef) = names(ranef.orig)
+      names(pred.ranef) = colnames(ranef.orig)
     }
     out = list('call' = call,
                'predicted_survival' = preds,
