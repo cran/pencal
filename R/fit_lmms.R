@@ -31,6 +31,8 @@
 #' measurement of a longitudinal response variable. Default is 0.2
 #' @param verbose if \code{TRUE} (default and recommended value), information
 #' on the ongoing computations is printed in the console
+#' @param seed random seed used for the bootstrap sampling. Default 
+#' is \code{seed = 123}
 #' 
 #' @return A list containing the following objects:
 #' \itemize{
@@ -102,7 +104,7 @@
 fit_lmms = function(y.names, fixefs, ranefs, long.data, 
                     surv.data, t.from.base, n.boots = 0, 
                     n.cores = 1, max.ymissing = 0.2, 
-                    verbose = TRUE) {
+                    verbose = TRUE, seed = 123) {
   call = match.call()
   # load namespaces
   requireNamespace('nlme')
@@ -225,7 +227,7 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
                                           niterEM = 1e3, msMaxEval = 1e3)),
                  silent = TRUE)
     }
-    if (inherits(temp, 'try-error')) {
+    if (inherits(lmm, 'try-error')) {
       stop(paste('no model could be fitted for response', y.names[i]))
     }
     lmm
@@ -241,8 +243,8 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
     # draw n bootstrap samples
     ids = unique(df$numeric.id)
     n = length(ids)
+    set.seed(seed)
     boot.ids = foreach(i = 1:n.boots) %do% {
-      set.seed(i)
       sort(sample(ids, n, TRUE))
     }
     

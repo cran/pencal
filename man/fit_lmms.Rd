@@ -5,7 +5,8 @@
 \title{Step 1 of PRC-LMM (estimation of the linear mixed models)}
 \usage{
 fit_lmms(y.names, fixefs, ranefs, long.data, surv.data, t.from.base,
-  n.boots = 0, n.cores = 1, max.ymissing = 0.2, verbose = TRUE)
+  n.boots = 0, n.cores = 1, max.ymissing = 0.2, verbose = TRUE,
+  seed = 123)
 }
 \arguments{
 \item{y.names}{character vector with the names of the
@@ -45,6 +46,9 @@ measurement of a longitudinal response variable. Default is 0.2}
 
 \item{verbose}{if \code{TRUE} (default and recommended value), information
 on the ongoing computations is printed in the console}
+
+\item{seed}{random seed used for the bootstrap sampling. Default 
+is \code{seed = 123}}
 }
 \value{
 A list containing the following objects:

@@ -164,31 +164,50 @@ summarize_lmms = function(object, n.cores = 1, verbose = TRUE) {
     .info_ncores(n.cores, verbose = verbose)
     # retrieve bootstrap ids
     boot.ids = object$boot.ids
-
     
     # compute predicted ranefs for each bootstrap sample (training set)
     # and for the original dataset (validation set)
     
     # training set
-    ranef.boot.train = foreach(b = 1:n.boots,
+    boot.train = foreach(b = 1:n.boots,
         .packages = c('foreach', 'pencal', 'nlme', 'purrr', 'dplyr')) %dopar% {
-      ranef.train = foreach(j = 1:p) %do% {
-        x = ranef(object$lmm.fits.boot[[b]][[j]])
-        # fix column names
-        is.inter = (names(x) == '(Intercept)')
-        if (sum(is.inter) > 0) names(x)[which(is.inter == 1)] = 'int'
-        names(x) = paste(y.names[j], 'b', names(x), sep = '_')
-        # return
-        data.frame(idv = rownames(x), x)
+          
+      jset = 1:p
+      ranef.train = foreach(j = jset) %do% {
+        lmm = object$lmm.fits.boot[[b]][[j]]
+        if (!inherits(lmm, 'try-error')) {
+          x = ranef(lmm)
+          # fix column names
+          is.inter = (names(x) == '(Intercept)')
+          if (sum(is.inter) > 0) names(x)[which(is.inter == 1)] = 'int'
+          names(x) = paste(y.names[j], 'b', names(x), sep = '_')
+          # return
+          out = data.frame(idv = rownames(x), x)
+        }
+        else out = NA
+        out
       }
+
+      if (any(is.na(ranef.train))) {
+        # if estimation of an LMM on sample b failed, remove it
+        rem = which(is.na(ranef.train))
+        ranef.train = ranef.train[-rem]
+        jset = setdiff(jset, rem)
+      }
+      # gather all predicted random effects
       ranef.train = purrr::reduce(ranef.train, dplyr::full_join, by = 'idv')
       if (any(is.na(ranef.train))) {
+        # set NAs = 0 (population average)
         ranef.train[is.na(ranef.train)] = 0
       }
       ranef.train = as.matrix(ranef.train[ , -1])
       # return
-      ranef.train
+      out = list('ranefs' = ranef.train, 'jset' = jset)
+      out
     }
+    # retrieve jset and ranefs
+    jset = foreach(b = 1:n.boots) %do% boot.train[[b]]$jset
+    ranef.boot.train = foreach(b = 1:n.boots) %do% boot.train[[b]]$ranefs
     
     # validation set
     ranef.boot.valid = foreach(b = 1:n.boots,
@@ -197,7 +216,7 @@ summarize_lmms = function(object, n.cores = 1, verbose = TRUE) {
       n = length(ids)
       
       # for each response, derive predicted ranefs for that given bootstrap sample
-      ranef.b = foreach(j = 1:p, .combine = 'cbind') %do% {
+      ranef.b = foreach(j = jset[[b]], .combine = 'cbind') %do% {
         # check if NAs on response
         new.df = data
         y = new.df[ , y.names[j]]
@@ -241,7 +260,7 @@ summarize_lmms = function(object, n.cores = 1, verbose = TRUE) {
         current
       }
       rownames(ranef.b) = ids
-      colnames(ranef.b) = names(ranef.boot.train[[b]])
+      colnames(ranef.b) = colnames(ranef.boot.train[[b]])
       ranef.b
     }
     # close the cluster

@@ -21,9 +21,9 @@ knitr::include_graphics("PRC_diagram.jpg")
 #  install.packages('pencal')
 
 ## ---- eval=TRUE, echo=TRUE, results='asis'------------------------------------
-library('pencal')
+library(pencal)
 
-## ----simulate, cache = T------------------------------------------------------
+## ----simulate, cache = F------------------------------------------------------
 set.seed(1234)
 p = 10
 simdata = simulate_prclmm_data(n = 100, p = p, p.relev = 5, 
@@ -62,7 +62,7 @@ survminer::ggsurvplot(kaplan, data = simdata$surv.data)
 ## -----------------------------------------------------------------------------
 n.cores = 2
 
-## ----step1, cache = T---------------------------------------------------------
+## ----step1, cache = F---------------------------------------------------------
 y.names = paste('marker', 1:p, sep = '')
 step1 = fit_lmms(y.names = y.names, 
                  fixefs = ~ age, ranefs = ~ age | id, 
@@ -76,7 +76,7 @@ ls(step1)
 # estimated LMM for marker1:
 step1$lmm.fits.orig[1]
 
-## ----step2, cache = T---------------------------------------------------------
+## ----step2, cache = F---------------------------------------------------------
 step2 = summarize_lmms(object = step1, n.cores = n.cores)
 
 ## -----------------------------------------------------------------------------
@@ -84,7 +84,7 @@ ls(step2)
 # view predicted random effects for the first two markers
 step2$ranef.orig[1:5, 1:4]
 
-## ----step3, cache = T---------------------------------------------------------
+## ----step3, cache = F---------------------------------------------------------
 step3 = fit_prclmm(object = step2, surv.data = simdata$surv.data,
                    baseline.covs = ~ baseline.age,
                    penalty = 'ridge', n.cores = n.cores)
@@ -100,7 +100,7 @@ preds = survpred_prclmm(step1, step2, step3, times = c(1, 2, 3))
 ls(preds)
 head(preds$predicted_survival)
 
-## ----cbocp, cache=T-----------------------------------------------------------
+## ----cbocp, cache = F---------------------------------------------------------
 cbocp = performance_prc(step2, step3, times = c(1, 2, 3), 
                    n.cores = n.cores)
 # C index estimates:

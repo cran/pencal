@@ -17,33 +17,35 @@ options(warn=-1)
 # suppress warnings related to number of cores when rendering the vignette
 ```
 
+<img src="https://user-images.githubusercontent.com/20061736/162180793-072613f0-a93e-4ef6-b0c4-b8d8a45d770a.png" align="right" alt="" width="250" />
+
 # Introduction
 
 ## What is `pencal`?
 
-`pencal` is an `R` package that has been created to make it easy and efficient to estimate and apply **Penalized Regression Calibration** ([Signorelli et al., 2021](https://doi.org/10.1002/sim.9178)).
+`pencal` is an `R` package that was developed to make it easy and efficient to estimate and apply **Penalized Regression Calibration**, a statistical method proposed in [Signorelli et al. (2021)](https://doi.org/10.1002/sim.9178).
 
 ## What is Penalized Regression Calibration?
 
-Longitudinal and high-dimensional measurements have become increasingly common in biomedical research. However, methods to predict survival outcomes using covariates that are both longitudinal and high-dimensional are currently missing.
+Longitudinal and high-dimensional measurements have become increasingly common in biomedical research. However, methods to predict survival outcomes using a large number of longitudinal covariates as predictors are currently missing.
 
-Penalized Regression Calibration (PRC) is a statistical method that has been developed to fill this methodological gap, making it possible to **predict survival using as predictors a set of covariates that are at the same time longitudinal and high-dimensional**.
+Penalized Regression Calibration (PRC) is a statistical method that has been developed to fill this methodological gap, making it possible to **predict survival using as predictors a large (potentially high-dimensional) number of longitudinal covariates**.
 
-PRC is described in detail in the following article:
+PRC is described in detail in the following scientific article:
 
-Signorelli, M., Spitali, P., Al-Khalili Sgyziarto, C., The Mark-MD Consortium, Tsonaka, R. (2021). Penalized regression calibration: A method for the prediction of survival outcomes using complex longitudinal and high-dimensional data. Statistics in Medicine, 40 (27), 6178-6196. DOI:  [10.1002/sim.9178](https://doi.org/10.1002/sim.9178).
+Signorelli, M., Spitali, P., Al-Khalili Sgyziarto, C., The Mark-MD Consortium, Tsonaka, R. (2021). [Penalized regression calibration: A method for the prediction of survival outcomes using complex longitudinal and high-dimensional data](https://doi.org/10.1002/sim.9178). Statistics in Medicine, 40 (27), 6178-6196. DOI:  [10.1002/sim.9178](https://doi.org/10.1002/sim.9178).
 
 ## How does PRC work?
 
 In short, PRC comprises three modelling steps:
 
-1. in the first step, we **model the trajectories described by the longitudinal biomarkers using mixed effects models**;
+1. in the first step, we **model the trajectories described by the longitudinal covariates using mixed effects models**;
 
-2. in the second step, we **compute subject-specific summaries of the longitudinal trajectories**. In practice, these summaries are the predicted random effects from the mixed models estimated in step 1, and they allow us to summarize the way in which the biomarkers change over time across subjects;
+2. in the second step, we **compute subject-specific summaries of the longitudinal trajectories**. In practice, these summaries are the predicted random effects from the mixed models estimated in step 1, and they allow us to summarize the way in which the trajectories evolve over time across subjects;
 
-3. in the third step, we **estimate a penalized Cox model** where the summaries computed in step 3 (alongside with other relevant covariates, such as baseline age or important confounders) are employed as predictors of the survival time.
+3. in the third step, we **estimate a penalized Cox model** where the summaries computed in step 3 (alongside with any relevant time-independent covariate, such as baseline age, gender, ...) are employed as predictors of the survival outcome.
 
-By performing these 3 steps we can estimate PRC, obtaining a model that allows us to compute predicted survival probabilities.
+The final output of PRC is a penalized Cox model that allows to compute predicted survival probabilities for each individual.
 
 Additionally, one may want to quantify the predictive performance of the fitted model. To achieve this aim, in `pencal` we have implemented a **Cluster Bootstrap Optimism Correction Procedure** (CBOCP) that can be used to obtain optimism-corrected estimates of the C index and time-dependent AUC associated to the fitted model. Depending on the dimensionality of your dataset, computing the CBOCP might be time consuming; for this reason, we offer the possibility to parallelize the CBOCP using multiple cores.
 
@@ -87,7 +89,7 @@ install.packages('pencal')
 After having installed `pencal`, you can load the package with
 
 ```{r, eval=TRUE, echo=TRUE, results='asis'}
-library('pencal')
+library(pencal)
 ```
 
 # Overview of the functionalities of `pencal`
@@ -135,7 +137,7 @@ In addition to the functions mentioned above, `pencal` comprises also 3 function
 
 To illustrate how `pencal` works, let us simulate an example dataset from the PRC-LMM model. Hereafter we generate a dataset that comprises $n = 100$ subjects, $p = 10$ longitudinal biomarkers that are measured at $t = 0, 0.2, 0.5, 1, 1.5, 2$ years from baseline, and a survival outcome that is associated with 5 (`p.relev`) of the 10 biomarkers:
 
-```{r simulate, cache = T}
+```{r simulate, cache = F}
 set.seed(1234)
 p = 10
 simdata = simulate_prclmm_data(n = 100, p = p, p.relev = 5, 
@@ -209,7 +211,7 @@ $$y_{ij} = \beta_0 + u_{0i} + \beta_1 a_{ij} + u_{1i} a_{ij} + \varepsilon_{ij}.
 
 To do this in `R` we use the `fit_lmms` function:
 
-```{r step1, cache = T}
+```{r step1, cache = F}
 y.names = paste('marker', 1:p, sep = '')
 step1 = fit_lmms(y.names = y.names, 
                  fixefs = ~ age, ranefs = ~ age | id, 
@@ -237,7 +239,7 @@ For more details about the arguments of `fit_lmms` and its outputs, see the help
 
 In the second step we **compute the predicted random intercepts and random slopes** for the LMMs fitted in step 1:
 
-```{r step2, cache = T}
+```{r step2, cache = F}
 step2 = summarize_lmms(object = step1, n.cores = n.cores)
 ```
 
@@ -255,7 +257,7 @@ For more details about the arguments of `summarize_lmms` and its outputs, see th
 
 Lastly, in the third step of PRC-LMM we estimate a **penalized Cox model** where we employ as predictors baseline age and all the summaries (predicted random effects) computed in step 2:
 
-```{r step3, cache = T}
+```{r step3, cache = F}
 step3 = fit_prclmm(object = step2, surv.data = simdata$surv.data,
                    baseline.covs = ~ baseline.age,
                    penalty = 'ridge', n.cores = n.cores)
@@ -298,7 +300,7 @@ Most of the steps that the CBOCP requires are directly computed by the functions
 
 To gather the results of the CBOCP we can use the function `performance_prc`:
 
-```{r cbocp, cache=T}
+```{r cbocp, cache = F}
 cbocp = performance_prc(step2, step3, times = c(1, 2, 3), 
                    n.cores = n.cores)
 # C index estimates:
@@ -316,8 +318,4 @@ From the results above we can see that:
 
 # Further details and material
 
-The aim of this vignette is to provide a quick-start introduction to the `R` package `pencal`. Here I have focused my attention on the fundamental aspects that one needs to use the package. 
-
-Further details, functions and examples can be found in [the manual of the package](https://CRAN.R-project.org/package=pencal/pencal.pdf).
-
-The description of the method is available in an article [that you can read here](https://doi.org/10.1002/sim.9178).
+The aim of this vignette is to provide a quick-start introduction to the `R` package `pencal`. Here I have focused my attention on the fundamental aspects that one needs to know to be able use the package. More details, functions and examples can be found in [the manual of the package](https://CRAN.R-project.org/package=pencal/pencal.pdf). The methodology that `pencal` relies on is described in [Signorelli et al. (2021)](https://doi.org/10.1002/sim.9178).

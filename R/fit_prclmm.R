@@ -194,11 +194,11 @@ fit_prclmm = function(object, surv.data, baseline.covs = NULL,
   }
   if (!is.null(baseline.covs)) {
     X0 = model.matrix(as.formula(baseline.covs), data = surv.data)
-    X.orig = as.matrix(cbind(X0, ranef.orig))
-    contains.int = '(Intercept)' %in% colnames(X.orig)
+    contains.int = '(Intercept)' %in% colnames(X0)
     if (contains.int) {
-      X.orig = X.orig[ , -1] 
+      X0 = X0[ , -1, drop = FALSE] 
     }
+    X.orig = as.matrix(cbind(X0, ranef.orig))
     # fix penalty factor
     if (length(pfac.base.covs) > ncol(X0)) {
       stop('pfac.base.covs contains too many elements!')

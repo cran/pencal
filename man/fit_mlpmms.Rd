@@ -6,7 +6,8 @@
 \usage{
 fit_mlpmms(y.names, fixefs, ranef.time, randint.items = TRUE, long.data,
   surv.data, t.from.base, n.boots = 0, n.cores = 1, verbose = TRUE,
-  maxiter = 100, conv = rep(0.001, 3), lcmm.warnings = FALSE)
+  seed = 123, maxiter = 100, conv = rep(0.001, 3),
+  lcmm.warnings = FALSE)
 }
 \arguments{
 \item{y.names}{a list with the names of the
@@ -51,6 +52,9 @@ cores are available on your computer}
 
 \item{verbose}{if \code{TRUE} (default and recommended value), information
 on the ongoing computations is printed in the console}
+
+\item{seed}{random seed used for the bootstrap sampling. Default 
+is \code{seed = 123}}
 
 \item{maxiter}{maximum number of iterations to use when calling
 the function \code{multlcmm}. Default is 100}

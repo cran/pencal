@@ -16,6 +16,16 @@ Each subsection corresponds to a specific package version.
 
 # 1.2.x
 
+## pencal 1.2.2
+
+-   Released: July 2022
+-   Added `seed` argument to `fit_lmms` and `fit_mlpmms`
+-   Added a fix within `summarize_lmms` in case estimation of a LMM
+    fails for a bootstrap replicate
+-   Fixed condition that triggers error message associated with length
+    of `pfac.base.covs` in `fit_prclmm`
+-   Minor updates in the vignette
+
 ## pencal 1.2.1
 
 -   Released: June 2022

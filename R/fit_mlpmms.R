@@ -36,6 +36,8 @@
 #' cores are available on your computer
 #' @param verbose if \code{TRUE} (default and recommended value), information
 #' on the ongoing computations is printed in the console
+#' @param seed random seed used for the bootstrap sampling. Default 
+#' is \code{seed = 123}
 #' @param maxiter maximum number of iterations to use when calling
 #' the function \code{multlcmm}. Default is 100
 #' @param conv a vector containing the three convergence criteria
@@ -137,7 +139,7 @@
 fit_mlpmms = function(y.names, fixefs, ranef.time, 
                     randint.items = TRUE, long.data, 
                     surv.data, t.from.base, n.boots = 0, 
-                    n.cores = 1, verbose = TRUE,
+                    n.cores = 1, verbose = TRUE, seed = 123,
                     maxiter = 100, conv = rep(1e-3, 3),
                     lcmm.warnings = FALSE) {
   call = match.call()
@@ -261,8 +263,8 @@ fit_mlpmms = function(y.names, fixefs, ranef.time,
     # draw n bootstrap samples
     ids = unique(df$numeric.id)
     n = length(ids)
+    set.seed(seed)
     boot.ids = foreach(i = 1:n.boots) %do% {
-      set.seed(i)
       sort(sample(ids, n, TRUE))
     }
     # set up environment for parallel computing
