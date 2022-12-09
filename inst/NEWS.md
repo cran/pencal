@@ -14,6 +14,17 @@ package - in other words, within a section you will find all those
 package versions a.b.x where a and b are fixed whereas x = 1, 2, 3, …
 Each subsection corresponds to a specific package version.
 
+# 1.3.x
+
+## pencal 1.3.1
+
+- Released: December 2022
+- Added classes (`prclmm` and `prcmlpmm`) and corresponding methods (`print` and `summary`) to the package
+- Added the functions `getlmm` and `getmlpmm`
+- Added `control` argument to `fit_lmms`. This argument is used to pass control parameters to `nlme::lme` (see `?nlme::lmeControl`). See `?fit_lmms` for the defaults
+- `simulate_prclmm_data` now outputs an extra element (`theta.true`) containing the true parameters used to generate the data
+- Added `eval( )` when creating `baseline.covs` within `survpred_prclmm` and `survpred_prcmlpmm`
+
 # 1.2.x
 
 ## pencal 1.2.2

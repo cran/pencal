@@ -107,6 +107,7 @@ step2 = summarize_lmms(object = step1, n.cores = n.cores)
 step3 = fit_prclmm(object = step2, surv.data = simdata$surv.data,
                    baseline.covs = ~ baseline.age,
                    penalty = 'ridge', n.cores = n.cores)
+summary(step3)                    
 }
 \references{
 Signorelli, M., Spitali, P., Al-Khalili Szigyarto, C, 

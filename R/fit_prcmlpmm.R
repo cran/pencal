@@ -113,6 +113,7 @@
 #'                    baseline.covs = ~ baseline.age,
 #'                    include.b0s = TRUE,
 #'                    penalty = 'ridge', n.cores = n.cores)
+#' summary(step3)
 #' }
 
 
@@ -154,5 +155,6 @@ fit_prcmlpmm = function(object, surv.data, baseline.covs = NULL,
                    n.folds.elnet = n.folds.elnet, 
                    n.cores = n.cores, verbose = verbose)
   out$call = call
+  class(out) = 'prcmlpmm'
   return(out)
 }

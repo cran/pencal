@@ -139,7 +139,7 @@ survpred_prclmm = function(step1, step2, step3,
   check2 = temp %in% ls(step3)
   mess2 = paste('step2 input should cointain:', do.call(paste, as.list(temp)) )
   if (sum(check2) != 4) stop(mess2)
-  baseline.covs = step3$call$baseline.covs
+  baseline.covs = eval(step3$call$baseline.covs)
   pcox.orig = step3$pcox.orig
   surv.data = step3$surv.data
   n = length(unique(surv.data$id))
@@ -181,7 +181,7 @@ survpred_prclmm = function(step1, step2, step3,
       sigma2.hat = summary(lmms[[j]])$sigma^2 # error variance
       # create X and Z
       X = model.matrix(as.formula(fixefs), data = new.df)
-      formYz = formula(lmms[[j]]$modelStruct$reStruct[[1]]) 
+      formYz = formula(lmms[[j]]$modelStruct$reStruct[[1]])
       mfZ = model.frame(terms(formYz), data = new.df)
       Z = model.matrix(formYz, mfZ)
       #####

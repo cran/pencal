@@ -33,6 +33,9 @@
 #' on the ongoing computations is printed in the console
 #' @param seed random seed used for the bootstrap sampling. Default 
 #' is \code{seed = 123}
+#' @param control a list of control values to be passed to \code{lme} when fitting the
+#' linear mixed models. By default, we set \code{opt = 'optim', niterEM = 500, maxIter = 500}. 
+#' See \code{?nlme::lmeControl} for all possible arguments and values
 #' 
 #' @return A list containing the following objects:
 #' \itemize{
@@ -104,7 +107,8 @@
 fit_lmms = function(y.names, fixefs, ranefs, long.data, 
                     surv.data, t.from.base, n.boots = 0, 
                     n.cores = 1, max.ymissing = 0.2, 
-                    verbose = TRUE, seed = 123) {
+                    verbose = TRUE, seed = 123,
+                    control = list(opt = 'optim', niterEM = 500, maxIter = 500)) {
   call = match.call()
   # load namespaces
   requireNamespace('nlme')
@@ -133,7 +137,7 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
   if (n.cores > 1) {
     max.cores = parallel::detectCores()
     if (!is.na(max.cores)) {
-      .check_ncores(avail = max.cores, requested = n.cores)
+      .check_ncores(avail = max.cores, requested = n.cores, verbose = verbose)
     }
   }
   
@@ -203,15 +207,16 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
     lmm = try( nlme::lme(fixed = fixef.formula, 
                     random = ranef.formula, 
                     data = df, na.action = na.exclude,
-                    keep.data = FALSE),
+                    keep.data = FALSE, control = control),
                 silent = TRUE)
-    if (inherits(lmm, 'try-error')) { # retry with increased max number of iterations
+    if (inherits(lmm, 'try-error')) { 
+      # retry with larger max number of iterations (larger than lmeControl's controls given above)
       lmm = try( nlme::lme(fixed = fixef.formula, 
                      random = ranef.formula, 
                      data = df, na.action = na.exclude,
                      keep.data = FALSE,
-                     control = list(maxIter = 1e4, msMaxIter = 1e3,
-                                    niterEM = 1e3, msMaxEval = 1e3)),
+                     control = list(control$opt, niterEM = 1e3,
+                                    maxIter = 1e3, msMaxIter = 1e3, msMaxEval = 1e3)),
                  silent = TRUE)
     }
     if (inherits(lmm, 'try-error')) {
@@ -223,8 +228,7 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
                            random = ~ 1 | id, 
                            data = df, na.action = na.exclude,
                            keep.data = FALSE,
-                           control = list(maxIter = 1e4, msMaxIter = 1e3,
-                                          niterEM = 1e3, msMaxEval = 1e3)),
+                           control = control),
                  silent = TRUE)
     }
     if (inherits(lmm, 'try-error')) {
@@ -266,24 +270,25 @@ fit_lmms = function(y.names, fixefs, ranefs, long.data,
         lmm = try( nlme::lme(fixed = fixef.formula, 
                               random = ranef.formula, 
                               data = boot.df, na.action = na.exclude,
-                              keep.data = FALSE),
+                              keep.data = FALSE, control = control),
                     silent = TRUE)
-        if (inherits(lmm, 'try-error')) { # retry with increased max number of iterations
+        if (inherits(lmm, 'try-error')) {
+          # retry with larger max number of iterations (larger than lmeControl's defaults)
           lmm = try( nlme::lme(fixed = fixef.formula, 
                                random = ranef.formula, 
                                data = boot.df, na.action = na.exclude,
                                keep.data = FALSE,
-                               control = list(maxIter = 1e4, msMaxIter = 1e3,
-                                            niterEM = 1e3, msMaxEval = 1e3)),
-                     silent = TRUE)
+                               control = list(control$opt, niterEM = 1e3,
+                                              maxIter = 1e3, msMaxIter = 1e3, 
+                                              msMaxEval = 1e3),
+                     silent = TRUE))
         }
         if (inherits(lmm, 'try-error')) {
           lmm = try( nlme::lme(fixed = fixef.formula, 
                                random = ~ 1 | id, 
                                data = boot.df, na.action = na.exclude,
                                keep.data = FALSE,
-                               control = list(maxIter = 1e4, msMaxIter = 1e3,
-                                            niterEM = 1e3, msMaxEval = 1e3)),
+                               control = control),
                      silent = TRUE)
         }
         if (inherits(lmm, 'try-error')) {

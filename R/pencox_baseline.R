@@ -151,7 +151,7 @@ pencox_baseline = function(data, formula,
   if (n.boots > 0) {
     max.cores = parallel::detectCores()
     if (!is.na(max.cores)) {
-      .check_ncores(avail = max.cores, requested = n.cores)
+      .check_ncores(avail = max.cores, requested = n.cores, verbose = verbose)
     }
   }
   

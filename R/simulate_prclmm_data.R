@@ -41,7 +41,10 @@
 #' (\code{event}) that is 1 if the event
 #' is observed, and 0 in case of right-censoring;
 #' \item \code{perc.cens} the proportion of censored individuals 
-#' in the simulated dataset.
+#' in the simulated dataset;
+#' \item \code{theta.true} a list containing the true parameter values
+#' used to simulate data from the mixed model (beta0 and beta1) and
+#' from the Weibull model (tau.age, gamma, delta)
 #' }
 #' 
 #' @import stats
@@ -91,11 +94,11 @@ simulate_prclmm_data = function(n = 100, p = 10, p.relev = 4,
   beta1 = .sim.eff.sizes(n = p, abs.range = c(1, 2))
   gamma = c(.sim.eff.sizes(n = p.relev,  
                           abs.range = c(0.5, 1),
-                          seed = seed+1), 
+                          seed = seed + 1), 
             rep(0, p - p.relev))
   delta = c(.sim.eff.sizes(n = p.relev,  
                           abs.range = c(0.5, 1), 
-                          seed = seed+2), 
+                          seed = seed + 2), 
                     rep(0, p - p.relev))
   baseline.age = runif(n, base.age.range[1], base.age.range[2])
 
@@ -132,8 +135,10 @@ simulate_prclmm_data = function(n = 100, p = 10, p.relev = 4,
   observed.t = ifelse(event == 1, true.t, censoring.times)
   surv.data = data.frame('id' = 1:n, baseline.age, 'time' = observed.t, event)
   censoring.prop = length(which(event == 0)) / length(event)
+  theta.true = list('beta0' = beta0, 'beta1' = beta1,
+               'tau.age' = tau.age, 'gamma' = gamma, 'delta' = delta)
   out = list('long.data' = long.data, 'surv.data' = surv.data,
-             'censoring.prop' = censoring.prop)
+             'censoring.prop' = censoring.prop, 'theta.true' = theta.true)
   return(out)
 }
 

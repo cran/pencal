@@ -51,7 +51,10 @@ the time to event outcome (\code{time}) and a binary vector
 (\code{event}) that is 1 if the event
 is observed, and 0 in case of right-censoring;
 \item \code{perc.cens} the proportion of censored individuals 
-in the simulated dataset.
+in the simulated dataset;
+\item \code{theta.true} a list containing the true parameter values
+used to simulate data from the mixed model (beta0 and beta1) and
+from the Weibull model (tau.age, gamma, delta)
 }
 }
 \description{

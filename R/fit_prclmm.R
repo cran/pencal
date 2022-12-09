@@ -104,6 +104,7 @@
 #' step3 = fit_prclmm(object = step2, surv.data = simdata$surv.data,
 #'                    baseline.covs = ~ baseline.age,
 #'                    penalty = 'ridge', n.cores = n.cores)
+#' summary(step3)                    
 
 fit_prclmm = function(object, surv.data, baseline.covs = NULL,
                       penalty = 'ridge', standardize = TRUE,
@@ -164,7 +165,7 @@ fit_prclmm = function(object, surv.data, baseline.covs = NULL,
   if (n.boots > 0) {
     max.cores = parallel::detectCores()
     if (!is.na(max.cores)) {
-      .check_ncores(avail = max.cores, requested = n.cores)
+      .check_ncores(avail = max.cores, requested = n.cores, verbose = verbose)
     }
   }
   
@@ -333,5 +334,6 @@ fit_prclmm = function(object, surv.data, baseline.covs = NULL,
     out[['boot.ids']] = boot.ids
     out[['pcox.boot']] = pcox.boot
   }
+  class(out) = 'prclmm'
   return(out)
 }

@@ -117,6 +117,7 @@ step3 = fit_prcmlpmm(object = step2, surv.data = simdata$surv.data,
                    baseline.covs = ~ baseline.age,
                    include.b0s = TRUE,
                    penalty = 'ridge', n.cores = n.cores)
+summary(step3)
 }
 }
 \references{

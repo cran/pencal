@@ -62,7 +62,7 @@ survpred_prcmlpmm = function(step2, step3, times = 1) {
   check2 = temp %in% ls(step3)
   mess2 = paste('step2 input should cointain:', do.call(paste, as.list(temp)) )
   if (sum(check2) != 4) stop(mess2)
-  baseline.covs = step3$call$baseline.covs
+  baseline.covs = eval(step3$call$baseline.covs)
   pcox.orig = step3$pcox.orig
   surv.data = step3$surv.data
   n = length(unique(surv.data$id))

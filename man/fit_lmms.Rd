@@ -6,7 +6,7 @@
 \usage{
 fit_lmms(y.names, fixefs, ranefs, long.data, surv.data, t.from.base,
   n.boots = 0, n.cores = 1, max.ymissing = 0.2, verbose = TRUE,
-  seed = 123)
+  seed = 123, control = list(opt = "optim", niterEM = 500, maxIter = 500))
 }
 \arguments{
 \item{y.names}{character vector with the names of the
@@ -49,6 +49,10 @@ on the ongoing computations is printed in the console}
 
 \item{seed}{random seed used for the bootstrap sampling. Default 
 is \code{seed = 123}}
+
+\item{control}{a list of control values to be passed to \code{lme} when fitting the
+linear mixed models. By default, we set \code{opt = 'optim', niterEM = 500, maxIter = 500}. 
+See \code{?nlme::lmeControl} for all possible arguments and values}
 }
 \value{
 A list containing the following objects:
