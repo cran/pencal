@@ -56,12 +56,12 @@
 #' # IMPORTANT: set do.bootstrap = TRUE to compute the optimism correction!
 #' n.boots = ifelse(do.bootstrap, 100, 0)
 #' more.cores = FALSE
-#' # IMPORTANT: set more.cores = TRUE to speed computations up!
-#' if (!more.cores) n.cores = 2
+#' # IMPORTANT: set more.cores = TRUE to parallelize and speed computations up!
+#' if (!more.cores) n.cores = 1
 #' if (more.cores) {
 #'    # identify number of available cores on your machine
 #'    n.cores = parallel::detectCores()
-#'    if (is.na(n.cores)) n.cores = 2
+#'    if (is.na(n.cores)) n.cores = 8
 #' }
 #' 
 #' # step 1 of PRC-LMM: estimate the LMMs
@@ -120,13 +120,19 @@ summarize_lmms = function(object, n.cores = 1, verbose = TRUE) {
     }
   }
   
+  # set up environment for parallel computing
+  cl = parallel::makeCluster(n.cores)
+  doParallel::registerDoParallel(cl)
+  .info_ncores(n.cores, verbose = verbose)
+  
   ########################
   ### original dataset ###
   ########################
   if (verbose) cat('Computing the predicted random effects on the original dataset...\n')
   # create matrix with predicted random effects computed on original dataset
   lmms = object$lmm.fits.orig
-  ranef.orig = foreach(j = 1:p) %do% {
+  ranef.orig = foreach(j = 1:p,
+                       .packages = c('foreach', 'pencal', 'nlme')) %dopar% {
     x = ranef(lmms[[j]])
     # fix column names
     is.inter = (names(x) == '(Intercept)')
@@ -158,10 +164,6 @@ summarize_lmms = function(object, n.cores = 1, verbose = TRUE) {
   #######################
   if (n.boots >= 1) {
     if (verbose) cat('Bootstrap procedure started\n')
-    # set up environment for parallel computing
-    cl = parallel::makeCluster(n.cores)
-    doParallel::registerDoParallel(cl)
-    .info_ncores(n.cores, verbose = verbose)
     # retrieve bootstrap ids
     boot.ids = object$boot.ids
     
@@ -263,13 +265,13 @@ summarize_lmms = function(object, n.cores = 1, verbose = TRUE) {
       colnames(ranef.b) = colnames(ranef.boot.train[[b]])
       ranef.b
     }
-    # close the cluster
-    parallel::stopCluster(cl)
     if (verbose) {
       cat('Bootstrap procedure finished\n')
       cat('Computation of step 2: finished :)\n')
     }
   }
+  # close the cluster
+  parallel::stopCluster(cl)
   
   out = list('call' = call, 'ranef.orig' = ranef.orig, 
              'n.boots' = n.boots)

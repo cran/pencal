@@ -128,6 +128,10 @@ summarize_mlpmms = function(object, n.cores = 1, verbose = TRUE) {
       .check_ncores(avail = max.cores, requested = n.cores, verbose = verbose)
     }
   }
+  # set up environment for parallel computing
+  cl = parallel::makeCluster(n.cores)
+  doParallel::registerDoParallel(cl)
+  .info_ncores(n.cores, verbose = verbose)
   
   ########################
   ### original dataset ###
@@ -136,7 +140,8 @@ summarize_mlpmms = function(object, n.cores = 1, verbose = TRUE) {
   # create matrix with predicted random effects computed on original dataset
   mlpmms = object$mlpmm.fits.orig
   
-  ranef.orig = foreach(j = 1:p, .combine = 'cbind') %do% {
+  ranef.orig = foreach(j = 1:p, .combine = 'cbind',
+                       .packages = c('foreach', 'pencal', 'lcmm')) %dopar% {
     out = mlpmms[[j]]$predRE[,-1]
     rownames(out) = mlpmms[[j]]$predRE[,1]
     colnames(out) = paste(c('u0', 'u1'), j, sep = '_')
@@ -158,10 +163,6 @@ summarize_mlpmms = function(object, n.cores = 1, verbose = TRUE) {
     # retrieve bootstrap ids and fitted mlpmms
     boot.ids = object$boot.ids
     mlpmm.fits.boot = object$mlpmm.fits.boot
-    # set up environment for parallel computing
-    cl = parallel::makeCluster(n.cores)
-    doParallel::registerDoParallel(cl)
-    .info_ncores(n.cores, verbose = verbose)
     
     # compute predicted ranefs for each bootstrap sample (training set)
     # and for the original dataset (validation set)
@@ -211,14 +212,13 @@ summarize_mlpmms = function(object, n.cores = 1, verbose = TRUE) {
       colnames(ranef.b) = names(ranef.boot.train[[t]])
       ranef.b
     }
-    
-    # close the cluster
-    parallel::stopCluster(cl)
     if (verbose) {
       cat('Bootstrap procedure finished\n')
       cat('Computation of step 2: finished :)\n')
     }
   }
+  # close the cluster
+  parallel::stopCluster(cl)
   
   out = list('call' = call, 'ranef.orig' = ranef.orig, 
              'n.boots' = n.boots)

@@ -82,12 +82,12 @@ do.bootstrap = FALSE
 # IMPORTANT: set do.bootstrap = TRUE to compute the optimism correction!
 n.boots = ifelse(do.bootstrap, 100, 0)
 more.cores = FALSE
-# IMPORTANT: set more.cores = TRUE to speed computations up!
-if (!more.cores) n.cores = 2
+# IMPORTANT: set more.cores = TRUE to parallelize and speed computations up!
+if (!more.cores) n.cores = 1
 if (more.cores) {
    # identify number of available cores on your machine
    n.cores = parallel::detectCores()
-   if (is.na(n.cores)) n.cores = 2
+   if (is.na(n.cores)) n.cores = 8
 }
 
 # step 1 of PRC-LMM: estimate the LMMs

@@ -35,12 +35,16 @@ ls(simdata)
 # view the dataset in long format
 head(simdata$long.data)
 # visualize the trajectories for a randomly picked biomarker
-library(ptmixed)
-ptmixed::make.spaghetti(x = age, y = marker5, 
+# (the code in the if statement below relies on the ptmixed package)
+if ('ptmixed' %in% rownames(installed.packages())) {
+  library(ptmixed)
+  ptmixed::make.spaghetti(x = age, y = marker5, 
                id = id, group = id,
                data = simdata$long.data, 
                margins = c(4, 4, 2, 2),
                legend.inset = - 1)
+}
+
 
 ## ----view_survdata, fig.height=4.5, fig.width=4-------------------------------
 # view the dataset with the survival data
@@ -76,6 +80,11 @@ ls(step1)
 # estimated LMM for marker1:
 step1$lmm.fits.orig[1]
 
+## -----------------------------------------------------------------------------
+getlmm(step1, 'marker3', 'betas')
+getlmm(step1, 'marker3', 'tTable')
+getlmm(step1, 'marker3', 'variances')
+
 ## ----step2, cache = F---------------------------------------------------------
 step2 = summarize_lmms(object = step1, n.cores = n.cores)
 
@@ -88,6 +97,9 @@ step2$ranef.orig[1:5, 1:4]
 step3 = fit_prclmm(object = step2, surv.data = simdata$surv.data,
                    baseline.covs = ~ baseline.age,
                    penalty = 'ridge', n.cores = n.cores)
+
+## -----------------------------------------------------------------------------
+print(step3)
 
 ## -----------------------------------------------------------------------------
 ls(step3)

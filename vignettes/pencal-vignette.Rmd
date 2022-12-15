@@ -158,12 +158,16 @@ In order to estimate the PRC-LMM, you need to **provide the following two inputs
 # view the dataset in long format
 head(simdata$long.data)
 # visualize the trajectories for a randomly picked biomarker
-library(ptmixed)
-ptmixed::make.spaghetti(x = age, y = marker5, 
+# (the code in the if statement below relies on the ptmixed package)
+if ('ptmixed' %in% rownames(installed.packages())) {
+  library(ptmixed)
+  ptmixed::make.spaghetti(x = age, y = marker5, 
                id = id, group = id,
                data = simdata$long.data, 
                margins = c(4, 4, 2, 2),
                legend.inset = - 1)
+}
+
 ```
 
 2. **a dataset with information on the survival outcome**, which should contain (at least) the following variables: a subject identifier that should be named `id`, the time to event outcome called `time`, and the binary event indicator called `event` (NB: make sure that the variable names associated to these three variables are indeed `id`, `time` and `event`!)
@@ -233,7 +237,16 @@ ls(step1)
 step1$lmm.fits.orig[1]
 ```
 
-For more details about the arguments of `fit_lmms` and its outputs, see the help page: `?fit_lmms`.
+A useful helper function to inspect the parameter estimates from the LMMs is the `getlmm` function:
+
+```{r}
+getlmm(step1, 'marker3', 'betas')
+getlmm(step1, 'marker3', 'tTable')
+getlmm(step1, 'marker3', 'variances')
+```
+
+
+For more details about the arguments of `fit_lmms` and its outputs, see the help pages: `?fit_lmms` and `getlmm`.
 
 ### Step 2
 
@@ -265,7 +278,13 @@ step3 = fit_prclmm(object = step2, surv.data = simdata$surv.data,
 
 In this example I have set `penalty = 'ridge'`, but you may also use elasticnet or lasso as alternatives. Moreover, by default the predicted random effects are standardized when included in the penalized Cox model (if you don't want to perform such standardization, set `standardize = F`).
 
-`fit_prclmm` returns as output a list that contains, among other elements, the fitted penalized Cox model `pcox.orig`, which is a `glmnet` object:
+`fit_prclmm` returns as output an object of class `prclmm` with its own `print` and `summary` methods:
+
+```{r}
+print(step3)
+```
+
+In practice, the `prclmm` object is also a list that contains, among other elements, the fitted penalized Cox model `pcox.orig`, which is a `glmnet` object:
 
 ```{r}
 ls(step3)

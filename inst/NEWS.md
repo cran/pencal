@@ -16,6 +16,12 @@ Each subsection corresponds to a specific package version.
 
 # 1.3.x
 
+## pencal 1.3.2
+
+- Released: December 2022
+- Updated vignettes, including mention of new functionalities introduced in version 1.3.1
+- Parallelized an extra computation in `summarize_lmms` and `summarize_mlpmms` (this should yield computing time gains with thousands of longitudinal predictors)
+
 ## pencal 1.3.1
 
 - Released: December 2022
