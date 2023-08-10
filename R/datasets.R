@@ -1,3 +1,36 @@
+#' pbc2 dataset
+#'
+#' This list contains data from the Mayo Clinic primary biliary cirrhosis (PBC)
+#' study (1974-1984). It comprises two datasets, one with the survival and baseline covariates
+#' and the other with the longitudinal measurements. The datasets are a 
+#' rearrangement of the `pbc2` dataframe from the `joineRML` package that makes
+#' them more suitable for analysis within `pencal`
+#' 
+#' @docType data
+#' @keywords datasets
+#' @usage data(pbc2data)
+#'
+#' @format The list contains two data frames:
+#' 
+#' \itemize{
+#' \item \code{baselineInfo} contains the subject indicator `id`, information about
+#' the survival outcome (`time` and `event`) and the covariates `baselineAge`, `sex`
+#' and `treatment`;
+#' \item \code{longitudinalInfo} contains the subject `id` and the repeated measurement 
+#' data: `age` is the age of the individual at each visit, `fuptime` the follow-up time
+#' (time on study), and `serBilir`, `serChol`, `albumin`, `alkaline`, `SGOT`,
+#' `platelets` and `prothrombin` contain the value of each covariate at the 
+#' corresponding visit
+#' }
+#' 
+#' @author Mirko Signorelli
+#' 
+#' @examples 
+#' data(pbc2data)
+#' head(pbc2data$baselineInfo)
+#' head(pbc2data$longitudinalInfo)
+"pbc2data"
+#'
 #' A fitted PRC LMM
 #'
 #' This list contains a fitted PRC LMM, where the CBOCP is

@@ -20,6 +20,9 @@ knitr::include_graphics("PRC_diagram.jpg")
 #  # step 2: install pencal and CRAN dependencies
 #  install.packages('pencal')
 
+## ---- eval=FALSE, echo=TRUE, results='asis'-----------------------------------
+#  install.packages('pencal')
+
 ## ---- eval=TRUE, echo=TRUE, results='asis'------------------------------------
 library(pencal)
 
@@ -113,10 +116,13 @@ ls(preds)
 head(preds$predicted_survival)
 
 ## ----cbocp, cache = F---------------------------------------------------------
-cbocp = performance_prc(step2, step3, times = c(1, 2, 3), 
-                   n.cores = n.cores)
-# C index estimates:
-cbocp$concordance
+cbocp = performance_prc(step2, step3, metric = c('tdauc', 'c', 'brier'),
+                        times = 1:3, n.cores = n.cores)
+ls(cbocp)
 # time-dependent AUC estimates:
 cbocp$tdAUC
+# C index estimates:
+cbocp$concordance
+# Brier score estimates:
+cbocp$Brier
 
