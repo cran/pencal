@@ -81,8 +81,8 @@ simdata = simulate_prclmm_data(n = 100, p = p, p.relev = 2,
              seed = 123, t.values = c(0, 0.2, 0.5, 1, 1.5, 2))
 #create dataframe with baseline measurements only
 baseline.visits = simdata$long.data[which(!duplicated(simdata$long.data$id)),]
-df = cbind(simdata$surv.data, baseline.visits)
-df = df[ , -c(5:7)]
+df = merge(simdata$surv.data, baseline.visits, by = 'id')
+df = df[ , -c(5:6)]
 
 do.bootstrap = FALSE
 # IMPORTANT: set do.bootstrap = TRUE to compute the optimism correction!

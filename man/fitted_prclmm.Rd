@@ -15,7 +15,8 @@ data(fitted_prclmm)
 This list contains a fitted PRC LMM, where the CBOCP is
 computed using 50 cluster bootstrap samples. It is
 used to reduce the computing time in the example of
-the function \code{performance_prc}
+the function \code{performance_prc}. The simulated dataset 
+on which the model was fitted was landmarked at t = 2.
 }
 \examples{
 data(fitted_prclmm)

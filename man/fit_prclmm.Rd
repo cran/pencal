@@ -26,8 +26,9 @@ as baseline covariates in the penalized Cox model. Example:
 Default is \code{'ridge'}, other possible values are \code{'elasticnet'} 
 and \code{'lasso'}}
 
-\item{standardize}{logical argument: should the predicted random effects
-be standardized when included in the penalized Cox model? Default is \code{TRUE}}
+\item{standardize}{logical argument: should the predictors (both baseline covariates
+and predicted random effects) be standardized when included  as covariates
+in the penalized Cox model? Default is \code{TRUE}}
 
 \item{pfac.base.covs}{a single value, or a vector of values, indicating
 whether the baseline covariates (if any) should be penalized (1) or not (0).

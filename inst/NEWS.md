@@ -14,6 +14,16 @@ package - in other words, within a section you will find all those
 package versions a.b.x where a and b are fixed whereas x = 1, 2, 3, …
 Each subsection corresponds to a specific package version.
 
+## pencal 2.1.0
+
+-   Released: September 2023
+-   Added NEW, more comprehensive vignette
+-   Added `landmark` argument to `simulate_prclmm_data` and
+    `simulate_prcmlpmm_data`. Examples updated accordingly and refitted
+    `fit_prclmm` and `fit_prcmlpmm`
+-   Updated examples in `survpred_prclmm`, `survpred_prcmlpmm`,
+    `performance_pencox` and `performance_pencox`
+
 # 2.0.x
 
 ## pencal 2.0.1
