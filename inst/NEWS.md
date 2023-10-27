@@ -14,6 +14,15 @@ package - in other words, within a section you will find all those
 package versions a.b.x where a and b are fixed whereas x = 1, 2, 3, …
 Each subsection corresponds to a specific package version.
 
+# 2.1.x
+
+## pencal 2.1.1
+
+-   Released: October 2023
+-   Vignette updated with arXiv preprint number
+-   Updated documentation
+-   Updated DESCRIPTION and CITATION files
+
 ## pencal 2.1.0
 
 -   Released: September 2023
