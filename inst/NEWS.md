@@ -14,6 +14,20 @@ package - in other words, within a section you will find all those
 package versions a.b.x where a and b are fixed whereas x = 1, 2, 3, …
 Each subsection corresponds to a specific package version.
 
+# 2.2.x
+
+## pencal 2.2.0
+
+-   Released: March 2024
+-   `getlmm` and `getmlpmm` functions have been replaced by two `S3`
+    classes with `summary` methods
+-   S3 classes and `summary` methods added for the output of steps 2
+-   Tuning parameter added to the `summary` methods for step 3
+-   `fitted_prclmm` and `fitted_prcmlpmm` objects have been refitted
+-   Added `survplot_prc` function
+-   Updated documentation
+-   Updated DESCRIPTION and CITATION files
+
 # 2.1.x
 
 ## pencal 2.1.1

@@ -1,7 +1,7 @@
 Package: pencal
 Title: Penalized Regression Calibration (PRC) for the Dynamic
         Prediction of Survival
-Version: 2.1.1
+Version: 2.2.1
 Authors@R: c(
     person("Mirko", "Signorelli", , "msignorelli.rpackages@gmail.com", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0002-8102-3356")),
@@ -26,7 +26,7 @@ Imports: doParallel, dplyr, foreach, glmnet, lcmm, magic, MASS, Matrix,
         survival, survivalROC
 Suggests: knitr, ptmixed, rmarkdown, survminer
 NeedsCompilation: no
-Packaged: 2023-10-27 15:28:15 UTC; ms
+Packaged: 2024-03-31 20:03:04 UTC; ms
 Author: Mirko Signorelli [aut, cre, cph]
     (<https://orcid.org/0000-0002-8102-3356>),
   Pietro Spitali [ctb],
@@ -34,4 +34,4 @@ Author: Mirko Signorelli [aut, cre, cph]
   Barbara Vreede [ctb]
 Maintainer: Mirko Signorelli <msignorelli.rpackages@gmail.com>
 Repository: CRAN
-Date/Publication: 2023-10-27 23:00:02 UTC
+Date/Publication: 2024-03-31 20:20:02 UTC
