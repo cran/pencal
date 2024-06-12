@@ -4,14 +4,14 @@ bibentry(
   bibtype = "Article",
   title = "pencal: an R Package for the Dynamic Prediction of Survival with Many Longitudinal Predictors",
   author   = c(person("M. Signorelli")),
-  journal  = "arXiv preprint",
-  year     = "2023",
+  journal  = "To appear in: The R Journal",
+  year     = "2024",
   number = "arXiv:2309.15600",
   url      = "https://doi.org/10.48550/arXiv.2309.15600",
   textVersion = paste(
-	"Signorelli, M. (2023).",
+	"Signorelli, M. (2024).",
   "pencal: an R Package for the Dynamic Prediction of Survival with Many Longitudinal Predictors",
-  "arXiv preprint: arXiv:2309.15600",
+  "To appear in: The R Journal. Preprint: arXiv:2309.15600",
   "URL https://doi.org/10.48550/arXiv.2309.15600"
   )
 )

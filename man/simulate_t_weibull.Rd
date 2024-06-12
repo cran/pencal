@@ -26,7 +26,8 @@ A vector of survival times
 \description{
 This function implements the algorithm proposed by
 Bender et al. (2005) to simulate survival times from 
-a Weibull model
+a Weibull model. In essence, it is simply the application
+of the Inverse Transformation Method.
 }
 \examples{
 # generate example data
@@ -44,9 +45,9 @@ Bender, R., Augustin, T., & Blettner, M. (2005).
 Generating survival times to simulate Cox proportional 
 hazards models. Statistics in medicine, 24(11), 1713-1723.
 
-Signorelli, M. (2023). pencal: an R Package for the Dynamic 
-Prediction of Survival with Many Longitudinal Predictors.
-arXiv preprint: arXiv:2309.15600
+Signorelli, M. (2024). pencal: an R Package for the Dynamic 
+Prediction of Survival with Many Longitudinal Predictors. 
+To appear in: The R Journal. Preprint: arXiv:2309.15600
 
 Signorelli, M., Spitali, P., Al-Khalili Szigyarto, C, 
 The MARK-MD Consortium, Tsonaka, R. (2021). 

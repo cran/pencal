@@ -57,6 +57,11 @@ step3 = fit_prclmm(object = step2, surv.data = simdata$surv.data,
 # visualize the predicted survival for subjects 1, 3, 7 and 13                    
 survplot_prc(step1, step2, step3, ids = c(1, 3, 7, 13), tmax = 6)
 }
+\references{
+Signorelli, M. (2024). pencal: an R Package for the Dynamic 
+Prediction of Survival with Many Longitudinal Predictors. 
+To appear in: The R Journal. Preprint: arXiv:2309.15600
+}
 \author{
 Mirko Signorelli
 }

@@ -16,7 +16,13 @@ Each subsection corresponds to a specific package version.
 
 # 2.2.x
 
-## pencal 2.2.0
+## pencal 2.2.2
+
+-   Released: June 2024
+-   Updated vignette with article version accepted by The R Journal
+-   Updated citations in documentation and CITATIOn file
+
+## pencal 2.2.1
 
 -   Released: March 2024
 -   `getlmm` and `getmlpmm` functions have been replaced by two `S3`
