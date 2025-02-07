@@ -34,7 +34,7 @@ high-dimensional data. Statistics in Medicine, 40 (27), 6178-6196.
 DOI: 10.1002/sim.9178
 }
 \seealso{
-\code{\link{fit_mlpmms}} and \code{\link{summary.multlcmm}}
+\code{\link{fit_mlpmms}} and \code{\link[lcmm]{summary.multlcmm}}
 }
 \author{
 Mirko Signorelli

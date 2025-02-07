@@ -61,7 +61,7 @@ the function \code{multlcmm}. Default is 100}
 
 \item{conv}{a vector containing the three convergence criteria
 (\code{convB}, \code{convL} and \code{convG}) to use when calling
-the function \code{\link{multlcmm}}. Default is c(1e-3, 1e-3, 1e-3)}
+the function \code{\link[lcmm]{multlcmm}}. Default is c(1e-3, 1e-3, 1e-3)}
 
 \item{lcmm.warnings}{logical. If TRUE, a warning is printed every 
 time the (strict) convergence criteria of the \code{multlcmm} function
@@ -93,17 +93,17 @@ of the PRC-MLPMM model proposed in Signorelli et al. (2021)
 }
 \details{
 This function is essentially a wrapper of the 
-\code{\link{multlcmm}} function that has the goal of simplifying
+\code{\link[lcmm]{multlcmm}} that is meant to simplify
 the estimation of several MLPMMs. In general, ensuring 
 convergence of the algorithm implemented in \code{multlcmm}
 is sometimes difficult, and it is hard to write a function that
-can automatically solve these convergence problems. \code{fit_mplmms}
+can automatically solve all possible convergence problems. \code{fit_mplmms}
 returns a warning when estimation did not converge for one or 
 more MLPMMs. If this happens, try to change the convergence 
 criteria in \code{conv} or the relevant \code{randint.items} value.
 If doing this doesn't solve the problem, it is recommended to
 re-estimate the specific MLPMMs for which estimation didn't converge
-directly with \code{\link{multlcmm}}, trying to manually solve
+directly with \code{multlcmm}, trying to manually solve
 the convergence issues
 }
 \examples{
@@ -135,6 +135,9 @@ for (i in 1:length(n.items)) {
   y.names[[i]] = paste('marker', i, '_', 1:n.items[i], sep = '')
 }
 
+# temporary patch v 2.2.3 (see NEWS file):
+run = FALSE
+if (run) {
 step1 = fit_mlpmms(y.names, fixefs = ~ contrast(age),  
                  ranef.time = age, randint.items = TRUE, 
                  long.data = simdata$long.data, 
@@ -144,6 +147,7 @@ step1 = fit_mlpmms(y.names, fixefs = ~ contrast(age),
 
 # print MLPMM summary for marker 5 (all items involved in that MLPMM):
 summary(step1, 'marker5_2')
+}
 }
 }
 \references{

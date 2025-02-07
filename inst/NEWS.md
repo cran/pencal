@@ -16,6 +16,18 @@ Each subsection corresponds to a specific package version.
 
 # 2.2.x
 
+## pencal 2.2.3
+
+-   Released: February 2025
+-   Fixed CRAN notes on package anchors in documentation links
+-   Added patch (`run = FALSE`) to examples in `?fit_mlpmms`,
+    `?summarize_mlpmms` and `?fit_prcmlpmm`: some changes have been
+    introduced in `lcmm` version 2.2.0 which make the example with
+    `fit_mlpmms` break. It’s unclear why this is happening, and it may
+    take some time until the problem is solved. Until the source of the
+    problem is found, the examples for the PRC MLPMM approach may fail
+    to work. The PRC LMM approach is still completely functional.
+
 ## pencal 2.2.2
 
 -   Released: June 2024
