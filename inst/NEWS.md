@@ -16,6 +16,13 @@ Each subsection corresponds to a specific package version.
 
 # 2.2.x
 
+## pencal 2.2.4
+
+-   Released: March 2025
+-   Added warning if input of `prepare_longdata` is not a dataframe
+-   Removed patch introduced in version 2.2.3 because the problems in
+    `lcmm` that broke the examples have been fixed
+
 ## pencal 2.2.3
 
 -   Released: February 2025

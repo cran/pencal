@@ -108,9 +108,6 @@ for (i in 1:length(n.items)) {
   y.names[[i]] = paste('marker', i, '_', 1:n.items[i], sep = '')
 }
 
-#' # temporary patch v 2.2.3 (see NEWS file):
-run = FALSE
-if (run) {
 step1 = fit_mlpmms(y.names, fixefs = ~ contrast(age),  
                  ranef.time = age, randint.items = TRUE, 
                  long.data = simdata$long.data, 
@@ -127,7 +124,6 @@ step3 = fit_prcmlpmm(object = step2, surv.data = simdata$surv.data,
                    include.b0s = TRUE,
                    penalty = 'ridge', n.cores = n.cores)
 summary(step3)
-}
 }
 }
 \references{
